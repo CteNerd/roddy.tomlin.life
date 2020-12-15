@@ -11,7 +11,6 @@ export default function SideNav() {
   function closeNav() {
     if (document.getElementById("mySidenav"))
       document.getElementById("mySidenav").style.width = "0";
-    document.getElementById("main").style.marginLeft = "0";
     document.body.style.backgroundColor = "white";
   }
 
@@ -21,7 +20,7 @@ export default function SideNav() {
         &times;
       </a>
       <a href="/"><HomeOutlined /> Home</a>
-      <a href="/about"><SmileOutlined /> About</a>
+      <a href="/about"><SmileOutlined spin /> About</a>
       <button onClick={() => setShowBallDropdown(!showBallDropdown)} class="dropdown-btn">
       <TrophyOutlined /> Ball Is Life
         <CaretDownOutlined className={'fa-caret-down'} />
