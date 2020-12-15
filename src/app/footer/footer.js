@@ -2,8 +2,6 @@ import React from "react";
 import {PhoneOutlined,AmazonOutlined, MailOutlined, BookOutlined} from '@ant-design/icons'
 
 export default function Footer() {
-  let resume = "&‌eacute;";
-
   return (
     <div class="footer">
       <a
@@ -20,7 +18,7 @@ export default function Footer() {
       <a className={"col-33"} href={"mailto:rtomlin62@gmail.com"}>
       <MailOutlined /> Email
       </a>
-      <p className={"col-33"}>
+      <p className={"col-50"}>
       <AmazonOutlined /> Built On AWS Amplify
       </p>
     </div>

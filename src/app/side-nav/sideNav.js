@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {CaretDownOutlined,InstagramOutlined,FacebookOutlined,LinkedinOutlined,TwitterOutlined} from '@ant-design/icons'
+import {CaretDownOutlined,HomeOutlined,GithubOutlined,SmileOutlined,TrophyOutlined,UsergroupAddOutlined,InstagramOutlined,FacebookOutlined,LinkedinOutlined,TwitterOutlined} from '@ant-design/icons'
 import "./sideNav.css";
 
 export default function SideNav() {
@@ -9,7 +9,6 @@ export default function SideNav() {
 
   /* Set the width of the side navigation to 0 */
   function closeNav() {
-    console.log("closed");
     if (document.getElementById("mySidenav"))
       document.getElementById("mySidenav").style.width = "0";
     document.getElementById("main").style.marginLeft = "0";
@@ -21,11 +20,10 @@ export default function SideNav() {
       <a href="javascript:void(0)" class="closebtn" onClick={closeNav}>
         &times;
       </a>
-      <a href="/">Home</a>
-      <a href="/about">About</a>
-      <a href="/photos">Photos</a>
+      <a href="/"><HomeOutlined /> Home</a>
+      <a href="/about"><SmileOutlined /> About</a>
       <button onClick={() => setShowBallDropdown(!showBallDropdown)} class="dropdown-btn">
-        Ball Is Life
+      <TrophyOutlined /> Ball Is Life
         <CaretDownOutlined className={'fa-caret-down'} />
       </button>
       <div
@@ -35,9 +33,10 @@ export default function SideNav() {
         <a href="#">High School</a>
         <a href="#">College</a>
         <a href="#">Professional</a>
+        <a href="#">Workouts</a>
       </div>
       <button onClick={() => setShowProjectsDropdown(!showProjectsDropdown)} class="dropdown-btn">
-        Projects
+      <GithubOutlined /> Projects
         <CaretDownOutlined className={'fa-caret-down'} />
       </button>
       <div
@@ -52,7 +51,7 @@ export default function SideNav() {
         <a href="#">Woodshop</a>
       </div>
       <button onClick={() => setShowSocialDropdown(!showSocialDropdown)} class="dropdown-btn">
-        Social
+      <UsergroupAddOutlined /> Social
         <CaretDownOutlined className={'fa-caret-down'} />
       </button>
       <div
