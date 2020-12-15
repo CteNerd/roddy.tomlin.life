@@ -1,25 +1,42 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import Footer from "./app/footer/footer";
+import SideNav from "./app/side-nav/sideNav";
+import Main from "./app/Main.js";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+    <>
+      <SideNav />
+      <header>
+        <span onClick={openNav}>
+          <MenuButton />
+        </span>
       </header>
-    </div>
+      <div className="main" id="main">
+        <Main />
+        <Footer />
+      </div>
+    </>
   );
+}
+
+function MenuButton() {
+  return (
+    <>
+      <div className="menu-stripe"></div>
+      <div className="menu-stripe"></div>
+      <div className="menu-stripe"></div>
+    </>
+  );
+}
+
+/* Set the width of the side navigation to 250px */
+function openNav() {
+  console.log("opened");
+  if (document.getElementById("mySidenav") && document.getElementById("main"))
+    document.getElementById("mySidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  // document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
 }
 
 export default App;
