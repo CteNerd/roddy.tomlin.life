@@ -1,14 +1,13 @@
 .tt {
   display: table;
-  border-color: red;
-  /* background-color: yellow; */
 }
 
 th,
 td {
   text-align: center;
-  padding: 2px 5px;
-  border-collapse: separate;
-  border-spacing: 2px;
-  border-color: red;
+  padding: 3px 10px;
+}
+
+tr:nth-child(even) {
+    background-color: rgb(236, 236, 236);
 }

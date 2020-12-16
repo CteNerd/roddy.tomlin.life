@@ -89,3 +89,7 @@
   box-sizing: border-box;
   font-family: Garamond, cursive;
 }
+
+button:hover {
+  cursor: pointer;
+}
