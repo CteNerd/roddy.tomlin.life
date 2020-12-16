@@ -39,7 +39,7 @@ export default function Workouts() {
           <td>{data.title}</td>
           <td>{data.date}</td>
           <td>
-            <a href={data.link}>
+            <a href={data.link} target={'_blank'}>
               <button type={"submit"}>WATCH</button>
             </a>
           </td>
