@@ -8,7 +8,7 @@ export default function Workouts() {
       key: "1",
       title: "12 Workouts Of Christmas",
       date: "December 16, 2020",
-      link: "https://youtu.be/_LWT8boHh0E",
+      link: "https://www.youtube.com/embed/_LWT8boHh0E",
     },
   ];
 
@@ -39,9 +39,14 @@ export default function Workouts() {
           <td>{data.title}</td>
           <td>{data.date}</td>
           <td>
-            <a href={data.link} target={'_blank'}>
-              <button type={"submit"}>WATCH</button>
-            </a>
+            <iframe
+              width="360"
+              height="220"
+              src={data.link}
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
           </td>
         </tr>
       );
