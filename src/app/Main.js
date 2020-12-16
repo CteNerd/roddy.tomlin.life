@@ -3,6 +3,7 @@ import Home from "./home/home";
 import About from "./about/about";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./Main.css";
+import Workouts from "./workouts/workouts";
 
 export default function App() {
   return (
@@ -13,6 +14,9 @@ export default function App() {
         <Switch>
           <Route path="/about">
             <About />
+          </Route>
+          <Route path="/workouts">
+            <Workouts />
           </Route>
           <Route path="/">
             <Home />

@@ -1,11 +1,22 @@
 import React, { useState } from "react";
-import {CaretDownOutlined,HomeOutlined,GithubOutlined,SmileOutlined,TrophyOutlined,UsergroupAddOutlined,InstagramOutlined,FacebookOutlined,LinkedinOutlined,TwitterOutlined} from '@ant-design/icons'
+import {
+  CaretDownOutlined,
+  HomeOutlined,
+  GithubOutlined,
+  SmileOutlined,
+  TrophyOutlined,
+  UsergroupAddOutlined,
+  InstagramOutlined,
+  FacebookOutlined,
+  LinkedinOutlined,
+  TwitterOutlined,
+} from "@ant-design/icons";
 import "./sideNav.css";
 
 export default function SideNav() {
-    const [showBallDropdown, setShowBallDropdown] = useState(false);
-    const [showProjectsDropdown, setShowProjectsDropdown] = useState(false);
-    const [showSocialDropdown, setShowSocialDropdown] = useState(false);
+  const [showBallDropdown, setShowBallDropdown] = useState(false);
+  const [showProjectsDropdown, setShowProjectsDropdown] = useState(false);
+  const [showSocialDropdown, setShowSocialDropdown] = useState(false);
 
   /* Set the width of the side navigation to 0 */
   function closeNav() {
@@ -19,11 +30,18 @@ export default function SideNav() {
       <a href="javascript:void(0)" class="closebtn" onClick={closeNav}>
         &times;
       </a>
-      <a href="/"><HomeOutlined /> Home</a>
-      <a href="/about"><SmileOutlined spin /> About</a>
-      <button onClick={() => setShowBallDropdown(!showBallDropdown)} class="dropdown-btn">
-      <TrophyOutlined /> Ball Is Life
-        <CaretDownOutlined className={'fa-caret-down'} />
+      <a href="/">
+        <HomeOutlined /> Home
+      </a>
+      <a href="/about">
+        <SmileOutlined spin /> About
+      </a>
+      <button
+        onClick={() => setShowBallDropdown(!showBallDropdown)}
+        class="dropdown-btn"
+      >
+        <TrophyOutlined /> Ball Is Life
+        <CaretDownOutlined className={"fa-caret-down"} />
       </button>
       <div
         class="dropdown-container"
@@ -32,11 +50,14 @@ export default function SideNav() {
         <a href="#">High School</a>
         <a href="#">College</a>
         <a href="#">Professional</a>
-        <a href="#">Workouts</a>
+        <a href="/workouts">Workouts</a>
       </div>
-      <button onClick={() => setShowProjectsDropdown(!showProjectsDropdown)} class="dropdown-btn">
-      <GithubOutlined /> Projects
-        <CaretDownOutlined className={'fa-caret-down'} />
+      <button
+        onClick={() => setShowProjectsDropdown(!showProjectsDropdown)}
+        class="dropdown-btn"
+      >
+        <GithubOutlined /> Projects
+        <CaretDownOutlined className={"fa-caret-down"} />
       </button>
       <div
         class="dropdown-container"
@@ -49,18 +70,29 @@ export default function SideNav() {
         <a href="#">We'll Call Consulting</a>
         <a href="#">Woodshop</a>
       </div>
-      <button onClick={() => setShowSocialDropdown(!showSocialDropdown)} class="dropdown-btn">
-      <UsergroupAddOutlined /> Social
-        <CaretDownOutlined className={'fa-caret-down'} />
+      <button
+        onClick={() => setShowSocialDropdown(!showSocialDropdown)}
+        class="dropdown-btn"
+      >
+        <UsergroupAddOutlined /> Social
+        <CaretDownOutlined className={"fa-caret-down"} />
       </button>
       <div
         class="dropdown-container"
         style={{ display: showSocialDropdown ? "block" : "none" }}
       >
-        <a href="https://www.facebook.com/roddy.tomlin.3"><FacebookOutlined /> Facebook</a>
-        <a href="https://www.linkedin.com/in/tutoringrod/"><LinkedinOutlined /> LinkedIn</a>
-        <a href="https://twitter.com/rct_62"><TwitterOutlined /> Twitter</a>
-        <a href="https://www.instagram.com/d.o.n._tomlin/"><InstagramOutlined /> Instagram</a>
+        <a href="https://www.facebook.com/roddy.tomlin.3">
+          <FacebookOutlined /> Facebook
+        </a>
+        <a href="https://www.linkedin.com/in/tutoringrod/">
+          <LinkedinOutlined /> LinkedIn
+        </a>
+        <a href="https://twitter.com/rct_62">
+          <TwitterOutlined /> Twitter
+        </a>
+        <a href="https://www.instagram.com/d.o.n._tomlin/">
+          <InstagramOutlined /> Instagram
+        </a>
       </div>
     </div>
   );

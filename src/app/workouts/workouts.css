@@ -1,0 +1,14 @@
+.tt {
+  display: table;
+  border-color: red;
+  /* background-color: yellow; */
+}
+
+th,
+td {
+  text-align: center;
+  padding: 2px 5px;
+  border-collapse: separate;
+  border-spacing: 2px;
+  border-color: red;
+}
