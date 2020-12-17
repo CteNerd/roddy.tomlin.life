@@ -1,17 +1,33 @@
-import { Table } from "antd";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { httpGetRequest } from "../../httpClient/client";
 import "./workouts.css";
 
 export default function Workouts() {
-  const dataSource = [
-    {
-      key: "1",
-      title: "12 Workouts Of Christmas",
-      date: "December 16, 2020",
-      link: "https://www.youtube.com/embed/_LWT8boHh0E",
-    },
-  ];
+    const moment = require('moment')
+  const [youtubeVideos, setYoutubeVideos] = useState();
 
+  useEffect(() => {
+    return async () => {
+      let responseVideo = {};
+      let responseVideos = [];
+      let response = await httpGetRequest({
+        url:
+          "https://www.googleapis.com/youtube/v3/search?key=AIzaSyCDDwVn1sr9_LIIyTLo0WfCy3kC6jIFY3w&channelId=UCvuHQc2R10QDv_Qa2GeG4kg&part=snippet,id&order=date&maxResults=50",
+      });
+      response.items.forEach((item) => {
+        if (item.id.kind === "youtube#video") {
+          responseVideo = {
+            id: item.id.videoId,
+            title: item.snippet.title,
+            date: moment(item.snippet.publishedAt).format("MMMM Do YYYY")
+          };
+          responseVideos.push(responseVideo);
+        }
+      });
+      setYoutubeVideos(responseVideos);
+    };
+  }, []);
+  
   const columns = [
     {
       title: "Title",
@@ -32,25 +48,27 @@ export default function Workouts() {
 
   function TableData() {
     let content = [];
-
-    dataSource.forEach((data) => {
-      content.push(
-        <tr>
-          <td>{data.title}</td>
-          <td>{data.date}</td>
-          <td>
-            <iframe
-              width="360"
-              height="220"
-              src={data.link}
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-            ></iframe>
-          </td>
-        </tr>
-      );
-    });
+    if (youtubeVideos) {
+      youtubeVideos.forEach((data) => {
+        content.push(
+          <tr>
+            <td>{data.title}</td>
+            <td>{data.date}</td>
+            <td>
+              <iframe
+                width="360"
+                height="220"
+                title={data.title}
+                src={"https://www.youtube.com/embed/" + data.id}
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            </td>
+          </tr>
+        );
+      });
+    }
     return <>{content}</>;
   }
 
