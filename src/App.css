@@ -15,7 +15,6 @@
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -92,4 +91,19 @@
 
 button:hover {
   cursor: pointer;
+}
+
+.menu-button {
+  float: left;
+}
+
+.menu-img {
+  min-width: 50px;
+  min-height: 50px;
+  width: 5vw;
+  height: 5vw;
+}
+
+.footer {
+  max-height: 10vh;
 }

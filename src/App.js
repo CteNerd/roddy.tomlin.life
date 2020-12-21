@@ -2,19 +2,18 @@ import "./App.css";
 import Footer from "./app/footer/footer";
 import SideNav from "./app/side-nav/sideNav";
 import Main from "./app/Main.js";
+import RtInitials from "./images/RT initials cursive - transparent.png";
 
 function App() {
   return (
     <>
       <SideNav />
-      <header>
-        <span onClick={openNav}>
-          <MenuButton />
-        </span>
-      </header>
       <div className="main" id="main">
+          <MenuButton />
         <Main />
-        <Footer />
+        <footer>
+          <Footer />
+        </footer>
       </div>
     </>
   );
@@ -22,11 +21,12 @@ function App() {
 
 function MenuButton() {
   return (
-    <>
-      <div className="menu-stripe"></div>
-      <div className="menu-stripe"></div>
-      <div className="menu-stripe"></div>
-    </>
+    <div className={'menu-button'} onClick={openNav}>
+      <img 
+      className={'menu-img'}
+        src={RtInitials}
+      />
+    </div>
   );
 }
 

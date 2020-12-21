@@ -10,11 +10,13 @@ import {
   FacebookOutlined,
   LinkedinOutlined,
   TwitterOutlined,
+  FieldTimeOutlined
 } from "@ant-design/icons";
 import "./sideNav.css";
 
 export default function SideNav() {
   const [showBallDropdown, setShowBallDropdown] = useState(false);
+  const [showHobbiesDropdown, setShowHobbiesDropdown] = useState(false);
   const [showProjectsDropdown, setShowProjectsDropdown] = useState(false);
   const [showSocialDropdown, setShowSocialDropdown] = useState(false);
 
@@ -68,6 +70,18 @@ export default function SideNav() {
         <a href="https://jimmyjamkalewraps.com">Jimmy Jam Kale Wrap</a>
         <a href="#">We'll Call Tix</a>
         <a href="#">We'll Call Consulting</a>
+      </div>
+      <button
+        onClick={() => setShowHobbiesDropdown(!showHobbiesDropdown)}
+        class="dropdown-btn"
+      >
+        <FieldTimeOutlined /> Hobbies
+        <CaretDownOutlined className={"fa-caret-down"} />
+      </button>
+      <div
+        class="dropdown-container"
+        style={{ display: showHobbiesDropdown ? "block" : "none" }}
+      >
         <a href="/woodshop">Woodshop</a>
       </div>
       <button
