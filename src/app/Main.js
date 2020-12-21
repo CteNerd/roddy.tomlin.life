@@ -4,6 +4,9 @@ import About from "./about/about";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./Main.css";
 import Workouts from "./workouts/workouts";
+import HSFootball from "./football/hsFootball";
+import NCAAFootball from "./football/ncaaFootball";
+import NFLFootball from "./football/nflFootball";
 import Woodshop from "./woodshop/woodshop";
 import PlyoBox from "./woodshop/plyobox";
 
@@ -23,7 +26,19 @@ export default function App() {
           <Route path="/woodshop">
             <Woodshop />
           </Route>
-          <Route path="/workouts">
+          <Route path="/football/highschool">
+            <HSFootball />
+          </Route>
+          <Route path="/football/ncaa">
+            <NCAAFootball />
+          </Route>
+          <Route path="/football/nfl">
+            <NFLFootball />
+          </Route>
+          <Route path="/football/workouts">
+            <Workouts />
+          </Route>
+          <Route path="/football">
             <Workouts />
           </Route>
           <Route path="/">

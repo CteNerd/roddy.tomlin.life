@@ -9,7 +9,7 @@ function App() {
     <>
       <SideNav />
       <div className="main" id="main">
-          <MenuButton />
+        <MenuButton />
         <Main />
         <footer>
           <Footer />
@@ -21,11 +21,8 @@ function App() {
 
 function MenuButton() {
   return (
-    <div className={'menu-button'} onClick={openNav}>
-      <img 
-      className={'menu-img'}
-        src={RtInitials}
-      />
+    <div className={"menu-button"} onClick={openNav}>
+      <img className={"menu-img"} src={RtInitials} />
     </div>
   );
 }

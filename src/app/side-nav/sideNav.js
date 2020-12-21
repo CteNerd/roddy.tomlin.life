@@ -10,7 +10,7 @@ import {
   FacebookOutlined,
   LinkedinOutlined,
   TwitterOutlined,
-  FieldTimeOutlined
+  FieldTimeOutlined,
 } from "@ant-design/icons";
 import "./sideNav.css";
 
@@ -49,10 +49,10 @@ export default function SideNav() {
         class="dropdown-container"
         style={{ display: showBallDropdown ? "block" : "none" }}
       >
-        <a href="#">High School</a>
-        <a href="#">College</a>
-        <a href="#">Professional</a>
-        <a href="/workouts">Workouts</a>
+        <a href="/football/highschool">High School</a>
+        <a href="/football/ncaa">College</a>
+        <a href="/football/nfl">Professional</a>
+        <a href="/football/workouts">Workouts</a>
       </div>
       <button
         onClick={() => setShowProjectsDropdown(!showProjectsDropdown)}
