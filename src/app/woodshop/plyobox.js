@@ -3,6 +3,7 @@ import PageHeader from "../../shared-components/page-header/page-header";
 import plyoboxFront from "./images/plyoboxFront.png";
 import plyoboxAngle from "./images/plyoboxAngle.png";
 import "./plyobox.css";
+import PlaceholderText from "../../shared-components/placeholder-text/placeholder-text";
 
 export default function PlyoBox() {
   return (
@@ -16,33 +17,9 @@ export default function PlyoBox() {
       <div>
         <img src={plyoboxFront} className={"instruction-img"} />
         <img src={plyoboxAngle} className={"instruction-img-2"} />
-        <p className={"instruction-p"}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
-          {<br />}
-          {<br />}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
-          {<br />}
-          {<br />}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
-        </p>
+        <div className={'instruction-p'}>
+          <PlaceholderText />
+        </div>
       </div>
     </>
   );

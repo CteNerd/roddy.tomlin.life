@@ -1,3 +1,4 @@
+import PlaceholderText from "../../shared-components/placeholder-text/placeholder-text";
 import React from "react";
 
 export default function About() {
@@ -5,13 +6,25 @@ export default function About() {
     <>
       <h1>About Roddy</h1>
       <h3>Childhood</h3>
-      <p>About Roddy and some more</p>
+      <div className={'instruction-p'}>
+        <PlaceholderText />
+      </div>
+      
       <h3>College</h3>
-      <p>About Roddy and college</p>
+      <div className={'instruction-p'}>
+        <PlaceholderText />
+      </div>
+      
       <h3>NFL</h3>
-      <p>About Roddy and ball</p>
+      <div className={'instruction-p'}>
+        <PlaceholderText />
+      </div>
+      
       <h3>IT</h3>
-      <p>About Roddy and tech</p>
+      <div className={'instruction-p'}>
+        <PlaceholderText />
+      </div>
+      
     </>
   );
 }
