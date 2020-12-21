@@ -11,10 +11,11 @@ export default function NflFootball() {
           "Not For Long. You learn quick how to get up... or keep falling."
         }
       />
-      <div className={'instruction-p'}>
+      <div className={"instruction-p"}>
         <PlaceholderText />
         <PlaceholderText />
-      </div>ß
+      </div>
+      ß
     </>
   );
 }

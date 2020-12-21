@@ -9,7 +9,7 @@ export default function HsFootball() {
         pageTitle={"High School Football"}
         pageDescription={"Roots like a tree trunk they said."}
       />
-      <div className={'instruction-p'}>
+      <div className={"instruction-p"}>
         <PlaceholderText />
         <PlaceholderText />
       </div>

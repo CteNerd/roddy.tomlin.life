@@ -9,7 +9,7 @@ export default function NcaaFootball() {
         pageTitle={"NCAA Football"}
         pageDescription={"Balancing Act Not Many Want"}
       />
-      <div className={'instruction-p'}>
+      <div className={"instruction-p"}>
         <PlaceholderText />
         <PlaceholderText />
       </div>

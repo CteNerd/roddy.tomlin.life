@@ -14,3 +14,22 @@
   text-align: justify;
   padding: 5px;
 }
+
+.column-33 {
+  width: 33%;
+  display: inline-block;
+}
+
+.column-100 {
+  width: 100%;
+  display: inline-block;
+}
+
+.column-25 {
+  width: 25%;
+  display: inline-block;
+}
+
+.plyobox-custom-measurements {
+  padding: 10px 0;
+}
