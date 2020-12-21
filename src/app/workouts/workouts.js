@@ -3,7 +3,7 @@ import { httpGetRequest } from "../../httpClient/client";
 import "./workouts.css";
 
 export default function Workouts() {
-    const moment = require('moment')
+  const moment = require("moment");
   const [youtubeVideos, setYoutubeVideos] = useState();
 
   useEffect(async () => {
@@ -18,7 +18,7 @@ export default function Workouts() {
         responseVideo = {
           id: item.id.videoId,
           title: item.snippet.title,
-          date: moment(item.snippet.publishedAt).format("MMMM Do YYYY")
+          date: moment(item.snippet.publishedAt).format("MMMM Do YYYY"),
         };
         responseVideos.push(responseVideo);
       }
