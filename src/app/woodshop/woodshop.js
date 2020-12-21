@@ -1,6 +1,6 @@
 import React from "react";
 import Card from "../../shared-components/card/card";
-import plyoboxFront from "./images/plyoboxFront.jpeg";
+import plyoboxFront from "./images/plyoboxFront.png";
 import "./woodshop.css";
 
 export default function Woodshop() {
