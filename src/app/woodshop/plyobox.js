@@ -1,7 +1,7 @@
 import React from "react";
 import PageHeader from "../../shared-components/page-header/page-header";
-import plyoboxFront from "./images/plyobox-front.jpeg";
-import plyoboxAngle from "./images/plyobox-angle.jpeg";
+import plyoboxFront from "./images/plyoboxFront.jpeg";
+import plyoboxAngle from "./images/plyoboxAngle.jpeg";
 import "./plyobox.css";
 
 export default function PlyoBox() {
