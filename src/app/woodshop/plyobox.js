@@ -213,7 +213,8 @@ export default function PlyoBox() {
           <p>
             <strong>Note for Cut #2:</strong> My wood beams happened to be 1.5"
             thick rather than the expected 2". This altered the cuts for Side B
-            can see in the table they are cut 3" shorter, double 1.5", rather than 4".
+            can see in the table they are cut 3" shorter, double 1.5", rather
+            than 4".
           </p>
           <p>
             <strong>Note for Cut #3:</strong> This cut is for connecting the two

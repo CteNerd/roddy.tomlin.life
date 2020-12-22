@@ -95,6 +95,7 @@ button:hover {
 
 .menu-button {
   float: left;
+  display: inline-grid;
 }
 
 .menu-img {

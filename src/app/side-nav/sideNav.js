@@ -52,7 +52,6 @@ export default function SideNav() {
         <a href="/football/highschool">High School</a>
         <a href="/football/ncaa">College</a>
         <a href="/football/nfl">Professional</a>
-        <a href="/football/workouts">Workouts</a>
       </div>
       <button
         onClick={() => setShowProjectsDropdown(!showProjectsDropdown)}
@@ -83,6 +82,7 @@ export default function SideNav() {
         style={{ display: showHobbiesDropdown ? "block" : "none" }}
       >
         <a href="/woodshop">Woodshop</a>
+        <a href="/workouts">Workouts</a>
       </div>
       <button
         onClick={() => setShowSocialDropdown(!showSocialDropdown)}

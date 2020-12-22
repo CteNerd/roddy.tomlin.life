@@ -23,6 +23,7 @@ function MenuButton() {
   return (
     <div className={"menu-button"} onClick={openNav}>
       <img className={"menu-img"} src={RtInitials} />
+      <label>Menu</label>
     </div>
   );
 }

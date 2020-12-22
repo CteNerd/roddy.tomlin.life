@@ -35,7 +35,7 @@ export default function App() {
           <Route path="/football/nfl">
             <NFLFootball />
           </Route>
-          <Route path="/football/workouts">
+          <Route path="/workouts">
             <Workouts />
           </Route>
           <Route path="/football">
