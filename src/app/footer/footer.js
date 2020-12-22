@@ -9,7 +9,7 @@ import {
 
 export default function Footer() {
   return (
-    <div class="footer">
+    <div className="footer">
       <a
         className={"col-33"}
         href={

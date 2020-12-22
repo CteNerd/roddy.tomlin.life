@@ -33,3 +33,12 @@
 .plyobox-custom-measurements {
   padding: 10px 0;
 }
+
+label {
+  font-size: 15px;
+}
+
+strong {
+  font-weight: 500;
+  color:red;
+}
