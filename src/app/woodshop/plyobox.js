@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import PageHeader from "../../shared-components/page-header/page-header";
 import plyoboxFront from "./images/plyoboxFront.png";
 import plyoboxAngle from "./images/plyoboxAngle.png";
 import "./plyobox.css";
-import PlaceholderText from "../../shared-components/placeholder-text/placeholder-text";
 
 export default function PlyoBox() {
   const [measurementOne, setMeasurementOne] = useState(12);
