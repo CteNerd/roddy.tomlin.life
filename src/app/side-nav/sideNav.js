@@ -80,8 +80,8 @@ export default function SideNav() {
         class="dropdown-container"
         style={{ display: showHobbiesDropdown ? "block" : "none" }}
       >
-        <a href="/woodshop">Woodshop</a>
-        <a href="/workouts">Workouts</a>
+        <a href="/hobbies/woodshop">Woodshop</a>
+        <a href="/hobbies/workouts">Workouts</a>
       </div>
       <button
         onClick={() => setShowSocialDropdown(!showSocialDropdown)}

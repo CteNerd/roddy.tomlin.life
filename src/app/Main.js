@@ -20,10 +20,13 @@ export default function App() {
           <Route path="/about">
             <About />
           </Route>
-          <Route path="/woodshop/plyobox">
+          <Route path="/hobbies/workouts">
+            <Workouts />
+          </Route>
+          <Route path="/hobbies/woodshop/plyobox">
             <PlyoBox />
           </Route>
-          <Route path="/woodshop">
+          <Route path="/hobbies/woodshop">
             <Woodshop />
           </Route>
           <Route path="/football/highschool">
@@ -34,9 +37,6 @@ export default function App() {
           </Route>
           <Route path="/football/nfl">
             <NFLFootball />
-          </Route>
-          <Route path="/workouts">
-            <Workouts />
           </Route>
           <Route path="/football">
             <Workouts />
