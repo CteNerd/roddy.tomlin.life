@@ -38,7 +38,7 @@ export default function Workouts() {
       key: "date",
     },
     {
-      title: "Video Url",
+      title: "Workouts",
       dataIndex: "link",
       key: "link",
     },
