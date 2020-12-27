@@ -19,7 +19,9 @@ export default function WorkoutInstructions() {
         responseVideo = {
           id: item.contentDetails.videoId,
           title: item.snippet.title,
-          date: moment(item.contentDetails.videoPublishedAt).format("MMMM Do YYYY"),
+          date: moment(item.contentDetails.videoPublishedAt).format(
+            "MMMM Do YYYY"
+          ),
         };
         responseVideos.push(responseVideo);
       }
@@ -83,6 +85,12 @@ export default function WorkoutInstructions() {
   return (
     <>
       <h1>Workout Instructionals</h1>
+      <p>
+        Thank you for coming by to hang with us. Below you will find
+        instructional videos that will assist you in understanding the technique
+        used during the workouts. If you have any questions or concerns, please
+        feel free to reach out.
+      </p>
       <p className={"disclaimer"}>
         This website and video content is for informational purposes only and is
         not intended to offer medical advice, or replace the recommendations of

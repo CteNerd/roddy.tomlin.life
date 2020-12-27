@@ -20,7 +20,9 @@ export default function Workouts() {
         responseVideo = {
           id: item.contentDetails.videoId,
           title: item.snippet.title,
-          date: moment(item.contentDetails.videoPublishedAt).format("MMMM Do YYYY"),
+          date: moment(item.contentDetails.videoPublishedAt).format(
+            "MMMM Do YYYY"
+          ),
         };
         responseVideos.push(responseVideo);
       }
@@ -98,9 +100,9 @@ export default function Workouts() {
         This website and video content is for informational purposes only and is
         not intended to offer medical advice, or replace the recommendations of
         your Doctor, Midwife, Physical Therapist or Medical Practitioner. Always
-        consult with your Doctor before beginning any exercise program. We will not
-        be held responsible in anyway for circumstances, conditions or injuries
-        that result directly or indirectly from information provided.
+        consult with your Doctor before beginning any exercise program. We will
+        not be held responsible in anyway for circumstances, conditions or
+        injuries that result directly or indirectly from information provided.
       </p>
       <table className={"tt"}>
         <tr>
