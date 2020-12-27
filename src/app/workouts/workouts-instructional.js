@@ -19,7 +19,7 @@ export default function WorkoutInstructions() {
         responseVideo = {
           id: item.contentDetails.videoId,
           title: item.snippet.title,
-          date: moment(item.snippet.publishedAt).format("MMMM Do YYYY"),
+          date: moment(item.contentDetails.videoPublishedAt).format("MMMM Do YYYY"),
         };
         responseVideos.push(responseVideo);
       }

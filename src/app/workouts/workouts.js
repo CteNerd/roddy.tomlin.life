@@ -20,7 +20,7 @@ export default function Workouts() {
         responseVideo = {
           id: item.contentDetails.videoId,
           title: item.snippet.title,
-          date: moment(item.snippet.publishedAt).format("MMMM Do YYYY"),
+          date: moment(item.contentDetails.videoPublishedAt).format("MMMM Do YYYY"),
         };
         responseVideos.push(responseVideo);
       }
@@ -92,7 +92,7 @@ export default function Workouts() {
       <p>
         If you need instructions on any of the exercises done in the workouts,
         please find instructional videos,{" "}
-        <a href={"/workouts/instructions"}>here</a>
+        <a href={"/hobbies/workouts/instructions"}>here</a>
       </p>
       <p className={"disclaimer"}>
         This website and video content is for informational purposes only and is
