@@ -11,12 +11,16 @@ export default function Workouts() {
     let responseVideos = [];
     let response = await httpGetRequest({
       url:
-        "https://www.googleapis.com/youtube/v3/search?key=AIzaSyCDDwVn1sr9_LIIyTLo0WfCy3kC6jIFY3w&channelId=UCvuHQc2R10QDv_Qa2GeG4kg&part=snippet,id&order=date&maxResults=50",
+        "https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyCDDwVn1sr9_LIIyTLo0WfCy3kC6jIFY3w&part=id,contentDetails,snippet&playlistId=PL-6JZMCvkoY-i2UvP4kW7JJH2cQApm7MA",
     });
+    console.log(response)
+
     response.items.forEach((item) => {
-      if (item.id.kind === "youtube#video") {
+      if (item.kind === "youtube#playlistItem") {
+        console.log('item')
+        console.log(item)
         responseVideo = {
-          id: item.id.videoId,
+          id: item.contentDetails.videoId,
           title: item.snippet.title,
           date: moment(item.snippet.publishedAt).format("MMMM Do YYYY"),
         };
