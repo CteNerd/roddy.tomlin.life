@@ -17,8 +17,6 @@ export default function Workouts() {
 
     response.items.forEach((item) => {
       if (item.kind === "youtube#playlistItem") {
-        console.log('item')
-        console.log(item)
         responseVideo = {
           id: item.contentDetails.videoId,
           title: item.snippet.title,
