@@ -1,5 +1,5 @@
 import React from "react";
-import FamilyPhoto from './family-photo.png'
+import FamilyPhoto from "./family-photo.png";
 import PageHeader from "../../shared-components/page-header/page-header";
 import "./home.css";
 
@@ -13,11 +13,8 @@ export default function Home() {
         }
       />
       <div className={"instruction-p"}>
-        <div className={'intro-img-container'}>
-          <img 
-            className={'intro-img'}
-            src={FamilyPhoto}
-          />
+        <div className={"intro-img-container"}>
+          <img className={"intro-img"} src={FamilyPhoto} />
         </div>
         <p>
           In layman's terms, I am simply grateful and blessed to be where I am;
@@ -27,9 +24,9 @@ export default function Home() {
           Throughout life I have been blessed to meet people that are in
           different places within this race we call life. Listening to the words
           of these people has opened my eyes to views I didn't think of prior to
-          the occassion. Rather it be learning from a rookie or
-          the vet on his/her way to be enshrined, I believe wisdom can come from
-          anyone at anytime.
+          the occassion. Rather it be learning from a rookie or the vet on
+          his/her way to be enshrined, I believe wisdom can come from anyone at
+          anytime.
         </p>
         <p>
           Here, you will find the projects that I am grateful to have the

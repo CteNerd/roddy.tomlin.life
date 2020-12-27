@@ -13,7 +13,7 @@ export default function Workouts() {
       url:
         "https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyCDDwVn1sr9_LIIyTLo0WfCy3kC6jIFY3w&part=id,contentDetails,snippet&playlistId=PL-6JZMCvkoY-i2UvP4kW7JJH2cQApm7MA",
     });
-    console.log(response)
+    console.log(response);
 
     response.items.forEach((item) => {
       if (item.kind === "youtube#playlistItem") {
@@ -84,6 +84,24 @@ export default function Workouts() {
   return (
     <>
       <h1>Workouts</h1>
+      <p>
+        The following videos are workouts I do from day to day. Feel free to
+        contact me for tips on new workouts, suggestions, or if you are looking
+        for advice. Thanks for stopping by.
+      </p>
+      <p>
+        If you need instructions on any of the exercises done in the workouts,
+        please find instructional videos,{" "}
+        <a href={"/workouts/instructions"}>here</a>
+      </p>
+      <p className={"disclaimer"}>
+        This website and video content is for informational purposes only and is
+        not intended to offer medical advice, or replace the recommendations of
+        your Doctor, Midwife, Physical Therapist or Medical Practitioner. Always
+        consult with your Doctor before beginning any exercise program. We will not
+        be held responsible in anyway for circumstances, conditions or injuries
+        that result directly or indirectly from information provided.
+      </p>
       <table className={"tt"}>
         <tr>
           <Columns />

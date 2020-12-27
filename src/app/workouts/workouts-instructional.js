@@ -83,6 +83,14 @@ export default function WorkoutInstructions() {
   return (
     <>
       <h1>Workout Instructionals</h1>
+      <p className={"disclaimer"}>
+        This website and video content is for informational purposes only and is
+        not intended to offer medical advice, or replace the recommendations of
+        your Doctor, Midwife, Physical Therapist or Medical Practitioner. Always
+        consult your Doctor before beginning any exercise program. We will not
+        be held responsible in anyway for circumstances, conditions or injuries
+        that result directly or indirectly from information provided.
+      </p>
       <table className={"tt"}>
         <tr>
           <Columns />
