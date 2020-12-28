@@ -38,7 +38,7 @@ export default function SideNav() {
       <a href="/about">
         <SmileOutlined spin /> About
       </a>
-      <button
+      {/* <button
         onClick={() => setShowBallDropdown(!showBallDropdown)}
         class="dropdown-btn"
       >
@@ -52,7 +52,7 @@ export default function SideNav() {
         <a href="/football/highschool">High School</a>
         <a href="/football/ncaa">College</a>
         <a href="/football/nfl">Professional</a>
-      </div>
+      </div> */}
       <button
         onClick={() => setShowProjectsDropdown(!showProjectsDropdown)}
         class="dropdown-btn"
