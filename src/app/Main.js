@@ -14,6 +14,7 @@ import Childhood from "./about/childhood";
 import College from "./about/college";
 import Nfl from "./about/nfl";
 import IT from "./about/it";
+import Wedding from "./about/wedding";
 
 export default function App() {
   return (
@@ -30,6 +31,9 @@ export default function App() {
           </Route>
           <Route path="/about/nfl">
             <Nfl />
+          </Route>
+          <Route path="/about/wedding">
+            <Wedding />
           </Route>
           <Route path="/about/it">
             <IT />

@@ -1,5 +1,3 @@
-import PlaceholderText from "../../shared-components/placeholder-text/placeholder-text";
-import Card from "../../shared-components/card/card";
 import "./about.css";
 import React from "react";
 import PageHeader from "../../shared-components/page-header/page-header";
@@ -31,6 +29,7 @@ export default function About() {
             </p>
           </div>
         </div>
+
         <div className={"column"}>
           <div className="card">
             <h3>{"College"}</h3>
@@ -59,6 +58,22 @@ export default function About() {
             <p className="read-more">
               <button className="button">
                 <a href={"/about/nfl"}>Read More</a>
+              </button>
+            </p>
+          </div>
+        </div>
+        <div className={"column"}>
+          <div className="card">
+            <h3>{"The Big Day"}</h3>
+            <p>
+              The storm of life had came and gone, now the only thing that
+              mattered was taking care of the one I loved. Making sure
+              everything was perfect and the way she wanted while at the same
+              time having a good time.
+            </p>
+            <p className="read-more">
+              <button className="button">
+                <a href={"/about/wedding"}>Read More</a>
               </button>
             </p>
           </div>

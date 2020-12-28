@@ -1,12 +1,17 @@
 .about-row {
   margin: 0 -5px;
 }
+/* Clear floats after the columns */
+.about-row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
 
 .about-row .column {
+  float: left;
   width: 50%;
-  margin: 10px 0px;
-  display: inline-block;
-  max-height: fit-content;
+  padding: 10px 10px;
 }
 
 .about-row .read-more {
@@ -24,4 +29,12 @@
 
 .read-more a {
   color: black;
+}
+
+.column .card {
+  width: 100%;
+}
+
+.card p {
+  min-height: 90px;
 }

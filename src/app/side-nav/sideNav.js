@@ -50,6 +50,7 @@ export default function SideNav() {
         <a href="/about/childhood">Childhood</a>
         <a href="/about/college">College</a>
         <a href="/about/nfl">NFL</a>
+        <a href="/about/wedding">The Big Day</a>
         <a href="/about/it">IT</a>
       </div>
       {/* <button
