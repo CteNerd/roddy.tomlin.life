@@ -40,7 +40,6 @@
 #main {
   transition: margin-left 0.5s;
   text-align: -webkit-center;
-  height: 100vh;
 }
 
 /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
@@ -68,7 +67,9 @@
 /* Main content */
 .main {
   font-size: 20px; /* Increased text to enable scrolling */
-  padding: 0px 10px;
+  min-height: 100vh;
+  padding: 0px 8vw;
+  background-color: rgb(60, 193, 148, 0.2);
 }
 
 /* Add an active class to the active dropdown button */

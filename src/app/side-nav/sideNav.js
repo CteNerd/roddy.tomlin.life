@@ -19,6 +19,7 @@ export default function SideNav() {
   const [showHobbiesDropdown, setShowHobbiesDropdown] = useState(false);
   const [showProjectsDropdown, setShowProjectsDropdown] = useState(false);
   const [showSocialDropdown, setShowSocialDropdown] = useState(false);
+  const [showAboutDropdown, setShowAboutDropdown] = useState(false);
 
   /* Set the width of the side navigation to 0 */
   function closeNav() {
@@ -35,9 +36,22 @@ export default function SideNav() {
       <a href="/">
         <HomeOutlined /> Home
       </a>
-      <a href="/about">
+      <button
+        onClick={() => setShowAboutDropdown(!showAboutDropdown)}
+        class="dropdown-btn"
+      >
         <SmileOutlined spin /> About
-      </a>
+        <CaretDownOutlined className={"fa-caret-down"} />
+      </button>
+      <div
+        class="dropdown-container"
+        style={{ display: showAboutDropdown ? "block" : "none" }}
+      >
+        <a href="/about/childhood">Childhood</a>
+        <a href="/about/college">College</a>
+        <a href="/about/nfl">NFL</a>
+        <a href="/about/it">IT</a>
+      </div>
       {/* <button
         onClick={() => setShowBallDropdown(!showBallDropdown)}
         class="dropdown-btn"

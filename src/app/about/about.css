@@ -1,0 +1,27 @@
+.about-row {
+  margin: 0 -5px;
+}
+
+.about-row .column {
+  width: 50%;
+  margin: 10px 0px;
+  display: inline-block;
+  max-height: fit-content;
+}
+
+.about-row .read-more {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  margin: 0;
+  /* padding: 30px 0; */
+
+  /* "transparent" only works here because == rgba(0,0,0,0) */
+  background-image: linear-gradient(to bottom, transparent, #f1f1f1);
+}
+
+.read-more a {
+  color: black;
+}

@@ -10,6 +10,10 @@ import NFLFootball from "./football/nflFootball";
 import Woodshop from "./woodshop/woodshop";
 import PlyoBox from "./woodshop/plyobox";
 import WorkoutInstructions from "./workouts/workouts-instructional";
+import Childhood from "./about/childhood";
+import College from "./about/college";
+import Nfl from "./about/nfl";
+import IT from "./about/it";
 
 export default function App() {
   return (
@@ -18,6 +22,18 @@ export default function App() {
         {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
         <Switch>
+          <Route path="/about/childhood">
+            <Childhood />
+          </Route>
+          <Route path="/about/college">
+            <College />
+          </Route>
+          <Route path="/about/nfl">
+            <Nfl />
+          </Route>
+          <Route path="/about/it">
+            <IT />
+          </Route>
           <Route path="/about">
             <About />
           </Route>

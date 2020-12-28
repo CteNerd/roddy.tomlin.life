@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PageHeader from "../../shared-components/page-header/page-header";
 import { httpGetRequest } from "../../httpClient/client";
 import "./workouts.css";
 
@@ -85,12 +86,12 @@ export default function Workouts() {
 
   return (
     <>
-      <h1>Workouts</h1>
-      <p>
-        The following videos are workouts I do from day to day. Feel free to
-        contact me for tips on new workouts, suggestions, or if you are looking
-        for advice. Thanks for stopping by.
-      </p>
+      <PageHeader
+        pageTitle={"Workouts"}
+        pageDescription={
+          "The following videos are workouts I do from day to day. Feel free to contact me for tips on new workouts, suggestions, or if you are looking for advice. Thanks for stopping by."
+        }
+      />
       <p>
         If you need instructions on any of the exercises done in the workouts,
         please find instructional videos,{" "}

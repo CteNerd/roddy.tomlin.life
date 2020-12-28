@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PageHeader from "../../shared-components/page-header/page-header";
 import { httpGetRequest } from "../../httpClient/client";
 import "./workouts.css";
 
@@ -84,13 +85,12 @@ export default function WorkoutInstructions() {
 
   return (
     <>
-      <h1>Workout Instructionals</h1>
-      <p>
-        Thank you for coming by to hang with us. Below you will find
-        instructional videos that will assist you in understanding the technique
-        used during the workouts. If you have any questions or concerns, please
-        feel free to reach out.
-      </p>
+      <PageHeader
+        pageTitle={"Workout Instructionals"}
+        pageDescription={
+          "Thank you for coming by to hang with us. Below you will find instructional videos that will assist you in understanding the technique used during the workouts. If you have any questions or concerns, please feel free to reach out."
+        }
+      />
       <p className={"disclaimer"}>
         This website and video content is for informational purposes only and is
         not intended to offer medical advice, or replace the recommendations of
