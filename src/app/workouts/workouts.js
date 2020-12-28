@@ -14,7 +14,6 @@ export default function Workouts() {
       url:
         "https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyCDDwVn1sr9_LIIyTLo0WfCy3kC6jIFY3w&part=id,contentDetails,snippet&playlistId=PL-6JZMCvkoY-i2UvP4kW7JJH2cQApm7MA&maxResults=50",
     });
-    console.log(response);
 
     response.items.forEach((item) => {
       if (item.kind === "youtube#playlistItem") {
