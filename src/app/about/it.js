@@ -82,6 +82,77 @@ export default function IT() {
           focus.
         </p>
         <p>
+          Along with transitioning life to a new city once again, I was also
+          preparing to make one of the biggest transitions of my life, marriage.
+          I had given my all to school, football, and other parts of life, but
+          now it was time to give my all to my one love. So yes there was plenty
+          in my life to make decisions on at this point, but it was all in my
+          control. Getting here wasn't easy though. There were hearts broken and
+          relationships sacraficed on the road to the engagement. Did I want to
+          make those decisions to lose those people? Not at all. But I reminded
+          myself many of times, "as a child, I did childish things. As a man, it
+          was time to put those childish things away and be a man". By no means
+          necessary did I consider these hearts or relationships childish, yet I
+          had to stop being childish and decide to focus solely on my
+          relationship with my love or focus on my relationships with others.
+          For some this may have been easy, but I struggled cutting some of
+          these ties. Yes, my love had been there for every win and loss of my
+          football career; as well as, life's wins and losses. The one's I was
+          cutting ties with had also had been there when I felt there was
+          nothing in life that mattered. For instance, I recall the time in
+          college where I had disappeared and lost contact with all around me. I
+          was in the middle of college, struggling to find my footing balancing
+          life, relationship with my girlfriend and mom, grades were
+          satisfactory in my eyes, and broke. I had snapped on twitter earlier
+          that day, questioning many parts of my life; including life itself. As
+          I sit in my duplex, there was a knock at the door. Two young women
+          entered. "Roddy are you ok" one asked. Of couse I lied and enjoyed
+          their company until they left 30 minutes later. Those moments were
+          tough for me but those young women had left there mark in my life
+          without knowing it. So as I contemplate if I want to cut down my loved
+          ones to just a loved one, I struggled. But faith pushed my feet in the
+          right direction. I began to cut ties and focus on my love. Some
+          lingered longer than others but eventually I left all those loved ones
+          behind and focused on just my one love. This focus allowed the
+          planning of our wedding to be simple. As the day got closer, the
+          anticipation was nearly unbearable. All this work, leading to one day.
+          Was I even ready? Didn't know and didn't care. I knew my love and I
+          would figure it. We had seen plenty of turmoil that we knew that the
+          two of us would work though anything. And that is what we did.
+        </p>
+        <p>
+          September 2016, the morning was cool and crisp. My boys and I sit on
+          the patio of this barn house enjoying the morning dew. As we sat there
+          on the patio, I see my bride to be preparing for the big day. She's
+          already been up 3 hours and she's walking around stressing about
+          everything. Not even the grace of the beautiful morning could calm her
+          nerves. But did I care? Not one bit. We made it. Unlike many, we
+          managed to plan this wedding while also moving our careers to the
+          desert. The wedding was paid in full with minimal outside assistance.
+          And to top it all off, the few in the wedding party were enjoying
+          themselves. It could've rained during the wedding ceremony, that
+          wouldn't have mattered to me because I knew after it was all said and
+          done, we were married. Nothing could come between us. Did I mention my
+          mom was also helping out and showing love. We had fought for so many
+          years, and finally she came around. She admitted it was tough but she
+          wanted to see her son happy. Her presence was more love I felt from
+          her in years. But I couldn't break down, I had to stay clean and ready
+          for my moment to say those two words, I do. When the moment finally
+          came, I couldn't help but laugh. The people that had seen us grow up
+          from middle school when she had told me no the first time to the
+          people that helped us walk across the graduation stage at Murray State
+          were all here. It was time. As she walks down the aisle, a beautiful
+          butterfly lands near the alter. There hadn't been any butterflies all
+          day. Afterwards my mom told me my late uncle loved butterflies. It was
+          befitting for him to be there. When others had doubted our
+          relationship, he would tell me it doesn't matter what they think, it's
+          you and the one you love in a relationship and that's what mattered.
+          After the ceremony we partied with everyone and celebrated the union
+          of two hearts. As much fun as we were having, work was still waiting.
+          It was time to get back to it. A couple days after the wedding, we
+          were back on a plane back to the desert to get back to work.
+        </p>
+        <p>
           Initially in Phoenix I worked for Ready Logistics. This new business
           line as well as trying to continue to push my IT career was a
           whirlwind. I remember being commended by my boss for the amount of
