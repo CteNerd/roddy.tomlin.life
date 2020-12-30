@@ -16,7 +16,7 @@ export default function About() {
         <div className={"column"}>
           <div className="card">
             <h3>{"Childhood"}</h3>
-            <p>
+            <p className={'about-snippet'}>
               Born in Mississippi, I've never had the feeling like I was born
               and bred in The South. That could be due to the fact of being
               relocated to San Diego before I had a chance to take in the

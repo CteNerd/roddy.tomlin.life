@@ -47,6 +47,7 @@ export default function SideNav() {
         class="dropdown-container"
         style={{ display: showAboutDropdown ? "block" : "none" }}
       >
+      <a href="/about">Overview</a>
         <a href="/about/childhood">Childhood</a>
         <a href="/about/college">College</a>
         <a href="/about/nfl">NFL</a>
