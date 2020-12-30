@@ -17,7 +17,7 @@ export default function Woodshop() {
         <div className={"column"}>
           <Card
             src={plyoboxFront}
-            url={"/woodshop/plyobox"}
+            url={"/hobbies/woodshop/plyobox"}
             title={"Plyo Box"}
             description={
               "This one is 12 x 18 x 24. Learn to make yours here!!!"
