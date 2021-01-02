@@ -17,28 +17,28 @@ export default function IT() {
           way for me to pass the torch onto the next generation so they can
           follow their path? No, I didn't want the next generation to follow
           that path. I didn't want these kids that I had the opportunity to mold
-          to end up sleeping in their car like I had. So instead of football
+          to end up sleeping in their car like I had. Instead of football
           knowledge, I gave them life knowledge via the form of a football.
           There was an Offensive Lineman I was coaching that had size to sign to
           University of Alabama as a 9th grader, I know because I remember
           looking at him eye to eye when he was in the 9th grade. But he didn't
-          have the dog in him to be the beast. So I taught him the technique he
+          have the dog in him to be the beast. I taught him the technique he
           needed in order to improve but I also wanted him to know he should put
           his best foot forward in all he does because you never know who is
           watching. There was a running back who had speed that was like PAC-12
-          speed but he had trouble holding onto the ball. During sprints at the
+          speed, but he had trouble holding onto the ball. During sprints at the
           end of practice one day I told him to run with the ball and don't lose
           it. He laughed at me. While sprinting across the field, I snuck up
           from behind and popped the ball loose while he was running, then
-          continued on running and reminded him that every time he dropped the
+          continued running and reminded him that every time he dropped the
           ball it was 20 pushups (a wager we made earlier in practice). These
           moments brought back life to me that I had been missing. I was
           inspiring and mentoring others; little did they know, they were
           inspiring me as well. But I had a feeling it wasn't enough because it
-          was still focused around football. I needed to hit the drawing board
+          was still focused on football. I needed to hit the drawing board
           again. I wanted to inspire but reach others. The only kids I was
           reaching were the kids at football practice. I wanted to know more
-          about technology so I could possibly inspire via tech. So the same
+          about technology so I could possibly inspire via tech. The same
           effort I took during that first summer at Murray, those summers when
           the coaches had doubted my love for the game, to find me when I was
           sleeping in the car, was now going to be placed toward advancing my
@@ -47,7 +47,7 @@ export default function IT() {
           little to nothing in meaning because we only heard of them via tv or
           some news article. The towns I lived in didn't get those endorsement
           checks for a new computer lab or new state of the art technology and
-          you get to meet a CEO fro Silicone Valley. As a matter of fact, I
+          you get to meet a CEO from Silicone Valley. As a matter of fact, I
           remember my high school aptitude test stated I would be a teacher or
           actuary. I HAD A 34 ON THE MATH SECTION OF THE ACT. Every moment
           possible, I vowed to understand more and more about technology and
@@ -55,7 +55,7 @@ export default function IT() {
           family to be beta testers. I wasn't going to fail the next generation
           and leave the same paths I had to follow for them. During this process
           of finding the love for technology, I burned some old bridges,
-          reignited the love with my ex-fiance, built new relationships, and
+          reignited the love with my ex-fianc&eacute;, built new relationships, and
           began adjusting my growth trajectory within my IT career path. I
           relocated to Dallas/Ft. Worth area and began working for Greyhound
           after holding a position as Tester with SAIC for a year.
@@ -67,11 +67,11 @@ export default function IT() {
           I jumped at all tickets and didn't back down from any challenge. What
           could be worst then sleeping in my car again on my birthday. But of
           course, life doesn't want me to have the easy route. After living
-          together and settling the wrongs from before, my ex-fiance and I
+          together and settling the wrongs from before, my ex-fianc&eacute; and I
           renewed the engagement and promised to focus on us. We knew outside
-          forces would want to interfere with our goals but we had to stay true
-          to each other. As we are planning the wedding, she has the opportunity
-          to be promoted if she takes a position in Phoenix. I wasn't losing her
+          forces would want to interfere with our goals, but we had to stay true
+          to each other. As we are planning the wedding, she could 
+          be promoted if she takes a position in Phoenix. I wasn't losing her
           again. But work saw differently. Left with an ultimatum to choose
           between work and wife, I chose the latter and began searching for a
           new job. I didn't want to lose the job, as I had looked up to my Aunt
@@ -85,7 +85,7 @@ export default function IT() {
           Along with transitioning life to a new city once again, I was also
           preparing to make one of the biggest transitions of my life, marriage.
           I had given my all to school, football, and other parts of life, but
-          now it was time to give my all to my one love. So yes there was plenty
+          now it was time to give my all to my one love. Yes there was plenty
           in my life to make decisions on at this point, but it was all in my
           control. Getting here wasn't easy though. There were hearts broken and
           relationships sacrificed on the road to the engagement. Did I want to
@@ -97,18 +97,18 @@ export default function IT() {
           relationship with my love or focus on my relationships with others.
           For some this may have been easy, but I struggled cutting some of
           these ties. Yes, my love had been there for every win and loss of my
-          football career; as well as, life's wins and losses. The one's I was
-          cutting ties with had also had been there when I felt there was
+          football career; as well as life's wins and losses. The one's I was
+          cutting ties with had also been there when I felt there was
           nothing in life that mattered. For instance, I recall the time in
           college where I had disappeared and lost contact with all around me. I
           was in the middle of college, struggling to find my footing balancing
           life, relationship with my girlfriend and mom, grades were
           satisfactory in my eyes, and broke. I had snapped on twitter earlier
-          that day, questioning many parts of my life; including life itself. As
+          that day, questioning many parts of my life, including life itself. As
           I sit in my duplex, there was a knock at the door. Two young women
-          entered. "Roddy are you ok" one asked. Of course I lied and enjoyed
+          entered. "Roddy are you ok" one asked. Of course, I lied and enjoyed
           their company until they left 30 minutes later. Those moments were
-          tough for me but those young women had left there mark in my life
+          tough for me, but those young women had left their mark in my life
           without knowing it. So as I contemplate if I want to cut down my loved
           ones to just a loved one, I struggled. But faith pushed my feet in the
           right direction. I began to cut ties and focus on my love. Some
@@ -128,14 +128,14 @@ export default function IT() {
           everything. Not even the grace of the beautiful morning could calm her
           nerves. But did I care? Not one bit. We made it. Unlike many, we
           managed to plan this wedding while also moving our careers to the
-          desert. The wedding was paid in full with minimal outside assistance.
+          desert. The wedding was paid in full of minimal outside assistance.
           And to top it all off, the few in the wedding party were enjoying
           themselves. It could've rained during the wedding ceremony, that
           wouldn't have mattered to me because I knew after it was all said and
           done, we were married. Nothing could come between us. Did I mention my
-          mom was also helping out and showing love. We had fought for so many
+          mom was also helping and showing love? We had fought for so many
           years, and finally she came around. She admitted it was tough but she
-          wanted to see her son happy. Her presence was more love I felt from
+          wanted to see her son to be happy. Her presence was more love I felt from
           her in years. But I couldn't break down, I had to stay clean and ready
           for my moment to say those two words, I do. When the moment finally
           came, I couldn't help but laugh. The people that had seen us grow up
@@ -155,14 +155,14 @@ export default function IT() {
         <p>
           Initially in Phoenix I worked for Ready Logistics. This new business
           line as well as trying to continue to push my IT career was a
-          whirlwind. I remember being commended by my boss for the amount of
+          whirlwind. I remember being commended by my boss for 
           time I spent learning the system while at the same time being fussed
           at because support wasn't handling enough tickets. Support by the way
-          was a one man team, me. I eventually left my position working in
+          was a one-man team, me. I eventually left my position working in
           support and began working on actual development with a company by the
           name of Advanced Discovery (now Consilio). Once again, a new business
           line. I struggled with the big data queries and XML transformations
-          between databases but my boss was forgiving and knew this was a
+          between databases, but my boss was forgiving and knew this was a
           struggle for engineers coming from other industries. I felt the
           support, and in return gave more effort than before. I spent night and
           day learning the business as well as learning technology via
@@ -184,17 +184,17 @@ export default function IT() {
           Now at Integrate, I felt loved from the moment I interviewed. But I
           also had another great feeling, feeling of understanding from someone
           else. The CEO was also a former NFL player. He was doing what I
-          wanted, running a company. So I pulled my chair up and started taking
+          wanted, running a company. I pulled my chair up and started taking
           notes. It was a burden going to a new industry once again, catch up to
           the speed of their tech stack, and prepare for a newborn coming in the
           next couple of weeks. December 2018, the birth of my daughter was more
-          inspirational then any moment in my life. I had witnessed my wife make
+          inspirational than any moment in my life. I had witnessed my wife make
           life, have a complicated labor, see my newborn daughter heart rate
           drop, then hold her precious life and feel as if the Earth had finally
           stopped. She changed me. I wanted to give a path to all those kids
           before, but now I also had to make sure whatever path she wanted to
           take was also made available. While at Integrate, I haven't backed
-          down from challenges but I also don't step up to take on every task,
+          down from challenges, but I also don't step up to take on every task,
           I've learned that sometimes the best spot in the classroom is at your
           desk with your pencil taking notes and other times it is in front of
           the class leading the lesson. My mentoring ways are still there, but

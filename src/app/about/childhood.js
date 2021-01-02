@@ -21,25 +21,25 @@ export default function Childhood() {
         <p>
           Soon after my younger sister was born, we relocated to Philadelphia.
           The city life took a little adjustment from seeing the Pacific Ocean
-          everyday but my cousin showed me the ropes of getting around in and
+          every day, but my cousin showed me the ropes of getting around in and
           being a boy in Philadelphia. School was starting to become tedious with
           homework and schoolwork, no more arts and crafts all day. Even though
           there was more work to do, I didn't feel challenged majority of the
-          time. So what does a boy do when he is bored? TROUBLE. I remember
+          time. So, what does a boy do when he is bored? TROUBLE. I remember
           having my mom called to the school at least once a year for minor
           incidents I happened to find myself get into while attending school.
           For instance, I love the story of bringing matches to school, source
           will be left anonymous, and lighting leaves on fire at the playground.
-          No I didn't burn the school down, a kid had told on me before I could
+          No, I didn't burn the school down, a kid had told on me before I could
           get that far. However, when sent to the principal's office for a
           search and seize, there was nothing to be found and I was sent on my
           way. Maybe if the principal wasn't so busy and left me sitting in
-          those cushioned chairs outside his office for so long I wouldn't have
+          those cushioned chairs outside his office for so long, I wouldn't have
           thought of a way of hiding the matches in the cushion. Shrugs. Even
           though I knew how to find trouble, I managed to maintain good grades
-          throughout school. I even made a substitute mad one time because he
+          throughout school. I even made a substitute mad one time because the
           math was wrong. When I corrected her, she told me to go the
-          principal's office; along with some other words. I don't look on her
+          principal's office; along with some other words. I don't look down on her
           for her anger anymore, I've learned that everyone has their own anger
           issues, including myself.
         </p>
@@ -59,10 +59,10 @@ export default function Childhood() {
           papers and retire after serving his country for 24 years. Funny he
           got to end his career near the same area he went to boot camp to start
           it all, Paris Island. But before he could retire, there was one last
-          task, managing 9/11. The day it happened, all I remember is being at
+          task, managing 9/11. The day it happened; all I remember is being at
           school with a couple of teachers because all the kids had left.
           Channel One only showed before school started. When my mom finally was
-          able to pick me up, she was quiet. Reflecting back on the day now, my
+          able to pick me up, she was quiet. Reflecting on the day now, my
           dad explains how Camp Legune was one of the few air strips that could
           handle the load of air traffic preparing to land after all aircraft
           were instructed to land immediately. Given his duty was over Flight
@@ -70,7 +70,7 @@ export default function Childhood() {
           legit and made it safely. I didn't know the work put in by my parents
           to make it seem like all was going to be ok. When my dad finally
           retired that December on my birthday, it was the close of one chapter
-          of our lives, and the start of another. We were headed to Good Ol
+          of our lives, and the start of another. We were headed to Good Ol'
           Rocky Top.
         </p>
         <p>
@@ -84,21 +84,21 @@ export default function Childhood() {
           cards so she would be my wife later), my first sport, my first
           accident, and much more. But as many teens do, I also fell off the
           wagon with school. Remember that anger problem, it surfaced early and
-          ofter. I was in trouble for everything, vandalism, stealing, and
-          fighting to say the least; but, thats only the stuff they caught me
+          often. I was in trouble for everything, vandalism, stealing, and
+          fighting to say the least; but that's only the stuff they caught me
           doing. At one point though, anger wasn't in my control anymore. I
           remember those sit down talks with the psychologist about walking
-          though my day and steps to take when I feel my breathing is shorter
+          through my day and steps to take when I feel my breathing is shorter
           and vision is narrow. Was it fun? Heck yes, I got candy every visit.
-          Once again though, I didn't know how these meetings were effecting me
+          Once again though, I didn't know how these meetings were affecting me
           for the long term. Til today, I follow the practices I learned here
           (when given the time and space). As mentioned, I also began sports in
-          Tennessee. It wasn't until half way through high school when I tried
+          Tennessee. It wasn't until halfway through high school when I tried
           to see if I was any good at this game called football. While playing
           football, I was able to maintain my anger it seemed; or, allowing it
           to be dormant like a volcano. I started transferring my image from
           being the band kid with the saxophone to one of the varsity football
-          players. Then reality check, SCHOOL. Biology wasn't my thing, I was
+          players. Then reality check, SCHOOL. Biology wasn't my thing; I was
           all about numbers. Math and Analytical work put me in the zone;
           however, the rest I needed assistance. Most classes I found a way to
           push myself through, but 9th grade Biology wasn't making the cut.
@@ -109,11 +109,11 @@ export default function Childhood() {
           lovely via his own final exam paper, I pretty much had one option,
           find a new school. My parents then transferred me to the school where
           they were teaching. Just great, 2 former Marines are not only my
-          parents but also my teachers. Oh Sweet Baby Jesus, Let us pray. Life
+          parents but also my teachers. Oh, Sweet Baby Jesus, let us pray. Life
           took time adjusting in the new environment with no football. TSSAA had
           deemed me ineligible because I had transferred schools; however, after
           that school year they made a rule that students transferring to a
-          school where there parents work will not have to sit out a year,
+          school where their parents work will not have to sit out a year,
           RME!!! After going to Fort Knox for high school and finally being able
           to play football, I finished out 11th and 12th grade like a golden
           child. Similar to my dad a few years earlier, it was time to close a
