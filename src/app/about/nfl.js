@@ -64,7 +64,7 @@ export default function Nfl() {
           AFL, and eventually landed back in Atlanta with the Falcons. Funny
           right, the team I didn't make the cut to play against was now the team
           looking to sign me. Life was course correcting. Working out for the
-          Falcons for a week during rookie minicamp, left a good enough
+          Falcons for a week during rookie mini camp, left a good enough
           impression for Bob Kronenberg to give me a call to extend an offer to
           play for the Falcons. I had officially made it. I remember sitting at
           Bush Airport in Houston pondering if I should accept the offer or

@@ -72,7 +72,7 @@ export default function IT() {
           forces would want to interfere with our goals but we had to stay true
           to each other. As we are planning the wedding, she has the opportunity
           to be promoted if she takes a position in Phoenix. I wasn't losing her
-          again. But work saw differently. Left with an ultimatium to choose
+          again. But work saw differently. Left with an ultimatum to choose
           between work and wife, I chose the latter and began searching for a
           new job. I didn't want to lose the job, as I had looked up to my Aunt
           who was able to work for US Steel from the time she graduated high
@@ -88,7 +88,7 @@ export default function IT() {
           now it was time to give my all to my one love. So yes there was plenty
           in my life to make decisions on at this point, but it was all in my
           control. Getting here wasn't easy though. There were hearts broken and
-          relationships sacraficed on the road to the engagement. Did I want to
+          relationships sacrificed on the road to the engagement. Did I want to
           make those decisions to lose those people? Not at all. But I reminded
           myself many of times, "as a child, I did childish things. As a man, it
           was time to put those childish things away and be a man". By no means
@@ -106,7 +106,7 @@ export default function IT() {
           satisfactory in my eyes, and broke. I had snapped on twitter earlier
           that day, questioning many parts of my life; including life itself. As
           I sit in my duplex, there was a knock at the door. Two young women
-          entered. "Roddy are you ok" one asked. Of couse I lied and enjoyed
+          entered. "Roddy are you ok" one asked. Of course I lied and enjoyed
           their company until they left 30 minutes later. Those moments were
           tough for me but those young women had left there mark in my life
           without knowing it. So as I contemplate if I want to cut down my loved
@@ -199,7 +199,7 @@ export default function IT() {
           desk with your pencil taking notes and other times it is in front of
           the class leading the lesson. My mentoring ways are still there, but
           instead of reaching out to mentor I just leave my door open. I love
-          life as a father and enjoy every moment of the strugggle, haha. 30
+          life as a father and enjoy every moment of the struggle. 30
           years has brought plenty of knowledge and wisdom. I can't wait to see
           what else is to come.
         </p>

@@ -50,7 +50,7 @@ export default function College() {
           no insight on the amount of partying. By the way, the coaches who gave
           me the opportunity to come to Murray are now gone. My sister, trying
           to find her way as she starts high school. Life was threw me a
-          curveball winter of 2009. But as one door closes, another door shall
+          curve ball winter of 2009. But as one door closes, another door shall
           open. The new coach had this phrase he wouldn't stop saying every
           freaking day during 6 AM workouts, "when gives you lemons, make
           lemonade". And after all those workouts, while my mouth is dry as can
@@ -58,7 +58,7 @@ export default function College() {
           the lemonade from your horrible life. But as time went on, he
           installed other sayings that I would learn to manage life with. The
           one that stuck with me the most as grades fluctuated, footballs wins
-          and losses, and lifes rollercoaster ride was "control what you can
+          and losses, and life's rollercoaster ride was "control what you can
           control". Those fights with parents stating girlfriend was throwing my
           grades off or those moments sitting in meetings with coaches after the
           third straight loss, I would stick with it, "control what you can
@@ -117,9 +117,9 @@ export default function College() {
           involved with others, and learning how to navigate my path to the NFL.
           I hired an agent and thought life for me was set. Then graduation, I
           fell behind in a class prepping for the NFL that I threw my B.S. in
-          Mathemtics and Computer Science into jeopardy. After going undrafted
+          Mathematics and Computer Science into jeopardy. After going undrafted
           and signing to Jacksonville Jaguars, I managed to finish my degree
-          while in minicamp. College had officially given me all it could throw
+          while in mini camp. College had officially given me all it could throw
           at me and now time to close the chapter.
         </p>
       </div>

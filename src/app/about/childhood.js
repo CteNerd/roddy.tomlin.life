@@ -19,10 +19,10 @@ export default function Childhood() {
           now I got to be the older sibling.
         </p>
         <p>
-          Soon after my younger sister was born, we relocated to Philadephia.
+          Soon after my younger sister was born, we relocated to Philadelphia.
           The city life took a little adjustment from seeing the Pacific Ocean
           everyday but my cousin showed me the ropes of getting around in and
-          being a boy in Philadephia. School was starting to become tidious with
+          being a boy in Philadelphia. School was starting to become tedious with
           homework and schoolwork, no more arts and crafts all day. Even though
           there was more work to do, I didn't feel challenged majority of the
           time. So what does a boy do when he is bored? TROUBLE. I remember
@@ -37,14 +37,14 @@ export default function Childhood() {
           those cushioned chairs outside his office for so long I wouldn't have
           thought of a way of hiding the matches in the cushion. Shrugs. Even
           though I knew how to find trouble, I managed to maintain good grades
-          thoughout school. I even made a substitute mad one time because he
+          throughout school. I even made a substitute mad one time because he
           math was wrong. When I corrected her, she told me to go the
           principal's office; along with some other words. I don't look on her
           for her anger anymore, I've learned that everyone has their own anger
           issues, including myself.
         </p>
         <p>
-          After reaching the end of our lease in Philadephia, at least it seemed
+          After reaching the end of our lease in Philadelphia, at least it seemed
           liked a lease as frequent as we moved, we headed to good ol' North
           Carolina. The memories here will forever live with me, including the
           vivid memories of 9/11. While stationed in North Carolina, I had
@@ -56,7 +56,7 @@ export default function Childhood() {
           life. At the time the seemed minimal, but I still reflect on them til
           today. Before leaving North Carolina, my dad was excited, nervous, and
           had the feeling of accomplishment as he was preparing to turn in his
-          papers and retire after serviing his country for 24 years. Funny he
+          papers and retire after serving his country for 24 years. Funny he
           got to end his career near the same area he went to boot camp to start
           it all, Paris Island. But before he could retire, there was one last
           task, managing 9/11. The day it happened, all I remember is being at
@@ -79,7 +79,7 @@ export default function Childhood() {
           me "That's family". Life was very different here. No more city life
           like Philly. No more oceans like Cali. No more hoops like Tar Heel
           nation. Here, life moved slow, steady, and peaceful; or, at least
-          seemed to be that way. Tenneessee was the place I met my first
+          seemed to be that way. Tennessee was the place I met my first
           girlfriend, also my first rejection (she didn't know I was playing my
           cards so she would be my wife later), my first sport, my first
           accident, and much more. But as many teens do, I also fell off the
@@ -93,7 +93,7 @@ export default function Childhood() {
           Once again though, I didn't know how these meetings were effecting me
           for the long term. Til today, I follow the practices I learned here
           (when given the time and space). As mentioned, I also began sports in
-          Tenneessee. It wasn't until half way through high school when I tried
+          Tennessee. It wasn't until half way through high school when I tried
           to see if I was any good at this game called football. While playing
           football, I was able to maintain my anger it seemed; or, allowing it
           to be dormant like a volcano. I started transferring my image from
