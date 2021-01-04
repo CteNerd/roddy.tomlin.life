@@ -8,6 +8,7 @@ import HSFootball from "./football/hsFootball";
 import NCAAFootball from "./football/ncaaFootball";
 import NFLFootball from "./football/nflFootball";
 import Woodshop from "./woodshop/woodshop";
+import Vlog from "./vlog/vlog";
 import PlyoBox from "./woodshop/plyobox";
 import WorkoutInstructions from "./workouts/workouts-instructional";
 import Childhood from "./about/childhood";
@@ -40,6 +41,9 @@ export default function App() {
           </Route>
           <Route path="/about">
             <About />
+          </Route>
+          <Route path="/hobbies/vlog">
+            <Vlog />
           </Route>
           <Route path="/hobbies/workouts/instructions">
             <WorkoutInstructions />

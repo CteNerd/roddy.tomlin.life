@@ -96,6 +96,7 @@ export default function SideNav() {
         className="dropdown-container"
         style={{ display: showHobbiesDropdown ? "block" : "none" }}
       >
+      <a href="/hobbies/vlog">Vlog</a>
         <a href="/hobbies/woodshop">Woodshop</a>
         <a href="/hobbies/workouts">Workouts</a>
         <a href="/hobbies/workouts/instructions">Workouts Instructional</a>
