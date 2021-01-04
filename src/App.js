@@ -2,28 +2,33 @@ import "./App.css";
 import Footer from "./app/footer/footer";
 import SideNav from "./app/side-nav/sideNav";
 import Main from "./app/Main.js";
-import RtInitials from "./images/RT initials cursive - transparent.png";
+import Banner from "./images/banner-img.png";
 
 function App() {
   return (
     <>
       <SideNav />
-      <div className="main" id="main">
-        <MenuButton />
-        <Main />
+        <header>
+          <MenuButton />
+        </header>
+        <div className="main" id="main">
+          <Main />
+        </div>
         <footer>
           <Footer />
         </footer>
-      </div>
     </>
   );
 }
 
 function MenuButton() {
   return (
-    <div className={"menu-button"} onClick={openNav}>
-      <img className={"menu-img"} src={RtInitials} />
-      <label>Menu</label>
+    <div>
+      <div className={"menu-button col-50"} onClick={openNav}>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
     </div>
   );
 }

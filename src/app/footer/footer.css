@@ -13,14 +13,3 @@
 .footer a {
   color: white;
 }
-
-.col-33 {
-  width: 33%;
-  display: inline-block;
-}
-
-.col-50 {
-  width: 50%;
-  display: inline-block;
-  font-size: initial;
-}

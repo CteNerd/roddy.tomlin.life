@@ -13,7 +13,7 @@
   }
 }
 
-.App-header {
+/* .App-header {
   background-color: #282c34;
   display: flex;
   flex-direction: column;
@@ -21,7 +21,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
-}
+} */
 
 .App-link {
   color: #61dafb;
@@ -66,7 +66,7 @@
 
 /* Main content */
 .main {
-  font-size: 20px; /* Increased text to enable scrolling */
+  font-size: 16px; /* Increased text to enable scrolling */
   min-height: 100vh;
   padding: 0px 8vw;
   background-color: rgb(60, 193, 148, 0.2);
@@ -96,16 +96,39 @@ button:hover {
 
 .menu-button {
   float: left;
-  display: inline-grid;
+  font-size: initial;
+  height: -webkit-fill-available;
 }
 
-.menu-img {
-  min-width: 50px;
-  min-height: 50px;
-  width: 5vw;
-  height: 5vw;
+.menu-button div {
+  width: 35px;
+  height: 5px;
+  background-color: black;
+  margin: 6px 0;
+}
+
+.col-33 {
+  width: 33%;
+  display: inline-block;
+}
+
+.col-50 {
+  width: 50%;
+  display: inline-block;
+  font-size: initial;
+}
+
+.menu-banner {
+  max-height: 40px;
 }
 
 .footer {
+  max-height: 10vh;
+}
+
+header {
+  position: fixed;
+  text-align: center;
+  width: 100vw;
   max-height: 10vh;
 }

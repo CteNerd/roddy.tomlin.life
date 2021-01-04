@@ -29,8 +29,8 @@ export default function SideNav() {
   }
 
   return (
-    <div id="mySidenav" class="sidenav">
-      <a href="javascript:void(0)" class="closebtn" onClick={closeNav}>
+    <div id="mySidenav" className="sidenav">
+      <a href="javascript:void(0)" className="closebtn" onClick={closeNav}>
         &times;
       </a>
       <a href="/">
@@ -38,13 +38,13 @@ export default function SideNav() {
       </a>
       <button
         onClick={() => setShowAboutDropdown(!showAboutDropdown)}
-        class="dropdown-btn"
+        className="dropdown-btn"
       >
         <SmileOutlined spin /> About
         <CaretDownOutlined className={"fa-caret-down"} />
       </button>
       <div
-        class="dropdown-container"
+        className="dropdown-container"
         style={{ display: showAboutDropdown ? "block" : "none" }}
       >
       <a href="/about">Overview</a>
@@ -56,13 +56,13 @@ export default function SideNav() {
       </div>
       {/* <button
         onClick={() => setShowBallDropdown(!showBallDropdown)}
-        class="dropdown-btn"
+        className="dropdown-btn"
       >
         <TrophyOutlined /> Ball Is Life
         <CaretDownOutlined className={"fa-caret-down"} />
       </button>
       <div
-        class="dropdown-container"
+        className="dropdown-container"
         style={{ display: showBallDropdown ? "block" : "none" }}
       >
         <a href="/football/highschool">High School</a>
@@ -71,13 +71,13 @@ export default function SideNav() {
       </div> */}
       <button
         onClick={() => setShowProjectsDropdown(!showProjectsDropdown)}
-        class="dropdown-btn"
+        className="dropdown-btn"
       >
         <GithubOutlined /> Projects
         <CaretDownOutlined className={"fa-caret-down"} />
       </button>
       <div
-        class="dropdown-container"
+        className="dropdown-container"
         style={{ display: showProjectsDropdown ? "block" : "none" }}
       >
         <a href="https://ttyltutors.com">TTYL</a>
@@ -87,13 +87,13 @@ export default function SideNav() {
       </div>
       <button
         onClick={() => setShowHobbiesDropdown(!showHobbiesDropdown)}
-        class="dropdown-btn"
+        className="dropdown-btn"
       >
         <FieldTimeOutlined /> Hobbies
         <CaretDownOutlined className={"fa-caret-down"} />
       </button>
       <div
-        class="dropdown-container"
+        className="dropdown-container"
         style={{ display: showHobbiesDropdown ? "block" : "none" }}
       >
         <a href="/hobbies/woodshop">Woodshop</a>
@@ -102,13 +102,13 @@ export default function SideNav() {
       </div>
       <button
         onClick={() => setShowSocialDropdown(!showSocialDropdown)}
-        class="dropdown-btn"
+        className="dropdown-btn"
       >
         <UsergroupAddOutlined /> Social
         <CaretDownOutlined className={"fa-caret-down"} />
       </button>
       <div
-        class="dropdown-container"
+        className="dropdown-container"
         style={{ display: showSocialDropdown ? "block" : "none" }}
       >
         <a href="https://www.facebook.com/roddy.tomlin.3">

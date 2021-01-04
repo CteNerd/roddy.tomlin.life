@@ -13,10 +13,15 @@
 .intro-img-container {
   float: right;
   padding: 25px;
+  max-height: -webkit-fill-available;
 }
 
 .intro-img {
-  max-width: 100%;
-  height: -webkit-fill-available;
-  /* max-height: -webkit; */
+  max-width: 90%;
+  max-height: -webkit-fill-available;
+}
+
+.banner {
+  width: 100%;
+  background-color: #373543;
 }
