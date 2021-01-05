@@ -89,19 +89,28 @@ button:hover {
 
 .menu-button {
   float: left;
-  font-size: initial;
-  height: -webkit-fill-available;
+  vertical-align: middle;
 }
 
 .menu-button div {
   width: 35px;
   height: 5px;
-  background-color: #373543;
+  background-color: #eae4d4;
   margin: 6px 0;
 }
 
 .col-33 {
   width: 33%;
+  display: inline-block;
+}
+
+.col-32 {
+  width: 32%;
+  display: inline-block;
+}
+
+.col-4 {
+  width: 4%;
   display: inline-block;
 }
 
@@ -115,13 +124,19 @@ button:hover {
   max-height: 40px;
 }
 
-.footer {
-  max-height: 10vh;
-}
-
 header {
   position: fixed;
   text-align: center;
   width: 100vw;
   max-height: 10vh;
+  top: 0; /* Stay at the top */
+  z-index: 1;
+}
+
+.banner {
+  width: 100%;
+  max-width: 100vw;;
+  background-color: #373543;
+  color: #eae4d4;
+  font-weight: bold;
 }

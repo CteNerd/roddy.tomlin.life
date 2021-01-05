@@ -6,10 +6,13 @@
   width: 100vw;
   color: white;
   text-align: center;
-  /* background-color: white; */
   background-color: rgb(55, 53, 67);
 }
 
 .footer a {
   color: white;
+}
+
+.footer-btn {
+  padding: 3px;
 }

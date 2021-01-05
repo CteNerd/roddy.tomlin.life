@@ -76,11 +76,6 @@ export default function Vlog() {
 
   return (
     <>
-    <div className={'banner'}>
-        <p className={'col-33'}>REPS</p>
-        <p className={'col-33'}>CONVERSATIONS</p>
-        <p className={'col-33'}>TECH</p>
-    </div>
       <PageHeader
         pageDescription={
           "Welcome to 62, What it do? Not just a channel for dads, but for guys. Rather the topic is workouts, fatherhood, or  building your first website, I am here to talk about it. Through my experiences as an NFL player or software engineer, I hope it enlightens all that listen. I appreciate you swinging by, and if you would like to find out more about me, feel free to drop me a message."

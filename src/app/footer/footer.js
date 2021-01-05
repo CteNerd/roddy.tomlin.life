@@ -32,14 +32,12 @@ export default function Footer() {
           <MailOutlined /> Email
         </div>
       </a>
-      <p className={"col-50"}>
-        <div className={"footer-btn"}>
-          <AmazonOutlined /> Built On AWS Amplify
-        </div>
-      </p>
-      <p className={"col-50"}>
-        <div className={"footer-btn"}>Built Using ReactJS</div>
-      </p>
+      <div className={"col-50 footer-btn"}>
+        <AmazonOutlined /> Built On AWS Amplify
+      </div>
+      <div className={"col-50 footer-btn"}>
+      Built Using ReactJS
+      </div>
     </div>
   );
 }

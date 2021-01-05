@@ -2,7 +2,6 @@ import "./App.css";
 import Footer from "./app/footer/footer";
 import SideNav from "./app/side-nav/sideNav";
 import Main from "./app/Main.js";
-import Banner from "./images/banner-img.png";
 
 function App() {
   return (
@@ -24,10 +23,15 @@ function App() {
 function MenuButton() {
   return (
     <div>
-      <div className={"menu-button col-50"} onClick={openNav}>
-        <div></div>
-        <div></div>
-        <div></div>
+      <div className={'banner'} onClick={openNav}>
+        <div className={'menu-button col-4'}>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+        <p className={'col-32'}>REPS</p>
+        <p className={'col-32'}>CONVERSATIONS</p>
+        <p className={'col-32'}>TECH</p>
       </div>
     </div>
   );

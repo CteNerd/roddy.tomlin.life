@@ -1,5 +1,4 @@
 import React from "react";
-import Banner from "../../images/banner-img.png";
 import PageHeader from "../../shared-components/page-header/page-header";
 import FamilyPhoto from "./family-photo.png";
 import "./home.css";
@@ -7,11 +6,11 @@ import "./home.css";
 export default function Home() {
   return (
     <div className={"home-css"}>
-      <div className={'banner'}>
+      {/* <div className={'banner'}>
         <p className={'col-33'}>REPS</p>
         <p className={'col-33'}>CONVERSATIONS</p>
         <p className={'col-33'}>TECH</p>
-      </div>
+      </div> */}
       <PageHeader
         pageDescription={
           <p>The story, life, and r&eacute;sum&eacute; of Roddy Tomlin</p>
@@ -19,7 +18,7 @@ export default function Home() {
       />
       <div className={"instruction-p"}>
         <div className={"intro-img-container"}>
-          <img className={"intro-img"} src={FamilyPhoto} />
+          <img alt={'tomlin family'} className={"intro-img"} src={FamilyPhoto} />
         </div>
         <p>
           Welcome to my, Roddy Tomlin, site where I bring together the many aspects of my life into one platform. Within this site you will find resources for being a father (both do's and don'ts), workouts, as well as my background. I am simply grateful and blessed to be where I am;

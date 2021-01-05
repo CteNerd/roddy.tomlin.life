@@ -4,7 +4,7 @@ import {
   HomeOutlined,
   GithubOutlined,
   SmileOutlined,
-  TrophyOutlined,
+  // TrophyOutlined,
   UsergroupAddOutlined,
   InstagramOutlined,
   FacebookOutlined,
@@ -15,13 +15,12 @@ import {
 import "./sideNav.css";
 
 export default function SideNav() {
-  const [showBallDropdown, setShowBallDropdown] = useState(false);
+  // const [showBallDropdown, setShowBallDropdown] = useState(false);
   const [showHobbiesDropdown, setShowHobbiesDropdown] = useState(false);
   const [showProjectsDropdown, setShowProjectsDropdown] = useState(false);
   const [showSocialDropdown, setShowSocialDropdown] = useState(false);
   const [showAboutDropdown, setShowAboutDropdown] = useState(false);
 
-  /* Set the width of the side navigation to 0 */
   function closeNav() {
     if (document.getElementById("mySidenav"))
       document.getElementById("mySidenav").style.width = "0";
@@ -30,9 +29,9 @@ export default function SideNav() {
 
   return (
     <div id="mySidenav" className="sidenav">
-      <a href="javascript:void(0)" className="closebtn" onClick={closeNav}>
+      <div className="closebtn" onClick={closeNav}>
         &times;
-      </a>
+      </div>
       <a href="/">
         <HomeOutlined /> Home
       </a>
