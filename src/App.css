@@ -52,13 +52,6 @@
   }
 }
 
-.menu-stripe {
-  width: 35px;
-  height: 5px;
-  background-color: black;
-  margin: 6px 0;
-}
-
 .pay-img {
   width: 40px;
   height: 40px;
@@ -103,7 +96,7 @@ button:hover {
 .menu-button div {
   width: 35px;
   height: 5px;
-  background-color: black;
+  background-color: #373543;
   margin: 6px 0;
 }
 
