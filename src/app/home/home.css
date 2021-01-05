@@ -22,6 +22,18 @@
 }
 
 .banner {
+  margin-left: 10px;
   width: 100%;
+  max-width: 100vw;;
   background-color: #373543;
+}
+
+.banner p {
+  color: #eae4d4;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.banner-img {
+  height: 40px;
 }

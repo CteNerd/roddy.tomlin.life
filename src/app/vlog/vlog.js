@@ -77,7 +77,9 @@ export default function Vlog() {
   return (
     <>
     <div className={'banner'}>
-      <img className={'banner-img'} src={Banner}/>
+        <p className={'col-33'}>REPS</p>
+        <p className={'col-33'}>CONVERSATIONS</p>
+        <p className={'col-33'}>TECH</p>
     </div>
       <PageHeader
         pageDescription={

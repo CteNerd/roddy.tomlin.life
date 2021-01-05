@@ -8,10 +8,11 @@ export default function Home() {
   return (
     <div className={"home-css"}>
       <div className={'banner'}>
-        <img className={'banner-img'} src={Banner}/>
+        <p className={'col-33'}>REPS</p>
+        <p className={'col-33'}>CONVERSATIONS</p>
+        <p className={'col-33'}>TECH</p>
       </div>
       <PageHeader
-        // pageTitle={"Roddy Tomlin"}
         pageDescription={
           <p>The story, life, and r&eacute;sum&eacute; of Roddy Tomlin</p>
         }
