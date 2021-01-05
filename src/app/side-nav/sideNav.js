@@ -24,7 +24,7 @@ export default function SideNav() {
   function closeNav() {
     if (document.getElementById("mySidenav"))
       document.getElementById("mySidenav").style.width = "0";
-    document.body.style.backgroundColor = "white";
+    document.body.style.backgroundColor = "#eae4d4";
   }
 
   return (

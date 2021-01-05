@@ -4,13 +4,17 @@
   left: 0;
   bottom: 0;
   width: 100vw;
-  color: white;
+  color: #eae4d4;
   text-align: center;
   background-color: rgb(55, 53, 67);
 }
 
 .footer a {
-  color: white;
+  color: #eae4d4;
+}
+
+.footer a:hover {
+  color: rgb(60, 193, 148);
 }
 
 .footer-btn {

@@ -22,11 +22,6 @@
   transition: 0.3s;
 }
 
-/* When you mouse over the navigation links, change their color */
-.sidenav a:hover {
-  color: rgb(60, 193, 148);
-}
-
 /* Position and style the close button (top right corner) */
 .sidenav .closebtn {
   position: absolute;
@@ -59,8 +54,11 @@
 }
 
 /* On mouse-over */
-.sidenav a:hover,
 .dropdown-btn:hover {
+  color: rgb(60, 193, 148);
+}
+
+.sidenav a:hover {
   color: rgb(60, 193, 148);
 }
 
