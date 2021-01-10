@@ -33,6 +33,7 @@
 }
 
 .column .card {
+  overflow: hidden;
   width: 100%;
   position: relative;
   height: 250px;
