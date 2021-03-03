@@ -17,5 +17,6 @@
 }
 
 .intro-img {
+  max-height: 100vh;
   max-width: 90%;
 }
