@@ -145,7 +145,7 @@ header {
 }
 
 .banner-img {
-  max-height: 40vh;
+  max-width: 100vw;
 }
 
 @font-face {
