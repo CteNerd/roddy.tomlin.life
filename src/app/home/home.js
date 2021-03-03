@@ -6,17 +6,10 @@ import "./home.css";
 export default function Home() {
   return (
     <div className={"home-css"}>
-      {/* <div className={'banner'}>
-        <p className={'col-33'}>REPS</p>
-        <p className={'col-33'}>CONVERSATIONS</p>
-        <p className={'col-33'}>TECH</p>
-      </div> */}
-      <PageHeader
-        pageDescription={
-          <p>The story, life, and r&eacute;sum&eacute; of Roddy Tomlin</p>
-        }
-      />
       <div className={"instruction-p"}>
+      <PageHeader
+        pageTitle={"Welcome"}
+      />
         <div className={"intro-img-container"}>
           <img alt={'tomlin family'} className={"intro-img"} src={FamilyPhoto} />
         </div>

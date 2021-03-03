@@ -60,9 +60,10 @@
 /* Main content */
 .main {
   font-size: 16px; /* Increased text to enable scrolling */
+  font-family: Edo;
   min-height: 100vh;
-  padding: 0px 8vw;
-  background-color: rgb(60, 193, 148, 0.2);
+  padding: 20px 8vw;
+  background-color: #b4f1e7;
 }
 
 /* Add an active class to the active dropdown button */
@@ -80,7 +81,7 @@
 
 * {
   box-sizing: border-box;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: RockSalt;
 }
 
 button:hover {
@@ -134,9 +135,25 @@ header {
 }
 
 .banner {
+  text-align: center;
   width: 100%;
-  max-width: 100vw;;
+  max-width: 100vw;
+  max-height: 20%;
   background-color: #373543;
   color: #eae4d4;
   font-weight: bold;
+}
+
+.banner-img {
+  max-height: 40vh;
+}
+
+@font-face {
+  font-family: 'RockSalt';
+  src: local('RockSalt'), url(./app/fonts/RockSalt-Regular.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Edo';
+  src: local('Edo'), url(./app/fonts/edosz.ttf) format('truetype');
 }

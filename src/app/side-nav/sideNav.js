@@ -36,6 +36,8 @@ export default function SideNav() {
         <HomeOutlined /> Home
       </a>
       <button
+        // onMouseLeave={() => setShowAboutDropdown(false)}
+        onMouseOver={() => setShowAboutDropdown(true)}
         onClick={() => setShowAboutDropdown(!showAboutDropdown)}
         className="dropdown-btn"
       >
@@ -69,6 +71,8 @@ export default function SideNav() {
         <a href="/football/nfl">Professional</a>
       </div> */}
       <button
+        // onMouseLeave={() => setShowProjectsDropdown(false)}
+        onMouseOver={() => setShowProjectsDropdown(true)}
         onClick={() => setShowProjectsDropdown(!showProjectsDropdown)}
         className="dropdown-btn"
       >
@@ -85,6 +89,8 @@ export default function SideNav() {
         <a href="https://www.wewillcalltix.com">We'll Call Tix</a>
       </div>
       <button
+        // onMouseLeave={() => setShowHobbiesDropdown(false)}
+        onMouseOver={() => setShowHobbiesDropdown(true)}
         onClick={() => setShowHobbiesDropdown(!showHobbiesDropdown)}
         className="dropdown-btn"
       >
@@ -95,12 +101,14 @@ export default function SideNav() {
         className="dropdown-container"
         style={{ display: showHobbiesDropdown ? "block" : "none" }}
       >
-      <a href="/hobbies/vlog">Vlog</a>
+        <a href="/hobbies/vlog">Vlog</a>
         <a href="/hobbies/woodshop">Woodshop</a>
         <a href="/hobbies/workouts">Workouts</a>
         <a href="/hobbies/workouts/instructions">Workouts Instructional</a>
       </div>
       <button
+        // onMouseLeave={() => setShowSocialDropdown(false)}
+        onMouseOver={() => setShowSocialDropdown(true)}
         onClick={() => setShowSocialDropdown(!showSocialDropdown)}
         className="dropdown-btn"
       >
