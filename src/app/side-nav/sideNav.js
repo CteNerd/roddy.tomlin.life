@@ -36,7 +36,6 @@ export default function SideNav() {
         <HomeOutlined /> Home
       </a>
       <button
-        // onMouseLeave={() => setShowAboutDropdown(false)}
         onMouseOver={() => setShowAboutDropdown(true)}
         onClick={() => setShowAboutDropdown(!showAboutDropdown)}
         className="dropdown-btn"
@@ -46,6 +45,7 @@ export default function SideNav() {
       </button>
       <div
         className="dropdown-container"
+        onMouseOver={() => setShowAboutDropdown(true)}
         style={{ display: showAboutDropdown ? "block" : "none" }}
       >
       <a href="/about">Overview</a>
@@ -71,7 +71,6 @@ export default function SideNav() {
         <a href="/football/nfl">Professional</a>
       </div> */}
       <button
-        // onMouseLeave={() => setShowProjectsDropdown(false)}
         onMouseOver={() => setShowProjectsDropdown(true)}
         onClick={() => setShowProjectsDropdown(!showProjectsDropdown)}
         className="dropdown-btn"
@@ -81,6 +80,7 @@ export default function SideNav() {
       </button>
       <div
         className="dropdown-container"
+        onMouseOver={() => setShowProjectsDropdown(true)}
         style={{ display: showProjectsDropdown ? "block" : "none" }}
       >
         <a href="https://ttyltutors.com">TTYL</a>
@@ -89,7 +89,6 @@ export default function SideNav() {
         <a href="https://www.wewillcalltix.com">We'll Call Tix</a>
       </div>
       <button
-        // onMouseLeave={() => setShowHobbiesDropdown(false)}
         onMouseOver={() => setShowHobbiesDropdown(true)}
         onClick={() => setShowHobbiesDropdown(!showHobbiesDropdown)}
         className="dropdown-btn"
@@ -99,6 +98,7 @@ export default function SideNav() {
       </button>
       <div
         className="dropdown-container"
+        onMouseOver={() => setShowHobbiesDropdown(true)}
         style={{ display: showHobbiesDropdown ? "block" : "none" }}
       >
         <a href="/hobbies/vlog">Vlog</a>
@@ -107,7 +107,6 @@ export default function SideNav() {
         <a href="/hobbies/workouts/instructions">Workouts Instructional</a>
       </div>
       <button
-        // onMouseLeave={() => setShowSocialDropdown(false)}
         onMouseOver={() => setShowSocialDropdown(true)}
         onClick={() => setShowSocialDropdown(!showSocialDropdown)}
         className="dropdown-btn"
@@ -117,6 +116,7 @@ export default function SideNav() {
       </button>
       <div
         className="dropdown-container"
+        onMouseOver={() => setShowSocialDropdown(true)}
         style={{ display: showSocialDropdown ? "block" : "none" }}
       >
         <a href="https://www.facebook.com/roddy.tomlin.3">
