@@ -13,10 +13,9 @@
 .intro-img-container {
   float: right;
   padding: 25px;
-  max-height: -webkit-fill-available;
+  max-height: 100vh;
 }
 
 .intro-img {
   max-width: 90%;
-  max-height: -webkit-fill-available;
 }
