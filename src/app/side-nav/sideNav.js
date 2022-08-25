@@ -84,9 +84,10 @@ export default function SideNav() {
         style={{ display: showProjectsDropdown ? "block" : "none" }}
       >
         <a href="https://meta.cronies.io">Meta Cronies</a>
+     <a href="https://www.cronies.io/">Cronies</a>
         <a href="https://www.sugarsocietysc.com">Sugar Society</a>
         <a href="https://www.r3counseling.com">R3 Counseling</a>
-        <a href="https://www.cronies.io/">Cronies</a>
+   
       </div>
       <button
         onMouseOver={() => setShowHobbiesDropdown(true)}
