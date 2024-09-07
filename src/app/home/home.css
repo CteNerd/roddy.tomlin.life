@@ -1,10 +1,14 @@
 .home {
-  width: 100vw; /* Full viewport width */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure the home container takes at least the full viewport height */
   box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .home-body-container {
+  flex: 1; /* Allow the body container to grow and take up available space */
   padding: 10px;
+  padding-bottom: 60px; /* Add padding to the bottom to prevent footer overlap */
   box-sizing: border-box; /* Ensure padding is included in width */
 }
 
