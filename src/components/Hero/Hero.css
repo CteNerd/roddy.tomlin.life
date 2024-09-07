@@ -23,3 +23,12 @@
     transform: translateY(-50%);
   }
   
+
+@media (max-width: 768px) {
+  .hero {
+    height: 27vh; /* Adjust height for mobile */
+    background-size: contain; /* Ensure the image fits within the container */
+    background-position: top; /* Adjust position to show the top part of the image */
+    background-repeat: no-repeat;
+  }
+}
