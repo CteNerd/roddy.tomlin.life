@@ -1,0 +1,17 @@
+.footer {
+    background-color: #222;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .link {
+    color: #00e5ff;
+    margin: 0 10px;
+  }
+  
+  .built {
+    margin-top: 10px;
+    font-size: 0.8rem;
+  }
+  

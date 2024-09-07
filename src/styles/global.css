@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'RockSalt';
+    src: local('RockSalt'), url(../assets/fonts/RockSalt-Regular.ttf) format('truetype');
+  }
+  
+  @font-face {
+    font-family: 'Edo';
+    src: local('Edo'), url(../assets/fonts/edosz.ttf) format('truetype');
+  }

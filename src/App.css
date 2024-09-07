@@ -150,10 +150,10 @@ header {
 
 @font-face {
   font-family: 'RockSalt';
-  src: local('RockSalt'), url(./app/fonts/RockSalt-Regular.ttf) format('truetype');
+  src: local('RockSalt'), url(../src/assets/fonts/RockSalt-Regular.ttf) format('truetype');
 }
 
 @font-face {
   font-family: 'Edo';
-  src: local('Edo'), url(./app/fonts/edosz.ttf) format('truetype');
+  src: local('Edo'), url(../src/assets/fonts/edosz.ttf) format('truetype');
 }

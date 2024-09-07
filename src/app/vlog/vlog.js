@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PageHeader from "../../shared-components/page-header/page-header";
-import Banner from "../../images/banner-img.png";
+import Banner from "../../assets/images/banner-img.png";
 import { httpGetRequest } from "../../httpClient/client";
 
 export default function Vlog() {

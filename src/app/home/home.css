@@ -1,22 +1,28 @@
-.kale-wrap-img {
-  width: 50%;
-}
-
-.home-css {
-  text-align: center;
-}
-
-.home-bullets {
-  list-style-type: none;
+.home-body-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
 }
 
 .intro-img-container {
-  float: right;
-  padding: 25px;
-  max-height: 100vh;
+  flex: 1;
 }
 
-.intro-img {
-  max-height: 100vh;
-  max-width: 90%;
+.home-intro-body-container {
+  flex: 2;
+  padding-left: 20px;
+}
+
+@media (max-width: 768px) {
+  .home-body-container {
+    flex-direction: column;
+  }
+
+  .intro-img-container {
+    margin-bottom: 20px;
+  }
+
+  .home-intro-body-container {
+    padding-left: 0;
+  }
 }
