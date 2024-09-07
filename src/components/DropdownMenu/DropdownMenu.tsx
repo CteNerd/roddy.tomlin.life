@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import './DropdownMenu.css';
 
-
 interface HeaderProps {
-    menu: {
+  menu: {
+    title: string;
+    items: {
       title: string;
-      items: string[];
-    };
-  }
+      link: string;
+    }[];
+  };
+}
   
   const DropdownMenu: React.FC<HeaderProps> = ({ menu }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +27,7 @@ interface HeaderProps {
         <ul className="dropdown-menu">
           {menu.items.map((item, index) => (
             <li key={index} className="dropdown-item">
-              <button>{item}</button>
+              <a href={item.link}><button>{item.title}</button></a>
             </li>
           ))}
         </ul>

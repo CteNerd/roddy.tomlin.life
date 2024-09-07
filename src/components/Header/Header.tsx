@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import './Header.css';
 import DropdownMenu from '../DropdownMenu/DropdownMenu';
 
+
 interface HeaderProps {
   menus: {
     title: string;
-    items: string[];
+    items: {
+      title: string;
+      link: string;
+    }[];
   }[];
 }
 

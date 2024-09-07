@@ -3,11 +3,14 @@ import { Meta, StoryFn } from '@storybook/react';
 import DropdownMenu from './DropdownMenu';
 
 interface HeaderProps {
-    menu: {
+  menu: {
+    title: string;
+    items: {
       title: string;
-      items: string[];
-    };
-  }
+      link: string;
+    }[];
+  };
+}
 
   const headerProps: HeaderProps = {
       menu: {

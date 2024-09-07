@@ -9,17 +9,40 @@ import './home.css';
 interface HeaderProps {
   menus: {
     title: string;
-    items: string[];
+    items: {
+      title: string;
+      link: string;
+    }[];
   }[];
 }
 
 function Home() {
   const menus: HeaderProps['menus'] = [
-    { title: 'Option 1', items: ['Sub 1', 'Sub 2', 'Sub 3'] },
-    { title: 'Option 2', items: ['Sub 1', 'Sub 2', 'Sub 3'] },
-    { title: 'Option 3', items: ['Sub 1', 'Sub 2', 'Sub 3'] },
-    { title: 'Option 4', items: ['Sub 1', 'Sub 2', 'Sub 3'] },
-    { title: 'Option 5', items: ['Sub 1', 'Sub 2', 'Sub 3'] },
+    { title: 'Auto-Bio', items: [
+      { title: 'Prologue', link: '/prologue' },
+      { title: 'Childhood', link: '/childhood' },
+      { title: 'College', link: '/college' },
+      { title: 'NFL', link: '/nfl' },
+      { title: 'The Big Day', link: '/the-big-day' },
+      { title: 'IT', link: '/it' }
+    ]},
+    { title: 'Projects', items: [
+      { title: 'R3 Counseling', link: '/r3-counseling' },
+      { title: 'Sugar Society SC', link: '/sugar-society-sc' },
+      { title: 'Got Da Juice', link: '/got-da-juice' }
+    ]},
+    { title: 'Hobbies', items: [
+      { title: 'Vlog', link: '/vlog' },
+      { title: 'Woodshop', link: '/woodshop' },
+      { title: 'Workouts', link: '/workouts' },
+      { title: 'Gardening', link: '/gardening' }
+    ]},
+    { title: 'Social', items: [
+      { title: 'FB', link: '/fb' },
+      { title: 'LI', link: '/li' },
+      { title: 'X', link: '/x' },
+      { title: 'IG', link: '/ig' }
+    ]}
   ];
 
   return (
