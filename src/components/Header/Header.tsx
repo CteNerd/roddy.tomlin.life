@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Header.css';
 import DropdownMenu from '../DropdownMenu/DropdownMenu';
 
@@ -16,6 +16,23 @@ const Header: React.FC<HeaderProps> = ({ menus }) => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (isMobileMenuOpen && !(event.target as HTMLElement).closest('.nav')) {
+        closeMobileMenu();
+      }
+    };
+
+    document.addEventListener('click', handleOutsideClick);
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, [isMobileMenuOpen]);
+
   return (
     <header className="header">
       <div className="logo">Logo</div>
@@ -23,6 +40,9 @@ const Header: React.FC<HeaderProps> = ({ menus }) => {
         ☰
       </button>
       <nav className={`nav ${isMobileMenuOpen ? 'open' : ''}`}>
+        <div className="nav-close" onClick={closeMobileMenu}>
+          ✕
+        </div>
         <ul className="nav-list">
           {menus.map((menu, index) => (
             <li key={index}>

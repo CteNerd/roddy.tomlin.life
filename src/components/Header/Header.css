@@ -31,21 +31,27 @@
 }
 
 @media (max-width: 768px) {
+  .header {
+    justify-content: space-between; /* Ensure space between logo and nav-toggle */
+  }
+
   .nav {
     flex-direction: column;
     align-items: flex-start;
-    position: absolute;
+    position: fixed; /* Changed to fixed to cover the entire screen */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: white;
-    transform: translateX(-100%);
+    background: white; /* Ensure background color is applied */
+    transform: translateY(-100%); /* Changed to translateY for dropdown effect */
     transition: transform 0.3s ease-in-out;
+    z-index: 1000; /* Ensure the nav is above other content */
+    overflow-y: auto; /* Allow scrolling if content overflows */
   }
 
   .nav.open {
-    transform: translateX(0);
+    transform: translateY(0);
   }
 
   .nav-toggle {
@@ -60,6 +66,14 @@
   .nav-list li {
     width: 100%;
     text-align: left;
+    padding: 10px 20px; /* Add padding for better spacing */
+    border-bottom: 1px solid #ddd; /* Add a border for better separation */
+  }
+
+  .nav-close {
+    align-self: flex-end;
+    padding: 10px 20px;
+    cursor: pointer;
   }
 }
 
