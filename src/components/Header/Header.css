@@ -88,4 +88,8 @@
   .nav-toggle {
     display: none;
   }
+
+  .nav-close {
+    display: none;
+  }
 }
