@@ -1,9 +1,11 @@
 .header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
   background-color: #f8f8f8;
+  width: 100vw; /* Full viewport width */
+  box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .nav {
@@ -25,6 +27,7 @@
 
 .nav-toggle {
   display: none;
+  cursor: pointer; /* Add cursor pointer for better UX */
 }
 
 @media (max-width: 768px) {
@@ -57,5 +60,18 @@
   .nav-list li {
     width: 100%;
     text-align: left;
+  }
+}
+
+@media (min-width: 769px) {
+  .nav {
+    position: static;
+    transform: none;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .nav-toggle {
+    display: none;
   }
 }

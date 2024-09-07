@@ -1,11 +1,10 @@
-// src/pages/Home.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../../components/Header/Header';
 import HeroSection from '../../components/Hero/Hero';
 import WelcomeSection from './WelcomeSection';
 import Footer from '../../components/Footer/Footer';
 import FamilyPhoto from '../../assets/images/family-photo.png';
-import './home.css'
+import './home.css';
 
 interface HeaderProps {
   menus: {
@@ -13,24 +12,24 @@ interface HeaderProps {
     items: string[];
   }[];
 }
-function Home() {
 
+function Home() {
   const menus: HeaderProps['menus'] = [
     { title: 'Option 1', items: ['Sub 1', 'Sub 2', 'Sub 3'] },
     { title: 'Option 2', items: ['Sub 1', 'Sub 2', 'Sub 3'] },
     { title: 'Option 3', items: ['Sub 1', 'Sub 2', 'Sub 3'] },
     { title: 'Option 4', items: ['Sub 1', 'Sub 2', 'Sub 3'] },
     { title: 'Option 5', items: ['Sub 1', 'Sub 2', 'Sub 3'] },
-];
+  ];
 
   return (
     <div className='home'>
       <Header menus={menus} />
       <HeroSection />
       <WelcomeSection />
-      <body className='home-body-container' >
-        <div className={"intro-img-container"}>
-          <img alt={'tomlin family'} className={"intro-img"} src={FamilyPhoto} />
+      <div className='home-body-container'>
+        <div className='intro-img-container'>
+          <img alt='tomlin family' className='intro-img' src={FamilyPhoto} />
         </div>
         <div className='home-intro-body-container'>
           <p>
@@ -52,10 +51,10 @@ function Home() {
             also be found below.
           </p>
         </div>
-        </body>
+      </div>
       <Footer />
     </div>
   );
-};
+}
 
 export default Home;

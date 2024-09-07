@@ -18,10 +18,11 @@ const Header: React.FC<HeaderProps> = ({ menus }) => {
 
   return (
     <header className="header">
+      <div className="logo">Logo</div>
+      <button className="nav-toggle" onClick={toggleMobileMenu}>
+        ☰
+      </button>
       <nav className={`nav ${isMobileMenuOpen ? 'open' : ''}`}>
-        <button className="nav-toggle" onClick={toggleMobileMenu}>
-          ☰
-        </button>
         <ul className="nav-list">
           {menus.map((menu, index) => (
             <li key={index}>
