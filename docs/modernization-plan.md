@@ -38,6 +38,12 @@ The earlier local-only authorization above is historical. The owner subsequently
 - Default Actions permissions are read-only, Actions PR approvals are disabled, and dependency security updates are enabled. GitHub rejected private-repository branch protection and secret scanning under the current effective entitlement. These remain unresolved plan limitations, not enabled safeguards.
 - Google key revocation remains pending: the owner needs to identify the Google Cloud project. No credential validity or abuse was tested. AWS credentials cannot revoke a Google key, and deleting source alone would not resolve exposure.
 
+Release verification:
+
+- The AWS stack completed successfully and [the custom domain](https://roddy.tomlin.life) serves the approved profile over HTTPS. HTTP redirects to HTTPS, direct S3 object access returns 403, and retired story routes return the safe profile with HTTP 404.
+- [Main checks](https://github.com/CteNerd/roddy.tomlin.life/actions/runs/41683115781) and the [manual AWS OIDC release](https://github.com/CteNerd/roddy.tomlin.life/actions/runs/41683814801) passed. Browser checks at 320px and 1440px confirmed both pages load, portraits load, no horizontal overflow, no script errors, and no failed requests.
+- Dependabot now reports one open moderate advisory for development-only `minimatch` through ESLint: [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249). The installed version is 10.2.6; the advisory requires 11.0.1 or later. A forced major override or incompatible ESLint downgrade was not applied. The production artifact does not ship ESLint; compatible remediation remains pending.
+
 The [README](../README.md) contains reproducible provisioning/release steps. This static AWS milestone does not implement a backend, member authentication, paywall, agent, or MCP.
 
 ## 1. Purpose and decisions already made
