@@ -2,7 +2,7 @@
 
 Date: October 22, 2026
 
-Status: long-term proposal, with an interim static profile implemented locally on November 3, 2026; no deployment performed
+Status: long-term proposal with an implemented static profile; AWS publication approved November 3, 2026. See the latest release milestone below.
 
 Baseline: repository commit `4a6a26e`
 
@@ -26,6 +26,19 @@ The owner subsequently supplied 2025/2026 resumes and approved public employers,
 The owner also approved introducing his NFL background with the Jacksonville Jaguars and Atlanta Falcons. That concise hook is now part of the homepage without importing memoir text or inventing football dates/statistics. The full engineering timeline and education have moved to a separate, prerendered `experience.html` page to reduce mobile homepage scrolling. Both pages have working static navigation and independent print/save behavior; the Experience page is the printable career view.
 
 The Experience page introduction is intentionally minimal: back link, "Experience" heading, and one sentence connecting the NFL to engineering leadership, followed immediately by the FMG timeline. Detailed NFL introductory copy stays on the homepage rather than competing with the career chronology.
+
+### November 3, 2026: private-source AWS release
+
+The earlier local-only authorization above is historical. The owner subsequently approved committing/pushing the profile and then AWS provisioning, public deployment, and connecting `roddy.tomlin.life`.
+
+- The repository was briefly public to enable Pages. A read-only review confirmed that legacy narratives, media, and a Google API key were accessible in source/history even though excluded from the build. The owner authorized restoring private visibility; unauthenticated source access now returns 404. Privacy restoration cannot retract downloaded copies.
+- The default branch is now `main`; checks, manual workflows, and deployment environment policies must use it.
+- AWS Route 53 hosts `tomlin.life`. Public nameservers match the authorized hosted zone. The profile hostname had no explicit record and inherited a wildcard pointing to an ACM validation target, not a website. The approved stack adds explicit profile A/AAAA aliases and certificate validation without modifying the wildcard.
+- The selected host is private encrypted S3 behind CloudFront with HTTPS and origin access control. [Infrastructure](../infrastructure/profile-hosting.yml) and a [manual GitHub OIDC deployment workflow](../.github/workflows/aws.yml) keep public output separate from private source. Only checked `dist/` content is published; deployment credentials cannot modify infrastructure or read the original repository through AWS.
+- Default Actions permissions are read-only, Actions PR approvals are disabled, and dependency security updates are enabled. GitHub rejected private-repository branch protection and secret scanning under the current effective entitlement. These remain unresolved plan limitations, not enabled safeguards.
+- Google key revocation remains pending: the owner needs to identify the Google Cloud project. No credential validity or abuse was tested. AWS credentials cannot revoke a Google key, and deleting source alone would not resolve exposure.
+
+The [README](../README.md) contains reproducible provisioning/release steps. This static AWS milestone does not implement a backend, member authentication, paywall, agent, or MCP.
 
 ## 1. Purpose and decisions already made
 

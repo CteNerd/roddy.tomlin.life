@@ -41,18 +41,53 @@ Run `npm run check:release` after a build to repeat the output checks. These che
 
 Legacy components are intentionally excluded from active lint/test selectors and cannot run independently with the retired dependencies. Do not re-enable them without content approval, dependency review, and authorization design.
 
-## Preparing GitHub Pages
+## AWS hosting
 
-The repository is private. GitHub Pro permits a public Pages site from a private personal repository; private source does not make the published site private.
+The original repository must stay private: its legacy personal source and Git history are not approved public content. It was briefly public during Pages setup; restoring privacy cannot retract downloaded copies. An exposed legacy Google API key requires provider-side revocation, even after source removal. Never treat release checks as protection for public Git history.
+
+Production uses a private, encrypted S3 bucket behind CloudFront with origin access control, HTTPS, and Route 53 records for `roddy.tomlin.life`. Only reviewed `dist/` output is uploaded. Missing/retired routes return the safe profile with HTTP 404. The bucket is not a public website endpoint.
+
+Infrastructure is defined in [profile-hosting.yml](infrastructure/profile-hosting.yml). Provision the stack in `us-east-1` so its ACM certificate can be used by CloudFront:
+
+```sh
+aws cloudformation deploy \
+  --region us-east-1 \
+  --stack-name roddy-profile-hosting \
+  --template-file infrastructure/profile-hosting.yml \
+  --capabilities CAPABILITY_IAM \
+  --parameter-overrides HostedZoneId=YOUR_ZONE_ID GitHubOidcProviderArn=YOUR_EXISTING_GITHUB_OIDC_PROVIDER_ARN
+```
+
+Confirm the zone's nameservers match public delegation before deployment. The stack adds only the explicit profile hostname and its certificate validation record; it does not replace unrelated wildcard/subdomain records. S3/CloudFront usage charges apply. The bucket is retained on stack deletion; DNS, CDN, IAM, and certificate resources are managed by the stack.
+
+Configure the GitHub `aws-production` environment with a branch deployment policy allowing only `main`. Set these environment variables from the stack outputs (these are identifiers, not credentials):
+
+- `PROFILE_BUCKET`: `BucketName`
+- `PROFILE_DISTRIBUTION`: `DistributionId`
+- `PROFILE_DEPLOY_ROLE`: `DeploymentRoleArn`
+
+The pinned **Publish profile to AWS** workflow is manual only and accepts `main` only. It checks/tests/builds, assumes a narrowly scoped AWS role through GitHub OIDC, publishes assets before HTML, invalidates the CDN, and verifies both pages plus a retired route. No long-lived AWS keys are stored in GitHub. It intentionally retains older approved assets so visitors with cached HTML are not broken during releases.
+
+Require PR checks and prevent branch deletion/force-pushes where the GitHub plan permits. Use read-only default Actions permissions and disable Actions PR approval. In the current private repository, GitHub rejected branch protection and secret scanning as unavailable under the effective entitlement; these safeguards remain pending an eligible plan. Dependency security updates are enabled. Do not make the repository public to enable these features.
+
+### Pending Google credential remediation
+
+The legacy YouTube key remains unresolved; restoring source privacy does not revoke it. Sign into [Google Cloud API credentials](https://console.cloud.google.com/apis/credentials) using the accounts that owned the old YouTube integration and use the project picker to inspect candidate projects. Check key names, creation dates, API/application restrictions, and API usage; do not paste key values into issues, chat, logs, or commits. The old screen existed by January 2021, which may help locate its project.
+
+Once ownership is established, revoke the exposed key and inspect usage/quota/billing for unexpected activity. If another application still depends on it, migrate that application to a restricted replacement first. Then remove the three legacy source copies in a reviewed change. History remains sensitive even after source removal; do not make this repository public without a separate approved history/content cleanup. No Google Cloud account access or key validity has been verified from this environment.
+
+## Optional GitHub Pages fallback
+
+GitHub Pages is not the selected production host. Private-source Pages requires an eligible GitHub plan; the current effective entitlement did not permit it. Do not make the original repository public to enable Pages. Private source does not make any published site private.
 
 Publication is intentionally **manual only**. No push triggers deployment. The checks workflow validates pushes and PRs without publishing.
 
 After owner review and explicit release approval:
 
-1. Commit and push the reviewed changes to `master`; do not include raw resume/work exports.
+1. Commit and push the reviewed changes to `main`; do not include raw resume/work exports.
 2. In repository **Settings → Pages**, choose **GitHub Actions** as the publishing source.
-3. Ensure the `github-pages` environment permits deployment from `master`; configure required owner approval if desired.
-4. Run **Publish professional profile** from the **Actions** tab on `master`.
+3. Ensure the `github-pages` environment permits deployment from `main`; configure required owner approval if desired.
+4. Run **Publish professional profile** from the **Actions** tab on `main`.
 5. Share the URL returned by the deploy job. Without a custom domain, the expected project URL is `https://ctenerd.github.io/roddy.tomlin.life/`.
 
 The workflow reads the configured Pages base path, checks/tests/builds, and uploads only `dist/`. It does not configure DNS, change repository visibility, or enable Pages automatically.
@@ -66,7 +101,7 @@ BASE_PATH=/roddy.tomlin.life/ npm run preview
 
 Open the preview URL with `/roddy.tomlin.life/` appended. For a root/custom-domain build, omit `BASE_PATH`.
 
-No `CNAME` is included. `roddy.tomlin.life` did not resolve during the November 3 discovery; its DNS and any old Amplify deployment must be inspected separately. Do not promise that address or disable an old deployment until its ownership and replacement are verified. Test the returned Pages URL, assets, contacts, mobile layout, and a retired path after deployment.
+No `CNAME` is included. `roddy.tomlin.life` is reserved for the AWS deployment above. Do not point it to Pages while the AWS stack manages its DNS. Test the returned Pages URL, assets, contacts, mobile layout, and a retired path after any fallback deployment.
 
 GitHub Pages is an interim static-profile host. Move paid stories, authenticated content, payments, agent execution, and MCP to the planned backend-capable hosting; never implement a client-side paywall on Pages.
 

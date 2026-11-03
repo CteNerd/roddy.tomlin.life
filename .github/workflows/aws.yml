@@ -1,0 +1,62 @@
+name: Publish profile to AWS
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aws-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: aws-production
+      url: https://roddy.tomlin.life
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: us-east-1
+      PROFILE_BUCKET: ${{ vars.PROFILE_BUCKET }}
+      PROFILE_DISTRIBUTION: ${{ vars.PROFILE_DISTRIBUTION }}
+      BASE_PATH: /
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm install --global npm@11.6.2 --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:release
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.PROFILE_DEPLOY_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+      - name: Publish only approved output
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$PROFILE_BUCKET"
+          test -n "$PROFILE_DISTRIBUTION"
+          aws s3 sync dist/ "s3://$PROFILE_BUCKET/" --exclude "*.html" --cache-control "public,max-age=300" --only-show-errors
+          aws s3 cp dist/ "s3://$PROFILE_BUCKET/" --recursive --exclude "*" --include "*.html" --cache-control "no-cache" --only-show-errors
+          invalidation=$(aws cloudfront create-invalidation --distribution-id "$PROFILE_DISTRIBUTION" --paths "/*" --query Invalidation.Id --output text)
+          aws cloudfront wait invalidation-completed --distribution-id "$PROFILE_DISTRIBUTION" --id "$invalidation"
+      - name: Verify published profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --retry 5 --retry-all-errors --silent --show-error https://roddy.tomlin.life/ | grep --fixed-strings "Former NFL player" > /dev/null
+          curl --fail --retry 5 --retry-all-errors --silent --show-error https://roddy.tomlin.life/experience.html | grep --fixed-strings "FMG" > /dev/null
+          status=$(curl --silent --show-error --output /dev/null --write-out "%{http_code}" https://roddy.tomlin.life/about/childhood)
+          test "$status" = "404"
