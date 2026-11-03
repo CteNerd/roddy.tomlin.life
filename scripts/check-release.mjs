@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { pages, renderMetadata, renderSitemap, siteUrl } from "./page-metadata.mjs";
 
 export async function checkRelease() {
   let count = 0;
@@ -13,7 +14,7 @@ export async function checkRelease() {
         continue;
       }
       const relative = path.relative("dist", fullPath).replaceAll("\\", "/");
-      assert.match(relative, /^(index\.html|experience\.html|404\.html|favicon\.svg|robots\.txt|roddy-(headshot|seated)\.jpg|assets\/[\w-]+\.(js|css))$/,
+      assert.match(relative, /^(index\.html|experience\.html|404\.html|favicon\.svg|robots\.txt|sitemap\.xml|roddy-(headshot|seated)\.jpg|assets\/[\w-]+\.(js|css))$/,
         `Unexpected release file: ${relative}`);
       if (relative.endsWith(".jpg")) {
         const image = await readFile(fullPath);
@@ -21,6 +22,7 @@ export async function checkRelease() {
         assert.equal(image.readUInt16BE(0), 0xffd8, `Invalid JPEG: ${relative}`);
         let offset = 2;
         let scanFound = false;
+        let dimensions;
         while (offset + 3 < image.length) {
           assert.equal(image[offset], 0xff, `Invalid JPEG marker: ${relative}`);
           const marker = image[offset + 1];
@@ -29,9 +31,16 @@ export async function checkRelease() {
             `Portrait contains application metadata/comments: ${relative}`);
           const length = image.readUInt16BE(offset + 2);
           assert.ok(length >= 2 && offset + length + 2 <= image.length, `Invalid JPEG segment: ${relative}`);
+          if (marker === 0xc0 || marker === 0xc2) {
+            assert.ok(length >= 8, `Invalid JPEG dimensions: ${relative}`);
+            dimensions = { height: image.readUInt16BE(offset + 5), width: image.readUInt16BE(offset + 7) };
+          }
           offset += length + 2;
         }
         assert.ok(scanFound, `Missing JPEG image scan: ${relative}`);
+        if (relative === "roddy-headshot.jpg") {
+          assert.deepEqual(dimensions, { width: 721, height: 901 }, "Sharing image dimensions must match its metadata");
+        }
         count++;
         continue;
       }
@@ -61,7 +70,20 @@ export async function checkRelease() {
     assert.ok(index.includes(name), `Missing approved portrait: ${name}`);
     await readFile(path.join("dist", name));
   }
-  assert.equal(await readFile("dist/404.html", "utf8"), index);
+  for (const [page, html] of [["home", index], ["experience", experience]]) {
+    assert.ok(html.includes(renderMetadata(page)), `Missing or incorrect ${page} metadata`);
+    assert.equal((html.match(/<link rel="canonical"/g) || []).length, 1, `Duplicate ${page} canonical`);
+    assert.equal((html.match(/<title>/g) || []).length, 1, `Duplicate ${page} title`);
+    assert.equal((html.match(/<meta name="description"/g) || []).length, 1, `Duplicate ${page} description`);
+    assert.doesNotMatch(html, /noindex|profile-metadata:/);
+    assert.ok(html.includes(new URL(pages[page].path, siteUrl).href));
+  }
+  const fallback = await readFile("dist/404.html", "utf8");
+  assert.ok(fallback.includes(renderMetadata("notFound")));
+  assert.doesNotMatch(fallback, /rel="canonical"|application\/ld\+json/);
+  assert.equal(fallback.slice(fallback.indexOf("<body>")), index.slice(index.indexOf("<body>")));
+  assert.equal(await readFile("dist/sitemap.xml", "utf8"), renderSitemap());
+  assert.ok((await readFile("dist/robots.txt", "utf8")).includes(`Sitemap: ${siteUrl}sitemap.xml`));
   const javascript = (await readdir("dist/assets")).filter((file) => file.endsWith(".js"));
   assert.ok(javascript.length > 0, "Missing application bundle");
   const app = (await Promise.all(javascript.map((file) => readFile(`dist/assets/${file}`, "utf8")))).join("\n");

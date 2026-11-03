@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://roddy.tomlin.life/sitemap.xml
