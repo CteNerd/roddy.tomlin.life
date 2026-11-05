@@ -1,8 +1,8 @@
 # Portfolio implementation status
 
-Updated: 2026-11-05, application foundations after all three PR #1s merged.
+Updated: 2026-11-05, merged application/governance foundations and offline reporting.
 Scope: three existing private repos, all defaulting to `main`. Work remains on
-`feat/deployment-governance`; no application, DNS or infrastructure deployment
+`feat/durable-reporting`; no application, DNS or infrastructure deployment
 was performed by this increment.
 
 ## Completed and changed files
@@ -59,6 +59,33 @@ was performed by this increment.
   no infrastructure write/CloudFormation execution roles, publisher activation,
   budget notifications or cloud permission/restore rehearsals are completed.
 
+### Durable reporting slice
+
+- `apps/reporting-worker/` adds the typed SQS consumer, narrow DynamoDB adapter,
+  conditional two-item receipt/projection transactions, unit/bundle tests,
+  mandatory real DynamoDB Local integration tests and recovery runbook.
+  Receipts have no TTL; matching duplicates are safe after a lost response,
+  while reused IDs with changed facts fail. Poison messages are isolated.
+- Shared `prepareReportingEvent` reuses strict contracts/fingerprints/metric
+  contributions in the reference reducer and worker. Fact-time comparisons
+  use numeric instants, including offsets crossing four-digit year boundaries.
+  JSON schema is imported as a module and embedded in the Lambda bundle.
+  Producer copies remain pinned until the authority revision is reviewed.
+- `infra/src/eventing.ts` and tests add the separate per-environment bus,
+  source/type-filtered rules, two main queues, four separate delivery/processing
+  DLQs, bounded Lambda concurrency/retry/visibility, explicit logs, seven alarms
+  and SSM bus discovery. No source table, public frontend or DNS is modified.
+- The worker references the existing Founder table and governance boundary;
+  its actual grants are only that table's GetItem/PutItem, two exact queue
+  consumption permissions and own logs. The boundary queue allowlist is also
+  tightened to those exact queues, adding required GetQueueUrl.
+- Root manifests/lockfile, lint/check scripts, infra scripts and
+  `.github/workflows/checks.yml` cover the worker and both eventing synths.
+  Separate hosted integration uses the official digest-pinned DynamoDB Local
+  image, loopback-only access and synthetic credentials, never AWS writes.
+  Local Docker/Java are unavailable; hosted integration is a required merge
+  gate, not silently skipped or replaced by mocks.
+
 ## Confirmed domains and outstanding DNS/certificates
 
 | App | Production web | Development web | Production API |
@@ -89,10 +116,13 @@ Opt-in domains import existing zones; production requires explicit cutover flag
 in addition to mandatory deployment approval. See each `infra/README.md`.
 Development and production do not share tables/auth.
 
-Founder defines auth/API/projections only: it does not redeclare profile hosting.
-No database grants exist until real reporting reads are implemented. Private
-documents, operational alarms, durable bus/SQS/DLQs/consumer and granular business
-handlers remain future work; the worker will write only its own projections.
+Founder foundation defines auth/API/projections: it does not redeclare profile
+hosting. Its API still has no database grants or metrics route. Separate offline
+eventing now defines bus/SQS/DLQs/consumer and alarms; only its worker has access
+to the owned projections table. Governance and the table must exist before
+eventing is eventually provisioned. Alarm notification actions/recipients,
+private documents, producer outboxes and granular business handlers remain
+future work; no producer event publishing is activated.
 No unnecessary VPC, NAT, always-on server or RDS. Preserve the existing profile
 CloudFormation stack and all existing applications until replacements pass.
 
@@ -121,6 +151,8 @@ Check actual defaults when configuring triggers; all three currently use `main`.
 Certificates, Cognito public client IDs and asset destinations can be stack
 outputs rather than duplicated inputs. Secrets belong in backend secret stores,
 not frontend config. Never add AWS access keys to GitHub secrets.
+The worker's `REPORTING_TABLE_NAME`, `CONSULTING_QUEUE_ARN` and `DOTCOM_QUEUE_ARN`
+are populated by CDK, not manually copied into GitHub variables or secrets.
 
 Required roles: six app OIDC deploy roles (3 repos x 2 environments), separate
 bus deploy authority per environment, constrained CloudFormation execution/
@@ -131,10 +163,12 @@ no broad local bootstrap identity is copied to CI or app profiles.
 
 ## Validation and release blockers
 
-- **Passing locally:** Consulting 16 tests, Community 15, Personal/Founder 43
-  including its 22 existing profile tests. All workspace type checks and new
+- **Passing locally:** Consulting 16 tests, Community 15, Personal/Founder 58
+  including its 22 existing profile tests and 12 worker unit/bundle tests.
+  All workspace type checks and new
   source lint pass; both new web builds and the personal 10-file release boundary
-  pass. All six development/production synth commands pass with real local
+  pass. All six Founder foundation/governance/eventing synth commands, plus
+  both producer environments' foundation synths, pass with real local
   Lambda bundling and explicit synthetic account, without AWS lookups.
   Infrastructure alone relaxes exact-optionals for CDK declaration compatibility;
   strict TS remains and API/domain exact-optionals remain enabled.
@@ -151,8 +185,8 @@ no broad local bootstrap identity is copied to CI or app profiles.
 - Hosted validation must pass on each PR's latest head before merge; an older
   successful run does not substitute for validation of the current revision.
 - **Not implemented/tested:** live frontend/API integration, backend business
-  authorization, deployment smoke, durable outboxes/consumer, Cognito login UI,
-  live event recovery, notification receipt or rollback/restore rehearsal.
+  authorization, deployment smoke, durable producer outboxes, Cognito login UI,
+  cloud event delivery/recovery, notification receipt or rollback/restore rehearsal.
   Template assertions and mocked identity events do not prove live JWT behavior.
 - **Blockers:** private branch protection previously returned entitlement HTTP
   403. Current environment inventory still has only `copilot` on each producer;
@@ -181,3 +215,10 @@ classic-bus example rate, 50,000 small events are about $0.05 ingestion; SQS,
 Lambda, DynamoDB/PITR, Cognito, CDN and logs add usage-based costs.
 Confirm current regional pricing before provisioning and verify budget and
 operational alerts end-to-end.
+
+The new source-only eventing adds no current charge. Fourteen standard alarms
+across both environments are approximately $1.40/month at a $0.10 planning
+rate, before any free-tier allowances. Queue/event/transaction/log costs are
+usage based; indefinite receipt storage grows with accepted event IDs.
+Notification recipients and budgets remain unapproved. No always-on service,
+NAT gateway, customer-managed KMS key or event archive is introduced.

@@ -1,0 +1,22 @@
+{
+  "name": "@rct/reporting-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit && node --test src/*.test.ts",
+    "test:integration": "node --test test/integration.test.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.1162.0",
+    "@aws-sdk/lib-dynamodb": "3.1162.0",
+    "@rct/portfolio-contracts": "1.0.0",
+    "@rct/portfolio-reporting": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "8.10.164",
+    "@types/node": "24.19.2",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}

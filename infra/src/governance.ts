@@ -53,8 +53,9 @@ export class GovernanceStack extends Stack {
         }));
       } else {
         boundary.addStatements(new iam.PolicyStatement({
-          actions: ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes", "sqs:ChangeMessageVisibility"],
-          resources: [`arn:${this.partition}:sqs:${this.region}:${this.account}:rct-portfolio-${config.environment}-reporting-*`],
+          actions: ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes", "sqs:GetQueueUrl", "sqs:ChangeMessageVisibility"],
+          resources: ["consulting", "dotcom"].map((source) =>
+            `arn:${this.partition}:sqs:${this.region}:${this.account}:rct-portfolio-${config.environment}-reporting-${source}`),
         }));
       }
       const planner = new iam.Role(this, `${application.name}Planner`, {
