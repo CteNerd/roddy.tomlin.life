@@ -128,6 +128,9 @@ no broad local bootstrap identity is copied to CI or app profiles.
   no high/critical findings, but 10 moderate package entries per producer and 11
   personal entries from upstream minimatch. No advisory is suppressed or
   incompatible downgrade forced; the preserved CRA application is not certified.
+- GitHub push warnings still report critical/high advisories on the producers'
+  legacy default-branch dependency graphs. Passing scoped modern-workspace
+  checks is not a clean whole-repository audit or clearance of the old apps.
 - Hosted validation must pass on each PR's latest head before merge; an older
   successful run does not substitute for validation of the current revision.
 - **Not implemented/tested:** live frontend/API integration, backend business
