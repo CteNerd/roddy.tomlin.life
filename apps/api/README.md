@@ -33,7 +33,11 @@ an arbitrary value. No implicit current-month/timezone default is introduced.
 The only data grant is DynamoDB Query on the owned projections table, with
 LeadingKeys restricted to monthly partitions. No Scan, GetItem, receipt reads,
 business tables, writes or event publishing is permitted. The role also uses
-the governance runtime boundary; governance must exist before foundation.
+its governance-owned API-specific boundary, attached also as the identity
+policy. LeadingKeys must be present; an absent context does not qualify.
+Governance pre-creates the Lambda-only API role. Foundation imports it
+immutably and owns no IAM policies or roles; governance must exist first.
+Only the separately reviewed bootstrap operator may change runtime IAM.
 
 Query one month consistently with a small limit. Reject pagination, unknown
 metrics, corrupt/unsafe counters, malformed timestamps, duplicate records and
