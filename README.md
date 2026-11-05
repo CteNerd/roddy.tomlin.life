@@ -142,6 +142,31 @@ GitHub Pages is an interim static-profile host. Move paid stories, authenticated
 
 ## Next steps
 
+### Three-repository portfolio foundation
+
+The [portfolio integration ADR](docs/adr/0001-portfolio-integration.md) supersedes
+the supplied plans' proposed fourth Founder repository. This repo owns the
+[versioned reporting contracts](packages/contracts/README.md) and
+[reference projection model](packages/reporting/README.md). Consulting and
+Community pin reviewed copies to an immutable authority commit.
+
+```sh
+npm ci --no-audit --no-fund
+npm run check:portfolio
+```
+
+The Node 24 workspaces use native TypeScript execution plus strict `tsc` checks.
+They are not imported by the public profile. Profile checks and manual publishing
+also run the foundation checks; publication remains manual and deploys only the
+existing approved public output.
+
+The contract slice implements monthly inbound-lead and first-mentor-approval
+counts, signed corrections, strict payload validation and deterministic replay
+tests. It does **not** implement a durable outbox, AWS bus, SQS consumer, Cognito,
+or the future `/founder` route. IAM/bootstrap and staging deployment require
+separate reviewed increments. Do not equate passing local contract tests with a
+successful cloud integration.
+
 - [Modernization plan](docs/modernization-plan.md): longer-term AWS-first monorepo, public resume, protected stories, agent/MCP, and delivery gates.
 - [Career-context export prompt](docs/career-context-export-prompt.md): controlled intake for owner-reviewed career material.
 
