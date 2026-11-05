@@ -29,6 +29,8 @@
     "cdk:synth:governance:production": "npm run synth:governance:production --workspace @rct/founder-infra",
     "cdk:synth:eventing:development": "npm run synth:eventing:development --workspace @rct/founder-infra",
     "cdk:synth:eventing:production": "npm run synth:eventing:production --workspace @rct/founder-infra",
+    "cdk:synth:release-planning:development": "npm run synth:release-planning:development --workspace @rct/founder-infra",
+    "cdk:synth:release-planning:production": "npm run synth:release-planning:production --workspace @rct/founder-infra",
     "check:deployment": "npm run check:deployment --workspace @rct/founder-infra",
     "lint": "eslint src/App.jsx src/main.jsx src/profile.js src/App.test.jsx src/setupTests.js vite.config.js eslint.config.js scripts apps/api/src apps/reporting-worker/src apps/reporting-worker/test packages/reporting/src packages/contracts/src/index.ts infra/src",
     "check:release": "node scripts/check-release.mjs"

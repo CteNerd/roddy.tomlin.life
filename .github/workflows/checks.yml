@@ -32,6 +32,8 @@ jobs:
       - run: npm run cdk:synth:governance:production
       - run: npm run cdk:synth:eventing:development
       - run: npm run cdk:synth:eventing:production
+      - run: npm run cdk:synth:release-planning:development
+      - run: npm run cdk:synth:release-planning:production
   reporting-integration:
     runs-on: ubuntu-latest
     timeout-minutes: 10

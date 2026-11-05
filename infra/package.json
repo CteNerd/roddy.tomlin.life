@@ -11,6 +11,8 @@
     "synth:governance:production": "cdk synth -c component=governance -c environment=production -c account=123456789012 --output cdk.out/governance-production --quiet",
     "synth:eventing:development": "cdk synth -c component=eventing -c environment=development -c account=123456789012 --output cdk.out/eventing-development --quiet",
     "synth:eventing:production": "cdk synth -c component=eventing -c environment=production -c account=123456789012 --output cdk.out/eventing-production --quiet",
+    "synth:release-planning:development": "cdk synth -c component=release-planning -c environment=development -c account=123456789012 --output cdk.out/release-planning-development --quiet",
+    "synth:release-planning:production": "cdk synth -c component=release-planning -c environment=production -c account=123456789012 --output cdk.out/release-planning-production --quiet",
     "check:deployment": "node src/check-deployment.ts"
   },
   "devDependencies": {

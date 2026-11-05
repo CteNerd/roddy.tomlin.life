@@ -11,10 +11,14 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import type { Construct } from "constructs";
 import { resolve } from "node:path";
 import type { Configuration } from "./config.ts";
+import { releaseSynthesizer } from "./release-planning.ts";
 
 export class FounderStack extends Stack {
   constructor(scope: Construct, config: Configuration) {
-    super(scope, `${config.prefix}-foundation`, { env: { account: config.account, region: config.region } });
+    super(scope, `${config.prefix}-foundation`, {
+      env: { account: config.account, region: config.region },
+      synthesizer: releaseSynthesizer(config),
+    });
     Tags.of(this).add("Portfolio", "RCT");
     Tags.of(this).add("Application", "Founder");
     Tags.of(this).add("Environment", config.environment);

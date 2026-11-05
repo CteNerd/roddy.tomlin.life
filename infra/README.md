@@ -92,6 +92,65 @@ publisher roles, cost-tag activation, approved budget amounts/recipients and
 notification receipt, live allow/deny tests and restore/smoke rehearsal remain
 required before enabling write workflows. No AWS resources are applied here.
 
+## Isolated Founder release preparation
+
+The existing shared `CDKToolkit` execution role was verified read-only to have
+`AdministratorAccess`. It remains unchanged and must not be reachable from the
+new repository workflows. Founder foundation and eventing now use CDK's
+`CliCredentialsStackSynthesizer`: their actual Lambda/template asset manifests
+target only the separate environment/account/region-qualified
+`rct-founder-<environment>-release-assets-<account>-us-east-1` bucket under
+`release/`, using the caller's credentials. There are no shared bootstrap
+assume-role, lookup-role, execution-role or version-parameter references.
+The existing profile publisher and producer synths are unchanged.
+
+```sh
+npm run cdk:synth:release-planning:development
+npm run cdk:synth:release-planning:production
+```
+
+These commands remain offline/synthetic-account validation, not provisioning.
+The separate `rct-founder-<environment>-release-planning` stack defines:
+
+- A private, TLS-only, SSE-S3, versioned asset bucket, retained in both
+  environments; no automatic deletion or expiry of rollback assets.
+- `rct-founder-<environment>-release-plan`, trusted only for the exact personal
+  repository/environment OIDC subject and audience. It can upload/read only
+  `release/*`, list only its dedicated bucket, inspect its own IAM trust and
+  prepare/read/delete change sets for exactly the Founder foundation and
+  that environment's portfolio eventing stack. It cannot manage governance,
+  release-planning, producer or existing profile stacks.
+- `rct-founder-<environment>-execute`, trusted only by CloudFormation. It
+  currently has **asset reads only**, no application-resource or IAM-write
+  authority. The planner can pass only this role, only to CloudFormation,
+  and creating a change set requires its explicit `RoleArn`.
+- An explicit planner deny of `sts:AssumeRole`, change-set execution and direct
+  stack create/update/delete/rollback/policy mutation. No deploy/assume-role
+  fallback to the broad local user or shared CDK roles is allowed.
+
+**This is release preparation, not a completed deployment role chain.** No new
+OIDC workflow or AWS resources are activated. Provisioning this separate stack
+requires a reviewed real-account assembly and approved administrative bootstrap
+change set; the repository planner cannot bootstrap or update its own access.
+Governance and release-planning must exist before eventual application
+deployment. Imports are not automatic CloudFormation dependencies.
+
+After bootstrap, verify the exact short-lived planner with `check:deployment`
+and inspect its policies. CDK supports `--method prepare-change-set`; supply
+`--role-arn` with the exact stack-output execution ARN. Omitting it must fail
+the IAM condition, and neither `cdk deploy`'s default executing method nor
+`ExecuteChangeSet` is permitted. Initial CREATE change sets can leave an
+unexecuted `REVIEW_IN_PROGRESS` stack; review those placeholders explicitly.
+No live change set or allow/deny test is claimed by offline synthesis.
+
+Next, review service-specific application execution permissions, runtime
+role-creation boundary enforcement and pass-role restrictions. Do not broaden
+this planner or reuse `AdministratorAccess` to make deployment pass. Separate
+reviewed deployment authority, cost/notification verification, cloud IAM
+allow/deny tests and smoke/rollback evidence remain prerequisites. Production
+also requires tested protected-environment approval and separate authorization;
+the owner has approved development preparation only.
+
 ## Separate reporting/eventing stack
 
 `npm run cdk:synth:eventing:development` and the production equivalent synthesize
