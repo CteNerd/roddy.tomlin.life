@@ -149,6 +149,9 @@ the supplied plans' proposed fourth Founder repository. This repo owns the
 [versioned reporting contracts](packages/contracts/README.md) and
 [reference projection model](packages/reporting/README.md). Consulting and
 Community pin reviewed copies to an immutable authority commit.
+The [implementation status report](docs/portfolio-implementation-status.md)
+records the confirmed domains, development/production release requirements,
+planned infrastructure, required configuration and remaining deployment blockers.
 
 ```sh
 npm ci --no-audit --no-fund

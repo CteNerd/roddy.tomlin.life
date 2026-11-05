@@ -20,8 +20,8 @@ The owner instead selected this existing personal repository, alongside
   fixtures, metric semantics, and a separately deployed portfolio bus stack.
 - Producers pin reviewed contract files and their hashes to an immutable commit.
   Producer business semantics remain owned by the producer.
-- One existing AWS account in `us-east-1`, with distinct staging/production
-  tables, auth, queues, stacks and roles. No shared staging/production database.
+- One existing AWS account in `us-east-1`, with distinct development/production
+  tables, auth, queues, stacks and roles. No shared database across environments.
 - Use private S3, CloudFront OAC, API Gateway HTTP APIs, Lambda, DynamoDB
   on-demand, EventBridge and SQS. Do not copy Aurora/NAT fixed-cost patterns.
 - Preserve the existing profile CloudFormation stack. New CDK stacks must not
@@ -38,7 +38,9 @@ remains `main`; the owner approved migrating both WellCall defaults to `main` an
 making them private after checking workflow/hosting dependencies.
 
 PR CI has no AWS credentials or OIDC authority. Future default-branch merges
-deploy staging; production explicitly promotes an immutable tested candidate.
+deploy development; production promotes an immutable tested candidate only after
+protected GitHub environment approval. If that protection is unavailable,
+production is blocked; manual dispatch alone does not satisfy this requirement.
 Until that pipeline is implemented and approved, existing publication stays
 manual. The public publisher must not gain bus or reporting administration.
 
@@ -60,3 +62,16 @@ not block business transactions: producers own transactional outboxes and
 recovery; consumers own deduplication and reconciliation. The shared bus and
 dashboard cannot be accidentally deployed as part of public-profile publishing.
 This ADR authorizes code foundations, not AWS provisioning or DNS changes.
+
+## Confirmed domain/deployment amendment
+
+Consulting uses `thirddowntech.com`, `dev.thirddowntech.com` and
+`api.thirddowntech.com`; Community uses `cutblock.org`, `dev.cutblock.org` and
+`api.cutblock.org`. Both domains are registered in Route 53 with auto-renew.
+Reuse existing zones, use ACM in `us-east-1` for CloudFront, and preserve
+unrelated records/stacks. Brand names remain subject to legal clearance.
+New environment names are `development`/`production`; do not rename existing
+live profile resources or its manual publishing environment.
+
+The [implementation status report](../portfolio-implementation-status.md)
+records verified DNS state, required variables/roles, tests, costs and blockers.
