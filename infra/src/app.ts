@@ -1,6 +1,11 @@
 import { App } from "aws-cdk-lib";
 import { configuration } from "./config.ts";
 import { FounderStack } from "./stack.ts";
+import { GovernanceStack } from "./governance.ts";
 
 const app = new App();
-new FounderStack(app, configuration(app.node.tryGetContext("environment"), app.node.tryGetContext("account")));
+const config = configuration(app.node.tryGetContext("environment"), app.node.tryGetContext("account"));
+const component: unknown = app.node.tryGetContext("component");
+if (component === undefined || component === "foundation") new FounderStack(app, config);
+else if (component === "governance") new GovernanceStack(app, config);
+else throw new Error("component must be foundation or governance");

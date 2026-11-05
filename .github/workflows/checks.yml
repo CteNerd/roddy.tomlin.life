@@ -28,3 +28,5 @@ jobs:
       - run: npm audit --audit-level=high
       - run: npm run cdk:synth:development
       - run: npm run cdk:synth:production
+      - run: npm run cdk:synth:governance:development
+      - run: npm run cdk:synth:governance:production

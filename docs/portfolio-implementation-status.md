@@ -2,7 +2,7 @@
 
 Updated: 2026-11-05, application foundations after all three PR #1s merged.
 Scope: three existing private repos, all defaulting to `main`. Work remains on
-`feat/application-foundations`; no application, DNS or infrastructure deployment
+`feat/deployment-governance`; no application, DNS or infrastructure deployment
 was performed by this increment.
 
 ## Completed and changed files
@@ -41,6 +41,23 @@ was performed by this increment.
   Moderate upstream minimatch findings remain and are explicitly reported.
 - Actual business authorization is not complete: policies are unit tested, but
   no CRUD endpoints or trusted-record loaders exist. No enrollment opens.
+
+### Governance planning slice
+
+- Both producer HTTPS issuer fixes are merged after successful CI and Copilot
+  reviews. Founder was fixed in its merged foundation PR.
+- `infra/src/governance.ts` defines separate read-only OIDC planning roles and
+  runtime upper-bound policies for all three apps in each environment; existing
+  OIDC is imported, not recreated. No role/policy is applied or attached.
+- `deployment-readiness.ts`, `check-deployment.ts` and governance tests enforce
+  exact repo/environment/audience trust, short-lived caller identity, main-only
+  environment branches and production reviewer approval without admin bypass.
+  CLI reads existing metadata and fails closed; it does not deploy.
+- A live production preflight correctly stopped at the missing `production`
+  GitHub environment (HTTP 404), before attempting AWS identity/role inventory.
+- Governance synth scripts and CI cover both environments. This is partial P3:
+  no infrastructure write/CloudFormation execution roles, publisher activation,
+  budget notifications or cloud permission/restore rehearsals are completed.
 
 ## Confirmed domains and outstanding DNS/certificates
 
@@ -114,7 +131,7 @@ no broad local bootstrap identity is copied to CI or app profiles.
 
 ## Validation and release blockers
 
-- **Passing locally:** Consulting 16 tests, Community 15, Personal/Founder 38
+- **Passing locally:** Consulting 16 tests, Community 15, Personal/Founder 43
   including its 22 existing profile tests. All workspace type checks and new
   source lint pass; both new web builds and the personal 10-file release boundary
   pass. All six development/production synth commands pass with real local
