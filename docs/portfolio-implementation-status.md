@@ -1,8 +1,8 @@
 # Portfolio implementation status
 
-Updated: 2026-11-05, following the final domain/deployment decisions.
+Updated: 2026-11-05, application foundations after all three PR #1s merged.
 Scope: three existing private repos, all defaulting to `main`. Work remains on
-`feat/portfolio-foundation`; no application, DNS or infrastructure deployment
+`feat/application-foundations`; no application, DNS or infrastructure deployment
 was performed by this increment.
 
 ## Completed and changed files
@@ -24,6 +24,24 @@ was performed by this increment.
   and real transitive dependency resolution changes, not just formatting.
   Cache files are not dependency lockfiles and should not be tracked.
 
+### New application-foundation files
+
+- **All three:** `apps/api/{package.json,tsconfig.json,src/handler.ts,src/handler.test.ts}`,
+  `tsconfig.foundation.json`, `infra/{package.json,cdk.json,tsconfig.json,README.md}`,
+  `infra/src/{app.ts,config.ts,stack.ts,stack.test.ts}`, root manifests/lockfile
+  and ignores. API routes are safe health plus Gateway-JWT-bound own identity.
+- **Producers:** `apps/web/` typed React/Vite previews, responsive styles, branding,
+  tests; `packages/domain/` assignment/finance segregation policies and tests;
+  `infra/eslint.config.mjs`, READMEs and expanded `.github/workflows/ci.yml`.
+  Legacy CRA source and commands remain; previews are not replacement parity.
+- **Personal:** TS lint integration, expanded `.github/workflows/checks.yml` and
+  README. Existing public application and manual publisher files are unchanged.
+- Scoped lockfile patches and ESLint 7 minimatch/semver overrides fix high
+  advisories in legacy peers reached by the modern lint dependency graph.
+  Moderate upstream minimatch findings remain and are explicitly reported.
+- Actual business authorization is not complete: policies are unit tested, but
+  no CRUD endpoints or trusted-record loaders exist. No enrollment opens.
+
 ## Confirmed domains and outstanding DNS/certificates
 
 | App | Production web | Development web | Production API |
@@ -31,8 +49,8 @@ was performed by this increment.
 | Consulting | `thirddowntech.com` | `dev.thirddowntech.com` | `api.thirddowntech.com` |
 | Community | `cutblock.org` | `dev.cutblock.org` | `api.cutblock.org` |
 
-Read-only AWS checks confirm both registrations have auto-renew enabled and
-both public hosted zones exist. Each zone currently contains NS/SOA records
+The previous read-only AWS inventory confirmed auto-renew enabled and
+both public hosted zones exist. At that inventory each contained NS/SOA records
 only; no matching ACM certificate was returned in `us-east-1`.
 
 Reuse those zones; validate public delegation before deployment. Provision
@@ -44,21 +62,29 @@ custom hostname has been approved. The personal site's existing domain and
 hosting remain unchanged; its development hostname is still to be selected.
 Registration does not establish legal brand clearance or authorize public cutover.
 
-## Planned infrastructure, not yet deployed
+## Infrastructure implemented in source, not deployed
 
-Per app/environment: CDK v2 stacks for private S3/CloudFront OAC hosting,
-HTTP API/Lambda, Cognito, owned DynamoDB on-demand tables, private documents,
-logs/alarms and runtime IAM. Development and production never share tables/auth.
-The personal repo additionally owns isolated bus, SQS/DLQs and reporting stacks;
-Founder API is read-only and its worker writes only its own projections.
+Per environment, producer CDK stacks define private S3/CloudFront OAC, HTTP
+API/Node 24 Lambda, invitation-only Cognito with authenticator MFA, an on-demand
+core table and logs-only runtime IAM. Production tables have PITR/deletion
+protection/retention. Default synth creates no DNS records/certificates or uploads.
+Opt-in domains import existing zones; production requires explicit cutover flag
+in addition to mandatory deployment approval. See each `infra/README.md`.
+Development and production do not share tables/auth.
+
+Founder defines auth/API/projections only: it does not redeclare profile hosting.
+No database grants exist until real reporting reads are implemented. Private
+documents, operational alarms, durable bus/SQS/DLQs/consumer and granular business
+handlers remain future work; the worker will write only its own projections.
 No unnecessary VPC, NAT, always-on server or RDS. Preserve the existing profile
 CloudFormation stack and all existing applications until replacements pass.
 
-Community's roadmap includes technology, AI, mentorship, athletic training,
+Community's preview roadmap includes technology, AI, mentorship, athletic training,
 fitness and future facilities; only the approved adult tech/mentorship pilot
-is initially enabled. Youth enrollment requires reviewed safety/guardian consent.
-Assignment-level permissions are enforced in backend APIs; no contributor or
-mentor gets finance, contracts or unrelated records.
+is planned first. No enrollment or pilot operations are enabled by this increment.
+Youth enrollment requires reviewed safety/guardian consent. Backend APIs must
+enforce assignment policies before introducing business routes; no contributor
+or mentor is granted finance, contracts or unrelated records here.
 
 ## Required GitHub configuration and IAM
 
@@ -88,18 +114,33 @@ no broad local bootstrap identity is copied to CI or app profiles.
 
 ## Validation and release blockers
 
-- **Passing locally:** 6 contract tests per repo; 5 additional reference-reducer
-  tests in the personal repo; strict workspace type checks; both producer pin
-  checks; personal lint, 22 existing tests, build and 10-file public-release check.
-  Ignore tests confirm caches, dependency trees, env files and output are excluded.
+- **Passing locally:** Consulting 16 tests, Community 15, Personal/Founder 38
+  including its 22 existing profile tests. All workspace type checks and new
+  source lint pass; both new web builds and the personal 10-file release boundary
+  pass. All six development/production synth commands pass with real local
+  Lambda bundling and explicit synthetic account, without AWS lookups.
+  Infrastructure alone relaxes exact-optionals for CDK declaration compatibility;
+  strict TS remains and API/domain exact-optionals remain enabled.
+- Both producer previews were browser-checked on loopback at desktop and
+  390-pixel mobile width: anchor navigation works, no horizontal overflow/forms,
+  and the closed-enrollment/youth-safety messaging remains visible.
+- Dependency gates use high severity. Current selected-workspace audits report
+  no high/critical findings, but 10 moderate package entries per producer and 11
+  personal entries from upstream minimatch. No advisory is suppressed or
+  incompatible downgrade forced; the preserved CRA application is not certified.
+- GitHub push warnings still report critical/high advisories on the producers'
+  legacy default-branch dependency graphs. Passing scoped modern-workspace
+  checks is not a clean whole-repository audit or clearance of the old apps.
 - Hosted validation must pass on each PR's latest head before merge; an older
   successful run does not substitute for validation of the current revision.
-- **Not implemented/tested:** new frontend/API integration, backend assignment
-  authorization, CDK synth, deployment smoke, durable outboxes/consumer, Cognito,
+- **Not implemented/tested:** live frontend/API integration, backend business
+  authorization, deployment smoke, durable outboxes/consumer, Cognito login UI,
   live event recovery, notification receipt or rollback/restore rehearsal.
-  Contract CI does not certify the old CRA application or dependency health.
+  Template assertions and mocked identity events do not prove live JWT behavior.
 - **Blockers:** private branch protection previously returned entitlement HTTP
-  403; required production environment approval has not been configured or
+  403. Current environment inventory still has only `copilot` on each producer;
+  personal `aws-production`/`github-pages` have branch policies but no reviewer
+  approval. New required production approval has not been configured or
   verified. New production delivery remains blocked until protected approval
   works; manual dispatch alone is not an equivalent substitute.
 - Future pipeline: lint/types/unit/integration/dependency checks and both-env
@@ -113,6 +154,7 @@ no broad local bootstrap identity is copied to CI or app profiles.
 
 ## Estimated incremental AWS cost
 
+This source-only increment adds **$0/month** until resources are deployed.
 Low-traffic planning target remains **$20/app/month across both environments plus
 $5 shared eventing/operations**, approximately **$65/month**, not a quote/cap.
 Reuse the two existing zones (about $1/month together, plus queries; do not

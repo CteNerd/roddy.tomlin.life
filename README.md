@@ -163,11 +163,19 @@ They are not imported by the public profile. Profile checks and manual publishin
 also run the foundation checks; publication remains manual and deploys only the
 existing approved public output.
 
+The [Founder infrastructure foundation](infra/README.md) now defines isolated
+development/production Cognito, projections storage and an HTTP API skeleton.
+It is **not deployed** and does not change existing profile hosting. Only health
+and JWT-bound identity endpoints exist; no metric routes or database grants are
+present. CI also synthesizes both environments against a synthetic account,
+without AWS credentials. High/critical dependency advisories block CI; the
+remaining moderate upstream minimatch advisory is reported, not suppressed.
+
 The contract slice implements monthly inbound-lead and first-mentor-approval
 counts, signed corrections, strict payload validation and deterministic replay
-tests. It does **not** implement a durable outbox, AWS bus, SQS consumer, Cognito,
-or the future `/founder` route. IAM/bootstrap and staging deployment require
-separate reviewed increments. Do not equate passing local contract tests with a
+tests. It does **not** implement a durable outbox, AWS bus, SQS consumer, live
+Cognito login, or the future `/founder` route. IAM/bootstrap and development
+deployment require separate reviewed increments. Do not equate passing local contract tests with a
 successful cloud integration.
 
 - [Modernization plan](docs/modernization-plan.md): longer-term AWS-first monorepo, public resume, protected stories, agent/MCP, and delivery gates.
