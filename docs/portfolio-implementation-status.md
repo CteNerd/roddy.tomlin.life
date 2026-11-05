@@ -1,9 +1,10 @@
 # Portfolio implementation status
 
-Updated: 2026-11-05, merged offline reporting and owner-only read API increment.
-Scope: three existing private repos, all defaulting to `main`. Work remains on
-`feat/founder-metrics-api`; no application, DNS or infrastructure deployment
-was performed by this increment.
+Updated: 2026-11-05, merged application increments and verified GitHub controls.
+Scope: three existing repos, all defaulting to `main`. The owner elected public
+visibility; the public profile build boundary does not certify legacy source or
+Git history for publication. Application increments are merged. This update
+records GitHub configuration only; no AWS or DNS writes have been performed.
 
 ## Completed and changed files
 
@@ -18,7 +19,7 @@ was performed by this increment.
 - **Review fix:** leap seconds are rejected in domain/delivery timestamps before
   publishing or replay. Regression tests reproduced the prior `RangeError`.
   Both producer pins now reference authority commit
-  `6b91a720c76c7e439a9fdfb61b2dc42bee613081`.
+  `fbefd7e0532aaed988664ad9a1b441d21ef9d9c4`.
 - Lockfiles remain versioned. Their large producer diffs include npm v1-to-v3
   format conversion, the necessary CRA 4.0.1-to-4.0.3 peer-compatibility patch,
   and real transitive dependency resolution changes, not just formatting.
@@ -58,6 +59,28 @@ was performed by this increment.
 - Governance synth scripts and CI cover both environments. This is partial P3:
   no infrastructure write/CloudFormation execution roles, publisher activation,
   budget notifications or cloud permission/restore rehearsals are completed.
+
+### Verified GitHub controls
+
+- All three `main` branches require PRs, up-to-date GitHub Actions-bound checks,
+  resolved review conversations and administrator enforcement. Force pushes
+  and branch deletion are disabled. Solo-maintainer configuration does not
+  require an unavailable second human approval; Copilot review remains part
+  of the documented review process.
+- Both environments in all three repos now use one explicit deployment
+  **branch** policy: `main`. No tags, wildcards or implicit
+  "protected branches only" selection are allowed.
+- All three production environments preserve the configured owner reviewer
+  with self-review allowed for the sole operator. Administrator bypass is still
+  enabled, so the production validator remains blocked until it is disabled.
+- The repository's environment-only validator passes for all three development
+  environments. This does not prove OIDC role assumption, write permissions,
+  actual workflow approval enforcement or deployment readiness.
+- Existing profile publishing environments/workflows were not changed.
+- The owner reports the legacy Google key is no longer valid. Provider-side
+  revocation was not independently verified; copies remain in three legacy
+  files and history. Do not publish a replacement or treat this as a full
+  public-source/history review.
 
 ### Durable reporting slice
 
@@ -162,7 +185,7 @@ or mentor is granted finance, contracts or unrelated records here.
 
 ## Required GitHub configuration and IAM
 
-Proposed new environment names: **`development`** and **`production`**; earlier
+New environment names: **`development`** and **`production`**; earlier
 plans called development "staging". No existing stack/environment is renamed.
 Check actual defaults when configuring triggers; all three currently use `main`.
 
@@ -217,18 +240,19 @@ no broad local bootstrap identity is copied to CI or app profiles.
   authorization, deployment smoke, durable producer outboxes, Cognito login UI,
   cloud event delivery/recovery, notification receipt or rollback/restore rehearsal.
   Template assertions and mocked identity events do not prove live JWT behavior.
-- **Blockers:** private branch protection previously returned entitlement HTTP
-  403. Current environment inventory still has only `copilot` on each producer;
-  personal `aws-production`/`github-pages` have branch policies but no reviewer
-  approval. New required production approval has not been configured or
-  verified. New production delivery remains blocked until protected approval
-  works; manual dispatch alone is not an equivalent substitute.
+- **GitHub:** the earlier branch-protection entitlement error no longer blocks
+  current configuration. Branch protections and development main-only controls
+  are verified; production has its owner reviewer and main-only branch policy
+  but still allows administrator bypass. Production remains blocked until that
+  bypass is disabled and actual workflow approval is tested. Manual dispatch
+  alone is not an equivalent substitute.
 - Future pipeline: lint/types/unit/integration/dependency checks and both-env
   synth -> development deploy -> API/frontend/auth/event smoke -> protected
   production approval -> same-artifact promotion, summary and rollback evidence.
   No automatic production infrastructure deployment during scaffolding.
 - Remaining gates: scoped IAM/bootstrap review, DNS delegation/certificates,
-  budget recipient confirmation and actual test receipt, legal/content approval.
+  budget/notification resource configuration and actual test receipt,
+  public-source/history review and legal/content approval.
   Preserve configurable WellCall references; permanent redirects require cutover
   approval. No stack/record deletions without explicit review.
 
@@ -245,9 +269,16 @@ Lambda, DynamoDB/PITR, Cognito, CDN and logs add usage-based costs.
 Confirm current regional pricing before provisioning and verify budget and
 operational alerts end-to-end.
 
+The owner approved a **$65/month portfolio alerting budget**, actual-spend alerts
+at 50%, 80% and 100%, and a forecast alert at 100%. The recipient was supplied
+outside source control. Budget resources, verified portfolio-only cost filters
+and notification delivery are not configured yet; this is not a spending cap.
+Development preparation is approved; production deployment and cutover are not.
+
 The new source-only eventing adds no current charge. Fourteen standard alarms
 across both environments are approximately $1.40/month at a $0.10 planning
 rate, before any free-tier allowances. Queue/event/transaction/log costs are
 usage based; indefinite receipt storage grows with accepted event IDs.
-Notification recipients and budgets remain unapproved. No always-on service,
+Budget/recipient approval is complete; notification delivery remains unverified.
+No always-on service,
 NAT gateway, customer-managed KMS key or event archive is introduced.
