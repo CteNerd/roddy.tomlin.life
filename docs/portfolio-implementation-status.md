@@ -1,10 +1,11 @@
 # Portfolio implementation status
 
-Updated: 2026-11-05, merged application increments and verified GitHub controls.
+Updated: 2026-11-05, merged readiness report and isolated release preparation.
 Scope: three existing repos, all defaulting to `main`. The owner elected public
 visibility; the public profile build boundary does not certify legacy source or
 Git history for publication. Application increments are merged. This update
-records GitHub configuration only; no AWS or DNS writes have been performed.
+records GitHub configuration and source-only release preparation; no AWS or DNS
+writes have been performed.
 
 ## Completed and changed files
 
@@ -70,17 +71,54 @@ records GitHub configuration only; no AWS or DNS writes have been performed.
 - Both environments in all three repos now use one explicit deployment
   **branch** policy: `main`. No tags, wildcards or implicit
   "protected branches only" selection are allowed.
+- The owner approved removing human/latest-push/extra-unattributed approval
+  requirements from the new `main` rulesets for sole-maintainer operation.
+  Automatic Copilot reviews, conversation resolution, force-push/deletion
+  protections and the producers' signed-commit requirements remain unchanged.
 - All three production environments preserve the configured owner reviewer
-  with self-review allowed for the sole operator. Administrator bypass is still
-  enabled, so the production validator remains blocked until it is disabled.
-- The repository's environment-only validator passes for all three development
-  environments. This does not prove OIDC role assumption, write permissions,
+  with self-review allowed for the sole operator. Administrator bypass is now
+  disabled. Configuration does not prove actual workflow approval enforcement
+  or authorize production deployment.
+- The repository's environment-only validator passes for all six development/
+  production environments. This does not prove OIDC role assumption, write permissions,
   actual workflow approval enforcement or deployment readiness.
 - Existing profile publishing environments/workflows were not changed.
 - The owner reports the legacy Google key is no longer valid. Provider-side
   revocation was not independently verified; copies remain in three legacy
   files and history. Do not publish a replacement or treat this as a full
   public-source/history review.
+
+### Isolated Founder release-preparation slice
+
+- Read-only AWS inventory verified existing `CDKToolkit` version 30 and its
+  CloudFormation execution role's attached `AdministratorAccess`. No shared
+  bootstrap role, trust, policy or bucket is changed or granted to new CI.
+- `infra/src/release-planning.ts` and its tests add separate per-environment
+  private/versioned/retained asset storage, exact repository/environment OIDC
+  release planners and a CloudFormation-only execution identity with asset
+  reads only. Planners can prepare change sets for exactly Founder foundation
+  and portfolio eventing, passing only that exact execution role.
+- Founder `stack.ts` and `eventing.ts` use current-credential CDK synthesis with
+  Lambda/template assets confined to those separate buckets and `release/`.
+  Actual assembly tests check that shared bootstrap assumptions and version
+  lookups are absent; runtime routes, grants and application resources remain
+  unchanged. Root/infra scripts and `checks.yml` add both release-planning synths.
+  Dependency resolution is unchanged; no lockfile regeneration is required.
+- Planners explicitly cannot assume roles, execute change sets or directly
+  create/update/delete/roll back stacks. This is a release-preparation slice,
+  **not working deployment authority**. Service-specific execution permissions,
+  boundary-enforced runtime role creation, live IAM proof and notification/
+  smoke/recovery gates remain before deploying any application.
+- The [infra runbook](../infra/README.md#isolated-founder-release-preparation)
+  documents reviewed bootstrap prerequisites and non-executing change-set use.
+  No AWS stack, asset bucket, role or deployment workflow has been activated.
+- Local validation passes lint, infrastructure type checking, 14 infrastructure
+  tests (including four new policy/actual-assembly cases) and all six affected
+  offline synths. AWS's read-only custom-policy simulator also passed 28
+  development-model action/resource decisions: own-stack preparation and own
+  asset writes allow; unrelated/prod resources, absent/wrong pass-role context,
+  shared bootstrap assumptions and execution/delete attempts deny. Simulation
+  is not an assumed deployed-role, service-integration or real approval test.
 
 ### Durable reporting slice
 
@@ -241,11 +279,10 @@ no broad local bootstrap identity is copied to CI or app profiles.
   cloud event delivery/recovery, notification receipt or rollback/restore rehearsal.
   Template assertions and mocked identity events do not prove live JWT behavior.
 - **GitHub:** the earlier branch-protection entitlement error no longer blocks
-  current configuration. Branch protections and development main-only controls
-  are verified; production has its owner reviewer and main-only branch policy
-  but still allows administrator bypass. Production remains blocked until that
-  bypass is disabled and actual workflow approval is tested. Manual dispatch
-  alone is not an equivalent substitute.
+  current configuration. Branch protections and main-only controls are verified;
+  production has its owner reviewer with administrator bypass disabled.
+  Actual workflow approval still needs testing. Manual dispatch alone is not
+  an equivalent substitute, and production deployment remains unapproved.
 - Future pipeline: lint/types/unit/integration/dependency checks and both-env
   synth -> development deploy -> API/frontend/auth/event smoke -> protected
   production approval -> same-artifact promotion, summary and rollback evidence.
@@ -282,3 +319,7 @@ usage based; indefinite receipt storage grows with accepted event IDs.
 Budget/recipient approval is complete; notification delivery remains unverified.
 No always-on service,
 NAT gateway, customer-managed KMS key or event archive is introduced.
+The isolated release-preparation buckets and IAM roles add no current charge
+while undeployed. Once provisioned, versioned asset storage/requests add
+usage-based S3 charges; retained rollback versions need a reviewed retention
+policy. No extra hosted zone, custom KMS key, ECR repository or server is added.
