@@ -12,6 +12,7 @@ import type { Construct } from "constructs";
 import { resolve } from "node:path";
 import type { Configuration } from "./config.ts";
 import { releaseSynthesizer } from "./release-planning.ts";
+import { founderRuntimeIdentity } from "./governance.ts";
 
 export class FounderStack extends Stack {
   constructor(scope: Construct, config: Configuration) {
@@ -53,22 +54,15 @@ export class FounderStack extends Stack {
       retention: production ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK,
       removalPolicy,
     });
-    const role = new iam.Role(this, "ApiRole", {
-      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
-      permissionsBoundary: iam.ManagedPolicy.fromManagedPolicyArn(this, "RuntimeBoundary",
-        `arn:${this.partition}:iam::${this.account}:policy/rct/founder/${config.environment}/${config.prefix}-runtime-boundary`),
-    });
-    logGroup.grantWrite(role);
-    role.addToPolicy(new iam.PolicyStatement({
-      actions: ["dynamodb:Query"], resources: [projections.tableArn],
-      conditions: { "ForAllValues:StringLike": { "dynamodb:LeadingKeys": ["MONTH#????-??"] } },
-    }));
+    const identity = founderRuntimeIdentity(config, this.partition, "api");
+    const role = iam.Role.fromRoleArn(this, "ApiRole", identity.roleArn, { mutable: false });
     const ownerSubject = new CfnParameter(this, "FounderOwnerSubject", {
       type: "String", default: "disabled",
       allowedPattern: "^(disabled|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$",
       description: "Keep disabled until the reviewed owner is invited into this MFA-required Cognito pool; use its exact sub, never an email",
     });
     const handler = new NodejsFunction(this, "ApiHandler", {
+      functionName: identity.name,
       entry: resolve(import.meta.dirname, "../../apps/api/src/index.ts"),
       depsLockFilePath: resolve(import.meta.dirname, "../../package-lock.json"),
       runtime: lambda.Runtime.NODEJS_24_X, handler: "handler",

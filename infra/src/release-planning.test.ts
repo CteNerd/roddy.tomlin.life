@@ -85,14 +85,37 @@ for (const environment of ["development", "production"] as const) {
       "cloudformation:UpdateStack", "cloudformation:DeleteStack", "cloudformation:ContinueUpdateRollback",
       "cloudformation:RollbackStack", "cloudformation:CancelUpdateStack", "cloudformation:SetStackPolicy",
     ]) assert.ok(denial.Action.includes(action), `Missing execution guard: ${action}`);
-    const executionPolicy = policies.find((policy) => policy.Properties.Roles.some((role: { Ref: string }) => role.Ref === executionId));
-    assert.ok(executionPolicy);
-    assert.equal(executionPolicy.Properties.PolicyDocument.Statement.length, 1);
-    assert.deepEqual(executionPolicy.Properties.PolicyDocument.Statement[0].Action, ["s3:GetObject", "s3:GetObjectVersion"]);
+    const [boundaryId, executionBoundary] = Object.entries(template.findResources("AWS::IAM::ManagedPolicy", {
+      Properties: Match.objectLike({ ManagedPolicyName: `${config.prefix}-execution-boundary` }),
+    }))[0]!;
+    assert.ok(boundaryId);
+    const executionStatements = executionBoundary.Properties.PolicyDocument.Statement;
+    assert.equal(executionStatements.length, 4);
+    assert.deepEqual(executionStatements[0].Action, ["s3:GetObject", "s3:GetObjectVersion"]);
     const [bucketId] = Object.keys(template.findResources("AWS::S3::Bucket"));
     assert.ok(bucketId);
     const objects = { "Fn::Join": ["", [{ "Fn::GetAtt": [bucketId, "Arn"] }, "/release/*"]] };
-    assert.deepEqual(executionPolicy.Properties.PolicyDocument.Statement[0].Resource, objects);
+    assert.deepEqual(executionStatements[0].Resource, objects);
+    for (const statement of executionStatements) assert.notEqual(statement.Resource, "*");
+    const reading = executionStatements.find((statement: { Action: string }) => statement.Action === "iam:GetRole");
+    assert.ok(reading);
+    assert.deepEqual(reading.Resource, ["api", "reporting"].map((handler) => ({
+      "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+        `:iam::123456789012:role/rct/founder/${environment}/runtime/${config.prefix}-${handler}`]],
+    })));
+    assert.doesNotMatch(JSON.stringify(executionStatements), /iam:(Create|Update|Put|Attach|Detach|Delete)|sts:|cloudformation:|lambda:Create|AdministratorAccess/);
+    for (const handler of ["api", "reporting"] as const) {
+      const roleArn = { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+        `:iam::123456789012:role/rct/founder/${environment}/runtime/${config.prefix}-${handler}`]] };
+      const passing = executionStatements.find((statement: { Action: string; Resource: unknown }) =>
+        statement.Action === "iam:PassRole" && JSON.stringify(statement.Resource) === JSON.stringify(roleArn));
+      assert.ok(passing);
+      assert.deepEqual(passing.Condition, {
+        StringEquals: { "iam:PassedToService": "lambda.amazonaws.com" },
+        ArnEquals: { "iam:AssociatedResourceArn": { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+          `:lambda:us-east-1:123456789012:function:${config.prefix}-${handler}`]] } },
+      });
+    }
     const uploads = statements.find((statement: { Action: string | string[] }) => Array.isArray(statement.Action) && statement.Action.includes("s3:PutObject"));
     assert.ok(uploads);
     assert.deepEqual(uploads.Resource, objects);
@@ -102,7 +125,7 @@ for (const environment of ["development", "production"] as const) {
         Version: "2012-10-17",
         Statement: [{ Action: "sts:AssumeRole", Effect: "Allow", Principal: { Service: "cloudformation.amazonaws.com" } }],
       },
-      ManagedPolicyArns: Match.absent(),
+      PermissionsBoundary: { Ref: boundaryId }, ManagedPolicyArns: [{ Ref: boundaryId }],
     });
   });
 

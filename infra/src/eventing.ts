@@ -13,7 +13,7 @@ import * as ssm from "aws-cdk-lib/aws-ssm";
 import type { Construct } from "constructs";
 import { resolve } from "node:path";
 import type { Configuration } from "./config.ts";
-import { applications } from "./governance.ts";
+import { applications, founderRuntimeIdentity } from "./governance.ts";
 import { releaseSynthesizer } from "./release-planning.ts";
 
 export class EventingStack extends Stack {
@@ -74,16 +74,10 @@ export class EventingStack extends Stack {
       logGroupName: `/rct/${config.prefix}/reporting`,
       retention: production ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK, removalPolicy,
     });
-    const role = new iam.Role(this, "ReportingRole", {
-      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
-      permissionsBoundary: iam.ManagedPolicy.fromManagedPolicyArn(this, "RuntimeBoundary",
-        `arn:${this.partition}:iam::${this.account}:policy/rct/founder/${config.environment}/${config.prefix}-runtime-boundary`),
-    });
-    role.addToPolicy(new iam.PolicyStatement({
-      actions: ["dynamodb:GetItem", "dynamodb:PutItem"], resources: [table.tableArn],
-    }));
-    logGroup.grantWrite(role);
+    const identity = founderRuntimeIdentity(config, this.partition, "reporting");
+    const role = iam.Role.fromRoleArn(this, "ReportingRole", identity.roleArn, { mutable: false });
     const worker = new NodejsFunction(this, "ReportingWorker", {
+      functionName: identity.name,
       entry: resolve(import.meta.dirname, "../../apps/reporting-worker/src/index.ts"),
       depsLockFilePath: resolve(import.meta.dirname, "../../package-lock.json"),
       runtime: lambda.Runtime.NODEJS_24_X, handler: "handler",

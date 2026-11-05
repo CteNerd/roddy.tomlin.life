@@ -9,6 +9,16 @@ export const applications = [
   { name: "founder", repository: "CteNerd/roddy.tomlin.life", source: undefined, detailTypes: [] },
 ] as const;
 
+export function founderRuntimeIdentity(config: Configuration, partition: string, handler: "api" | "reporting") {
+  const name = `${config.prefix}-${handler}`;
+  const path = `/rct/founder/${config.environment}/runtime/`;
+  return {
+    name, path,
+    roleArn: `arn:${partition}:iam::${config.account}:role${path}${name}`,
+    functionArn: `arn:${partition}:lambda:${config.region}:${config.account}:function:${name}`,
+  };
+}
+
 export class GovernanceStack extends Stack {
   constructor(scope: Construct, config: Configuration) {
     super(scope, `rct-governance-${config.environment}`, {
@@ -57,6 +67,44 @@ export class GovernanceStack extends Stack {
           resources: ["consulting", "dotcom"].map((source) =>
             `arn:${this.partition}:sqs:${this.region}:${this.account}:rct-portfolio-${config.environment}-reporting-${source}`),
         }));
+        for (const handler of ["api", "reporting"] as const) {
+          const identity = founderRuntimeIdentity(config, this.partition, handler);
+          const statements = [
+            new iam.PolicyStatement({
+              actions: ["logs:CreateLogStream", "logs:PutLogEvents"],
+              resources: [`arn:${this.partition}:logs:${this.region}:${this.account}:log-group:/rct/${config.prefix}/${handler}:log-stream:*`],
+            }),
+            new iam.PolicyStatement({
+              actions: handler === "api" ? ["dynamodb:Query"] : ["dynamodb:GetItem", "dynamodb:PutItem"],
+              resources: [`arn:${this.partition}:dynamodb:${this.region}:${this.account}:table/${config.prefix}-projections`],
+              ...(handler === "api" ? {
+                conditions: {
+                  "ForAllValues:StringLike": { "dynamodb:LeadingKeys": ["MONTH#????-??"] },
+                  Null: { "dynamodb:LeadingKeys": "false" },
+                },
+              } : {}),
+            }),
+          ];
+          if (handler === "reporting") statements.push(new iam.PolicyStatement({
+            actions: ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes", "sqs:GetQueueUrl", "sqs:ChangeMessageVisibility"],
+            resources: ["consulting", "dotcom"].map((source) =>
+              `arn:${this.partition}:sqs:${this.region}:${this.account}:rct-portfolio-${config.environment}-reporting-${source}`),
+          }));
+          const runtimeBoundary = new iam.ManagedPolicy(this, `founder${handler}Boundary`, {
+            managedPolicyName: `${identity.name}-runtime-boundary`,
+            path: `/rct/founder/${config.environment}/`,
+            statements,
+          });
+          const runtime = new iam.Role(this, `founder${handler}Role`, {
+            roleName: identity.name, path: identity.path,
+            assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+            permissionsBoundary: runtimeBoundary,
+            managedPolicies: [runtimeBoundary],
+            description: `Governance-owned Founder ${handler} runtime; application execution cannot alter IAM`,
+          });
+          new CfnOutput(this, `founder${handler}RoleArn`, { value: runtime.roleArn });
+          new CfnOutput(this, `founder${handler}BoundaryArn`, { value: runtimeBoundary.managedPolicyArn });
+        }
       }
       const planner = new iam.Role(this, `${application.name}Planner`, {
         roleName: `${prefix}-plan`,
