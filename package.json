@@ -5,7 +5,9 @@
   "type": "module",
   "workspaces": [
     "packages/contracts",
-    "packages/reporting"
+    "packages/reporting",
+    "apps/api",
+    "infra"
   ],
   "engines": {
     "node": ">=24 <25"
@@ -19,7 +21,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:portfolio": "npm run check --workspaces",
-    "lint": "eslint src/App.jsx src/main.jsx src/profile.js src/App.test.jsx src/setupTests.js vite.config.js eslint.config.js scripts",
+    "cdk:synth:development": "npm run synth:development --workspace @rct/founder-infra",
+    "cdk:synth:production": "npm run synth:production --workspace @rct/founder-infra",
+    "lint": "eslint src/App.jsx src/main.jsx src/profile.js src/App.test.jsx src/setupTests.js vite.config.js eslint.config.js scripts apps/api/src infra/src",
     "check:release": "node scripts/check-release.mjs"
   },
   "dependencies": {
@@ -37,6 +41,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",
     "jsdom": "^27.0.1",
+    "typescript-eslint": "8.72.1",
     "vite": "^8.3.5",
     "vitest": "^5.1.0"
   }
