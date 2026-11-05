@@ -1,8 +1,8 @@
 # Portfolio implementation status
 
-Updated: 2026-11-05, merged application/governance foundations and offline reporting.
+Updated: 2026-11-05, merged offline reporting and owner-only read API increment.
 Scope: three existing private repos, all defaulting to `main`. Work remains on
-`feat/durable-reporting`; no application, DNS or infrastructure deployment
+`feat/founder-metrics-api`; no application, DNS or infrastructure deployment
 was performed by this increment.
 
 ## Completed and changed files
@@ -70,7 +70,9 @@ was performed by this increment.
   contributions in the reference reducer and worker. Fact-time comparisons
   use numeric instants, including offsets crossing four-digit year boundaries.
   JSON schema is imported as a module and embedded in the Lambda bundle.
-  Producer copies remain pinned until the authority revision is reviewed.
+  Producer PR #4s now pin the reviewed authority revision
+  `fbefd7e0532aaed988664ad9a1b441d21ef9d9c4` after completed Copilot reviews and
+  green hosted CI; event schemas/semantics are unchanged.
 - `infra/src/eventing.ts` and tests add the separate per-environment bus,
   source/type-filtered rules, two main queues, four separate delivery/processing
   DLQs, bounded Lambda concurrency/retry/visibility, explicit logs, seven alarms
@@ -85,6 +87,30 @@ was performed by this increment.
   image, loopback-only access and synthetic credentials, never AWS writes.
   Local Docker/Java are unavailable; hosted integration is a required merge
   gate, not silently skipped or replaced by mocks.
+
+### Owner-only read API slice
+
+- Personal reporting PR #4 is merged. Actual hosted DynamoDB Local integration
+  passed its four transaction/replay scenarios with no skips; review's request
+  to confirm that job was answered with exact-head evidence before merge.
+- `apps/api/src/{index.ts,handler.ts,projections.ts}` and tests define
+  `GET /metrics?month=YYYY-MM`. Backend requires the exact configured Cognito
+  owner subject and an access token after Gateway JWT validation. Other users,
+  ID tokens and headers cannot trigger database reads.
+- `FounderOwnerSubject` is a CloudFormation parameter defaulting explicitly to
+  `disabled`; no user is automatically authorized or invited. Select/verify
+  the owner in each MFA-required pool before a reviewed parameter activation.
+- The API role uses the governance runtime boundary and only Query on the
+  owned table's monthly partitions, not receipts/source data, Scan or writes.
+  Shared `packages/reporting/src/stored-projection.ts` validates persistent
+  rows for both API and worker, including safe totals/versions and timestamps.
+- Strict responses contain approved aggregate fields only; empty observations
+  are an empty array, not zero totals. Storage faults return explicit 503s with
+  sanitized diagnostics. The real integration job additionally tests the
+  actual API query against worker-written and empty months.
+- API/worker/infra runbooks and manifests/lockfile are updated. The existing
+  profile, public build/hosting and routes remain unchanged; no Founder UI or
+  login flow is published. This is partial P5, not a production-ready dashboard.
 
 ## Confirmed domains and outstanding DNS/certificates
 
@@ -117,7 +143,8 @@ in addition to mandatory deployment approval. See each `infra/README.md`.
 Development and production do not share tables/auth.
 
 Founder foundation defines auth/API/projections: it does not redeclare profile
-hosting. Its API still has no database grants or metrics route. Separate offline
+hosting. Its API has only an owner-gated Query route on monthly reporting
+partitions, with no writes or source-data access. Separate offline
 eventing now defines bus/SQS/DLQs/consumer and alarms; only its worker has access
 to the owned projections table. Governance and the table must exist before
 eventing is eventually provisioned. Alarm notification actions/recipients,
@@ -153,6 +180,8 @@ outputs rather than duplicated inputs. Secrets belong in backend secret stores,
 not frontend config. Never add AWS access keys to GitHub secrets.
 The worker's `REPORTING_TABLE_NAME`, `CONSULTING_QUEUE_ARN` and `DOTCOM_QUEUE_ARN`
 are populated by CDK, not manually copied into GitHub variables or secrets.
+CDK similarly populates API `REPORTING_TABLE_NAME` and `FOUNDER_OWNER_SUBJECT`
+from the owned table and disabled-by-default reviewed owner parameter.
 
 Required roles: six app OIDC deploy roles (3 repos x 2 environments), separate
 bus deploy authority per environment, constrained CloudFormation execution/
@@ -163,7 +192,7 @@ no broad local bootstrap identity is copied to CI or app profiles.
 
 ## Validation and release blockers
 
-- **Passing locally:** Consulting 16 tests, Community 15, Personal/Founder 58
+- **Passing locally:** Consulting 16 tests, Community 15, Personal/Founder 64
   including its 22 existing profile tests and 12 worker unit/bundle tests.
   All workspace type checks and new
   source lint pass; both new web builds and the personal 10-file release boundary

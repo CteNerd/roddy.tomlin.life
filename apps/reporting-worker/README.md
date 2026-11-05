@@ -65,7 +65,9 @@ loss. These do not prove cloud IAM, EventBridge/SQS delivery or live recovery.
 ## Activation and recovery gates
 
 See [infrastructure prerequisites](../../infra/README.md). No producer outbox
-publisher or Founder metrics API is wired. No new development or production
+publisher or public Founder UI is wired. The separate [read API](../api/README.md)
+defaults to disabled owner access and cannot mutate these records.
+No new development or production
 workflow deploys this stack. Protected environments, scoped write IAM,
 recipient approval/notification receipt and real cloud smoke/recovery tests
 remain mandatory. Do not copy broad local credentials into runtime or CI.

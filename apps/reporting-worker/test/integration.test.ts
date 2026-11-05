@@ -5,10 +5,12 @@ import { test } from "node:test";
 import {
   CreateTableCommand, DeleteTableCommand, DynamoDBClient, TransactionCanceledException, waitUntilTableExists,
 } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, GetCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { parseReportingEvent } from "@rct/portfolio-contracts";
 import { emptyProjection, projectEvent } from "@rct/portfolio-reporting";
 import { DynamoReportingStore, dynamoTransport, ImmutableEventConflict, ReportingContentionError } from "../src/store.ts";
+import { createProjectionReader } from "../../api/src/projections.ts";
+import { parseStoredProjection } from "@rct/portfolio-reporting/stored-projection";
 
 const endpoint = process.env.DYNAMODB_ENDPOINT;
 if (!endpoint) throw new Error("DYNAMODB_ENDPOINT is mandatory; integration tests cannot be skipped");
@@ -96,5 +98,14 @@ test("real DynamoDB transactions preserve exactly-once totals across replay, con
       assert.equal((await total(month))?.latestOccurredAt, reference.latestOccurredAt);
       assert.equal((await total(month))?.total, 0);
     }
+  });
+
+  await t.test("the read-only API query returns only its selected monthly projections and real empty results", async () => {
+    const read = createProjectionReader(table, (input) => document.send(new QueryCommand(input)));
+    const rows = await read("2026-03");
+    assert.equal(rows.length, 1);
+    assert.equal(parseStoredProjection(rows[0], "2026-03").total, 1);
+    assert.deepEqual(await read("1999-01"), []);
+    assert.ok(rows.every((row) => parseStoredProjection(row, "2026-03").PK.startsWith("MONTH#")));
   });
 });

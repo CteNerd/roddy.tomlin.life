@@ -22,13 +22,23 @@ Region is `us-east-1`; invalid/missing context throws rather than guessing.
 Per-environment resources are an on-demand reporting-projections table,
 invitation-only Cognito with required authenticator MFA, Node 24 Lambda and
 HTTP API. Production data/auth resources are retained; the table has PITR and
-deletion protection. Lambda can only write its explicit log group (7 days dev,
-30 days prod), not read/write tables or publish events. It exposes safe
-`GET /health` and JWT-protected `GET /me`; there are no fake metrics or mutation
-routes. Reporting read grants belong with real projection-read implementation.
+deletion protection. The API writes only its explicit log group (7 days dev,
+30 days prod) and can Query only its owned monthly projection partitions. It
+cannot read receipts/source tables, Scan, mutate data or publish events.
+It exposes safe `GET /health`, JWT-protected `GET /me` and owner-only
+`GET /metrics?month=YYYY-MM`. Metrics require an exact configured Cognito
+subject and access token, not just authenticated membership.
 
-No hosted login domain, initial users or business metrics API is implemented
-yet. The separate offline eventing stack is described below. Production CORS is the existing profile
+`FounderOwnerSubject` defaults explicitly to `disabled`; there is no anonymous
+or first-user bootstrap. After the owner is invited into the MFA-required pool,
+verify its exact subject and review that parameter change separately per
+environment. CDK supplies the Lambda environment, not frontend/GitHub secrets.
+The API references the governance runtime boundary, so reviewed governance
+must exist before the foundation is eventually provisioned.
+See the [read-only API runbook](../apps/api/README.md).
+
+No hosted login domain, initial users or Founder login/dashboard UI is
+implemented yet. The separate offline eventing stack is described below. Production CORS is the existing profile
 origin; development is loopback until its approved hostname is selected.
 Callback/logout client configuration is not a working login UI.
 

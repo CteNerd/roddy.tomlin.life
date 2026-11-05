@@ -17,6 +17,9 @@ test("Founder infrastructure neither redeclares live profile hosting nor grants 
   template.hasResourceProperties("AWS::ApiGatewayV2::Route", {
     RouteKey: "GET /me", AuthorizationType: "JWT", AuthorizerId: Match.anyValue(),
   });
+  template.hasResourceProperties("AWS::ApiGatewayV2::Route", {
+    RouteKey: "GET /metrics", AuthorizationType: "JWT", AuthorizerId: Match.anyValue(),
+  });
   const [poolId] = Object.keys(template.findResources("AWS::Cognito::UserPool"));
   const [clientId] = Object.keys(template.findResources("AWS::Cognito::UserPoolClient"));
   assert.ok(poolId);
@@ -28,13 +31,32 @@ test("Founder infrastructure neither redeclares live profile hosting nor grants 
       Audience: [{ Ref: clientId }],
     },
   });
-  template.resourceCountIs("AWS::ApiGatewayV2::Route", 2);
+  template.resourceCountIs("AWS::ApiGatewayV2::Route", 3);
   template.hasResourceProperties("AWS::Cognito::UserPool", {
     AdminCreateUserConfig: { AllowAdminCreateUserOnly: true }, MfaConfiguration: "ON",
   });
   const policies = JSON.stringify(template.findResources("AWS::IAM::Policy"));
-  assert.doesNotMatch(policies, /dynamodb:|events:|sts:AssumeRole|"Resource":"\*"/);
+  assert.doesNotMatch(policies, /rct-(consulting|dotcom)|dynamodb:(PutItem|UpdateItem|DeleteItem|Scan|GetItem|Batch)|events:|sts:AssumeRole|"Resource":"\*"/);
   assert.match(policies, /logs:PutLogEvents/);
+  const [tableId] = Object.keys(template.findResources("AWS::DynamoDB::Table"));
+  assert.ok(tableId);
+  template.hasResourceProperties("AWS::IAM::Policy", {
+    PolicyDocument: Match.objectLike({ Statement: Match.arrayWith([{
+      Action: "dynamodb:Query", Effect: "Allow", Resource: { "Fn::GetAtt": [tableId, "Arn"] },
+      Condition: { "ForAllValues:StringLike": { "dynamodb:LeadingKeys": ["MONTH#????-??"] } },
+    }]) }),
+  });
+  const [ownerId] = Object.keys(template.findParameters("FounderOwnerSubject", { Default: "disabled" }));
+  assert.ok(ownerId);
+  template.hasResourceProperties("AWS::Lambda::Function", {
+    Environment: { Variables: {
+      REPORTING_TABLE_NAME: { Ref: tableId }, FOUNDER_OWNER_SUBJECT: { Ref: ownerId },
+    } },
+  });
+  template.hasResourceProperties("AWS::IAM::Role", {
+    PermissionsBoundary: { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+      ":iam::123456789012:policy/rct/founder/development/rct-founder-development-runtime-boundary"]] },
+  });
 });
 
 test("production projection data and Cognito pool survive stack removal", () => {

@@ -4,13 +4,11 @@ import {
   type GetCommandInput, type GetCommandOutput, type TransactWriteCommandInput,
 } from "@aws-sdk/lib-dynamodb";
 import { prepareReportingEvent } from "@rct/portfolio-reporting";
+import { parseStoredProjection, ReportingIntegrityError } from "@rct/portfolio-reporting/stored-projection";
+export { ReportingIntegrityError } from "@rct/portfolio-reporting/stored-projection";
 
 export class ImmutableEventConflict extends Error {
   constructor() { super("Immutable reporting event ID was reused"); this.name = "ImmutableEventConflict"; }
-}
-
-export class ReportingIntegrityError extends Error {
-  constructor() { super("Reporting storage failed integrity validation"); this.name = "ReportingIntegrityError"; }
 }
 
 export class ReportingContentionError extends Error {
@@ -31,11 +29,6 @@ export function dynamoTransport(client: DynamoDBDocumentClient): ReportingTransp
 
 function object(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function canonicalInstant(value: unknown): value is string {
-  return typeof value === "string" && Number.isFinite(Date.parse(value))
-    && new Date(value).toISOString() === value;
 }
 
 function conditionalFailure(error: unknown): boolean {
@@ -73,20 +66,13 @@ export class DynamoReportingStore {
     if (await receiptExists()) return "duplicate";
     for (let attempt = 0; attempt < 5; attempt++) {
       const { Item: row } = await this.transport.get({ TableName: this.table, Key: projectionKey, ConsistentRead: true });
-      if (row !== undefined && (!object(row) || row.PK !== projectionKey.PK || row.SK !== projectionKey.SK
-        || typeof row.total !== "number" || !Number.isSafeInteger(row.total)
-        || typeof row.version !== "number" || !Number.isSafeInteger(row.version) || row.version < 1
-        || !canonicalInstant(row.latestOccurredAt))) {
-        throw new ReportingIntegrityError();
-      }
-      const previousTotal: unknown = row?.total;
-      const previousVersion: unknown = row?.version;
-      const previousTime: unknown = row?.latestOccurredAt;
-      const total = (typeof previousTotal === "number" ? previousTotal : 0) + delta;
-      const version = (typeof previousVersion === "number" ? previousVersion : 0) + 1;
+      const current = row === undefined ? undefined : parseStoredProjection(row, event.detail.data.reportingMonth);
+      if (current !== undefined && current.SK !== projectionKey.SK) throw new ReportingIntegrityError();
+      const total = (current?.total ?? 0) + delta;
+      const version = (current?.version ?? 0) + 1;
       if (!Number.isSafeInteger(total) || !Number.isSafeInteger(version)) throw new ReportingIntegrityError();
-      const latestOccurredAt = typeof previousTime === "string" && Date.parse(previousTime) > Date.parse(occurredAt)
-        ? previousTime : occurredAt;
+      const latestOccurredAt = current && Date.parse(current.latestOccurredAt) > Date.parse(occurredAt)
+        ? current.latestOccurredAt : occurredAt;
       const updatedAt = new Date().toISOString();
       try {
         await this.transport.transact({
@@ -101,10 +87,10 @@ export class DynamoReportingStore {
             { Put: {
               TableName: this.table,
               Item: { ...projectionKey, total, version, latestOccurredAt, updatedAt },
-              ...(row === undefined ? { ConditionExpression: "attribute_not_exists(PK)" } : {
+              ...(current === undefined ? { ConditionExpression: "attribute_not_exists(PK)" } : {
                 ConditionExpression: "#version = :expected",
                 ExpressionAttributeNames: { "#version": "version" },
-                ExpressionAttributeValues: { ":expected": previousVersion },
+                ExpressionAttributeValues: { ":expected": current.version },
               }),
             } },
           ],
