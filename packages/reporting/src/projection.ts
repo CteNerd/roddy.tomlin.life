@@ -34,27 +34,34 @@ function fingerprint(event: ReportingEvent): string {
   return createHash("sha256").update(JSON.stringify(canonical)).digest("hex");
 }
 
-export function projectEvent(state: ProjectionState, input: unknown): ProjectionState {
+export function prepareReportingEvent(input: unknown) {
   const event = parseReportingEvent(input);
-  const hash = fingerprint(event);
+  const { metric, delta } = contribution(event);
+  return {
+    event, metric, delta,
+    fingerprint: fingerprint(event),
+    key: `${event.detail.domain}#${event.detail.data.reportingMonth}#${metric}`,
+    occurredAt: new Date(event.detail.occurredAt).toISOString(),
+  };
+}
+
+export function projectEvent(state: ProjectionState, input: unknown): ProjectionState {
+  const { event, delta, fingerprint: hash, key, occurredAt } = prepareReportingEvent(input);
   const existing = state.processedEvents.get(event.detail.eventId);
   if (existing !== undefined) {
     if (existing !== hash) throw new Error("Immutable reporting event ID was reused with different content");
     return state;
   }
-  const { metric, delta } = contribution(event);
-  const key = `${event.detail.domain}#${event.detail.data.reportingMonth}#${metric}`;
   const totals = new Map(state.totals);
   const total = (totals.get(key) ?? 0) + delta;
   if (!Number.isSafeInteger(total)) throw new Error("Reporting total exceeds safe integer precision");
   totals.set(key, total);
   const processedEvents = new Map(state.processedEvents);
   processedEvents.set(event.detail.eventId, hash);
-  const occurredAt = new Date(event.detail.occurredAt).toISOString();
   return {
     totals,
     processedEvents,
-    latestOccurredAt: state.latestOccurredAt === null || occurredAt > state.latestOccurredAt
+    latestOccurredAt: state.latestOccurredAt === null || Date.parse(occurredAt) > Date.parse(state.latestOccurredAt)
       ? occurredAt : state.latestOccurredAt,
   };
 }

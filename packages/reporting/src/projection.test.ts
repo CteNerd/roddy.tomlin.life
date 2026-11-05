@@ -69,5 +69,15 @@ test("rejects unsupported leap seconds before replay and normalizes supported of
     ...lead,
     detail: { ...lead.detail, occurredAt: "2017-01-01T01:00:00+01:00" },
   });
+
   assert.equal(result.latestOccurredAt, "2017-01-01T00:00:00.000Z");
+});
+
+test("latest fact ordering uses instants even when offsets cross the four-digit year boundary", () => {
+  const later = { ...lead, detail: { ...lead.detail, occurredAt: "9999-12-31T23:59:59-01:00" } };
+  const earlier = { ...lead, detail: {
+    ...lead.detail, eventId: "00000000-0000-4000-8000-000000000099", occurredAt: "9999-12-31T23:00:00Z",
+  } };
+  const result = projectEvent(projectEvent(emptyProjection(), later), earlier);
+  assert.equal(result.latestOccurredAt, "+010000-01-01T00:59:59.000Z");
 });

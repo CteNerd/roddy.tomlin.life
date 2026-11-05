@@ -42,6 +42,16 @@ for (const environment of ["development", "production"] as const) {
       Properties: Match.objectLike({ ManagedPolicyName: `rct-founder-${environment}-runtime-boundary` }),
     });
     assert.doesNotMatch(JSON.stringify(founderBoundary), /events:PutEvents|table\/rct-(consulting|dotcom)-/);
+    assert.doesNotMatch(JSON.stringify(founderBoundary), /reporting-\*/);
+    template.hasResourceProperties("AWS::IAM::ManagedPolicy", {
+      ManagedPolicyName: `rct-founder-${environment}-runtime-boundary`,
+      PolicyDocument: Match.objectLike({ Statement: Match.arrayWith([Match.objectLike({
+        Action: Match.arrayWith(["sqs:ReceiveMessage", "sqs:GetQueueUrl"]),
+        Resource: ["consulting", "dotcom"].map((source) => ({
+          "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" }, `:sqs:us-east-1:123456789012:rct-portfolio-${environment}-reporting-${source}`]],
+        })),
+      })]) }),
+    });
     template.hasResourceProperties("AWS::IAM::ManagedPolicy", {
       ManagedPolicyName: `rct-consulting-${environment}-runtime-boundary`,
       PolicyDocument: Match.objectLike({ Statement: Match.arrayWith([Match.objectLike({

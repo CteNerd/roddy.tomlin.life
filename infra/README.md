@@ -27,8 +27,8 @@ deletion protection. Lambda can only write its explicit log group (7 days dev,
 `GET /health` and JWT-protected `GET /me`; there are no fake metrics or mutation
 routes. Reporting read grants belong with real projection-read implementation.
 
-No hosted login domain, initial users, event bus, queues, durable consumer or
-business metrics are implemented yet. Production CORS is the existing profile
+No hosted login domain, initial users or business metrics API is implemented
+yet. The separate offline eventing stack is described below. Production CORS is the existing profile
 origin; development is loopback until its approved hostname is selected.
 Callback/logout client configuration is not a working login UI.
 
@@ -81,3 +81,43 @@ completeness or operational readiness**. The calling role needs self-scoped
 publisher roles, cost-tag activation, approved budget amounts/recipients and
 notification receipt, live allow/deny tests and restore/smoke rehearsal remain
 required before enabling write workflows. No AWS resources are applied here.
+
+## Separate reporting/eventing stack
+
+`npm run cdk:synth:eventing:development` and the production equivalent synthesize
+the separate `rct-portfolio-<environment>-eventing` stack. It creates the custom
+bus `rct-portfolio-<environment>` and publishes its ARN through
+`/rct/<environment>/portfolio/event-bus-arn`. There is no cross-account bus
+policy or active producer publisher. Each producer's rule matches only its
+approved source and two v1 detail types; the worker independently validates the
+complete schema and delivery account/region/queue/source.
+
+Each source has an encrypted, TLS-only main queue, EventBridge delivery DLQ and
+worker processing DLQ. Main retention is four days; both DLQs retain fourteen.
+EventBridge retries at most 185 times within 24 hours; processing redrives after
+five receives. The 181-second visibility timeout covers six 30-second Lambda
+timeouts plus its one-second batching window. Partial batch responses isolate
+poison messages. Each mapping has concurrency two; Lambda reserves four.
+
+The worker imports the existing Founder projection table by name; it does not
+redeclare it or touch source tables or live hosting. Its role allows only
+GetItem/PutItem on that exact table, consumption of the two exact main queues
+and writes to its explicit log group. The role references the governance
+Founder's runtime boundary by stable policy ARN. **Review and provision
+governance and the Founder foundation before any eventual eventing deployment.**
+These external prerequisites are not automatic CloudFormation dependencies.
+Both environments are still source-only and no write deployment roles exist.
+
+Seven alarms per environment cover both delivery/processing DLQs, both backlog
+ages and Lambda invocation errors. They deliberately have **no notification
+actions** pending recipient approval; do not treat them as operational alert
+delivery. Partial-batch failures surface through safe logs, backlog and DLQs,
+not necessarily the Lambda invocation-error metric. Configure recipients and
+prove receipt before activation. At a planning rate of $0.10/standard alarm,
+fourteen alarms would add approximately $1.40/month across both environments,
+before free-tier allowances; verify current pricing and total budget first.
+
+See the [worker runbook](../apps/reporting-worker/README.md) for transaction,
+integration-test and replay/rollback requirements. Production queues/bus/logs
+are retained; do not remove/recreate the table or delete deduplication receipts
+to recover a release. No event archive or automatic replay is configured.
