@@ -10,8 +10,8 @@ for (const environment of ["development", "production"] as const) {
   test(`${environment} governance imports OIDC and restricts every planner to its own repo/environment/stacks`, () => {
     const template = Template.fromStack(new GovernanceStack(new App(), configuration(environment, "123456789012")));
     template.resourceCountIs("AWS::IAM::OIDCProvider", 0);
-    template.resourceCountIs("AWS::IAM::Role", 3);
-    template.resourceCountIs("AWS::IAM::ManagedPolicy", 3);
+    template.resourceCountIs("AWS::IAM::Role", 5);
+    template.resourceCountIs("AWS::IAM::ManagedPolicy", 5);
     for (const application of applications) {
       const prefix = `rct-${application.name}-${environment}`;
       template.hasResourceProperties("AWS::IAM::Role", {
@@ -33,6 +33,7 @@ for (const environment of ["development", "production"] as const) {
           Resource: { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" }, `:cloudformation:us-east-1:123456789012:stack/${prefix}-*/*`]] },
         })]) }),
       });
+
     }
     const planning = JSON.stringify(template.findResources("AWS::IAM::Policy"));
     assert.doesNotMatch(planning, /iam:PassRole|sts:AssumeRole"|cloudformation:Execute|cloudformation:Create|cloudformation:Delete|"Resource":"\*"/);
@@ -63,6 +64,60 @@ for (const environment of ["development", "production"] as const) {
         } },
       })]) }),
     });
+  });
+
+  test(`${environment} governance fixes Lambda-only runtime identities and separates read API from reporting writes`, () => {
+    const template = Template.fromStack(new GovernanceStack(new App(), configuration(environment, "123456789012")));
+    for (const handler of ["api", "reporting"] as const) {
+      const name = `rct-founder-${environment}-${handler}`;
+      const [boundaryId, boundary] = Object.entries(template.findResources("AWS::IAM::ManagedPolicy", {
+        Properties: Match.objectLike({ ManagedPolicyName: `${name}-runtime-boundary` }),
+      }))[0]!;
+      assert.ok(boundaryId);
+      template.hasResourceProperties("AWS::IAM::Role", {
+        RoleName: name, Path: `/rct/founder/${environment}/runtime/`,
+        PermissionsBoundary: { Ref: boundaryId }, ManagedPolicyArns: [{ Ref: boundaryId }],
+        AssumeRolePolicyDocument: {
+          Version: "2012-10-17",
+          Statement: [{ Effect: "Allow", Action: "sts:AssumeRole", Principal: { Service: "lambda.amazonaws.com" } }],
+        },
+      });
+      const statements = boundary.Properties.PolicyDocument.Statement;
+      const allowed = new Set(handler === "api" ? [
+        "logs:CreateLogStream", "logs:PutLogEvents", "dynamodb:Query",
+      ] : [
+        "logs:CreateLogStream", "logs:PutLogEvents", "dynamodb:GetItem", "dynamodb:PutItem",
+        "sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes", "sqs:GetQueueUrl", "sqs:ChangeMessageVisibility",
+      ]);
+      const actual = new Set<string>();
+      for (const statement of statements) {
+        assert.equal(statement.Effect, "Allow");
+        const actions: string[] = Array.isArray(statement.Action) ? statement.Action : [statement.Action];
+        for (const action of actions) {
+          assert.ok(allowed.has(action), `Unexpected ${handler} boundary grant: ${action}`);
+          actual.add(action);
+        }
+        assert.notEqual(statement.Resource, "*");
+        if (actions.some((action) => action.startsWith("dynamodb:"))) {
+          assert.deepEqual(statement.Resource, { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+            `:dynamodb:us-east-1:123456789012:table/rct-founder-${environment}-projections`]] });
+          if (handler === "api") assert.deepEqual(statement.Condition, {
+            "ForAllValues:StringLike": { "dynamodb:LeadingKeys": ["MONTH#????-??"] },
+            Null: { "dynamodb:LeadingKeys": "false" },
+          });
+        }
+        if (actions.some((action) => action.startsWith("logs:"))) assert.deepEqual(statement.Resource, {
+          "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+            `:logs:us-east-1:123456789012:log-group:/rct/rct-founder-${environment}/${handler}:log-stream:*`]],
+        });
+        if (actions.some((action) => action.startsWith("sqs:"))) assert.deepEqual(statement.Resource,
+          ["consulting", "dotcom"].map((source) => ({
+            "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+              `:sqs:us-east-1:123456789012:rct-portfolio-${environment}-reporting-${source}`]],
+          })));
+      }
+      assert.deepEqual(actual, allowed);
+    }
   });
 }
 

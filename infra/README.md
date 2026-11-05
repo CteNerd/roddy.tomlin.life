@@ -33,7 +33,7 @@ subject and access token, not just authenticated membership.
 or first-user bootstrap. After the owner is invited into the MFA-required pool,
 verify its exact subject and review that parameter change separately per
 environment. CDK supplies the Lambda environment, not frontend/GitHub secrets.
-The API references the governance runtime boundary, so reviewed governance
+The API imports its governance-owned runtime role, so reviewed governance
 must exist before the foundation is eventually provisioned.
 See the [read-only API runbook](../apps/api/README.md).
 
@@ -73,9 +73,41 @@ Runtime managed policies define upper bounds for each app's own table/log
 namespace. Producers additionally have only their source/version allowlist on
 the exact environment bus; Founder has reporting-queue receive permissions,
 not event publishing or source-table access. **These policies are not deployed
-or attached yet.** Boundaries cap permissions; they do not grant them. Future
-execution-role creation must require the exact boundary, prohibit its removal
-and restrict pass-role. Do not equate this slice with completed deployment IAM.
+yet.** Boundaries cap permissions; they do not grant them unless separately
+attached as identity policies. The owner selected governance-owned Founder
+runtime IAM rather than allowing application execution to create/manage roles.
+Do not equate this slice with completed deployment IAM.
+
+### Governance-owned Founder runtime IAM
+
+Governance pre-creates `rct-founder-<environment>-api` and
+`rct-founder-<environment>-reporting` under `/rct/founder/<environment>/runtime/`,
+each trusted only by Lambda. Each has a dedicated `<role-name>-runtime-boundary`
+under `/rct/founder/<environment>/`. The same reviewed managed policy is attached
+as its identity grant and its permissions boundary:
+
+- API: only its explicit API log streams and Query on the exact projection
+  table, requiring present `dynamodb:LeadingKeys` matching `MONTH#????-??`.
+  No worker writes, receipt reads, queue consumption, Scan or publishing.
+- Worker: only its reporting log streams, GetItem/PutItem on the exact projection
+  table and consumption of the two exact main reporting queues. No Query/Scan,
+  source tables, DLQs, event publishing or IAM authority.
+
+The earlier general Founder upper-bound policy is preserved for compatibility
+but is not attached to either role. Producer boundaries/planners are unchanged.
+Application stacks import the fixed roles with `mutable: false`; grants cannot
+silently create app-owned IAM policies or expand queue resource policies.
+Their Lambda names are now fixed to the corresponding role names. Tests verify
+both actual templates have zero IAM role/policy resources and the correct pair.
+
+This stronger ownership split avoids granting application execution any IAM
+role creation, trust update, policy attachment or boundary mutation privileges.
+Runtime trust/capability changes belong in a separate reviewed governance
+change set by the approved bootstrap operator. Never deploy governance with an
+application role or remove its roles/boundaries to roll back application code.
+All resources remain undeployed; inspect name collisions/actual IAM before
+bootstrap. These source-only naming changes must not be used to replace an
+already-running Lambda/role without a reviewed migration.
 
 For an existing, configured environment, `npm run check:deployment` performs
 read-only GitHub, STS and self-role inventory. Required environment inputs:
@@ -121,9 +153,14 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   that environment's portfolio eventing stack. It cannot manage governance,
   release-planning, producer or existing profile stacks.
 - `rct-founder-<environment>-execute`, trusted only by CloudFormation. It
-  currently has **asset reads only**, no application-resource or IAM-write
-  authority. The planner can pass only this role, only to CloudFormation,
-  and creating a change set requires its explicit `RoleArn`.
+  has a dedicated execution boundary attached as both identity policy and
+  boundary. It permits asset reads, metadata reads of the two runtime roles
+  and passing each exact runtime role only to Lambda and its paired function
+  ARN (`iam:AssociatedResourceArn`). No missing/cross-role/function/service
+  context qualifies. It cannot create/edit/delete IAM roles or policies.
+  Application-service deployment permissions are still absent. The planner
+  can pass only this execution role to CloudFormation; creating a change set
+  requires its explicit `RoleArn`.
 - An explicit planner deny of `sts:AssumeRole`, change-set execution and direct
   stack create/update/delete/rollback/policy mutation. No deploy/assume-role
   fallback to the broad local user or shared CDK roles is allowed.
@@ -143,8 +180,9 @@ the IAM condition, and neither `cdk deploy`'s default executing method nor
 unexecuted `REVIEW_IN_PROGRESS` stack; review those placeholders explicitly.
 No live change set or allow/deny test is claimed by offline synthesis.
 
-Next, review service-specific application execution permissions, runtime
-role-creation boundary enforcement and pass-role restrictions. Do not broaden
+Next, review service-specific application execution permissions and verify
+the actual CloudFormation/Lambda pass-role context and existing runtime roles.
+Offline assertions/simulations do not prove those service calls. Do not broaden
 this planner or reuse `AdministratorAccess` to make deployment pass. Separate
 reviewed deployment authority, cost/notification verification, cloud IAM
 allow/deny tests and smoke/rollback evidence remain prerequisites. Production
@@ -171,8 +209,8 @@ poison messages. Each mapping has concurrency two; Lambda reserves four.
 The worker imports the existing Founder projection table by name; it does not
 redeclare it or touch source tables or live hosting. Its role allows only
 GetItem/PutItem on that exact table, consumption of the two exact main queues
-and writes to its explicit log group. The role references the governance
-Founder's runtime boundary by stable policy ARN. **Review and provision
+and writes to its explicit log group. The role is imported immutably from governance and uses its separate worker
+boundary, not the broader compatibility policy. **Review and provision
 governance and the Founder foundation before any eventual eventing deployment.**
 These external prerequisites are not automatic CloudFormation dependencies.
 Both environments are still source-only and no write deployment roles exist.

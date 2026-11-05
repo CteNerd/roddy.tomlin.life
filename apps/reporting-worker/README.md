@@ -67,9 +67,14 @@ loss. These do not prove cloud IAM, EventBridge/SQS delivery or live recovery.
 See [infrastructure prerequisites](../../infra/README.md). No producer outbox
 publisher or public Founder UI is wired. The separate [read API](../api/README.md)
 defaults to disabled owner access and cannot mutate these records.
+Governance pre-creates the Lambda-only reporting role and its dedicated boundary/
+identity policy: owned projection GetItem/PutItem, two main queues and reporting
+logs only. Eventing imports it immutably; no IAM roles/policies are created or
+modified by application execution. Governance must precede eventing; role/trust/
+boundary changes require separate bootstrap review.
 No new development or production
 workflow deploys this stack. Protected environments, scoped write IAM,
-recipient approval/notification receipt and real cloud smoke/recovery tests
+notification setup/receipt and real cloud smoke/recovery tests
 remain mandatory. Do not copy broad local credentials into runtime or CI.
 
 Investigate delivery DLQs separately from processing DLQs. Fix schema/source

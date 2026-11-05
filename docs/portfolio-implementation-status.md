@@ -1,6 +1,6 @@
 # Portfolio implementation status
 
-Updated: 2026-11-05, merged readiness report and isolated release preparation.
+Updated: 2026-11-05, merged release preparation and governance-owned runtime IAM.
 Scope: three existing repos, all defaulting to `main`. The owner elected public
 visibility; the public profile build boundary does not certify legacy source or
 Git history for publication. Application increments are merged. This update
@@ -95,8 +95,8 @@ writes have been performed.
   bootstrap role, trust, policy or bucket is changed or granted to new CI.
 - `infra/src/release-planning.ts` and its tests add separate per-environment
   private/versioned/retained asset storage, exact repository/environment OIDC
-  release planners and a CloudFormation-only execution identity with asset
-  reads only. Planners can prepare change sets for exactly Founder foundation
+  release planners and a CloudFormation-only execution identity, initially with
+  asset reads only and now boundary-constrained as described below. Planners can prepare change sets for exactly Founder foundation
   and portfolio eventing, passing only that exact execution role.
 - Founder `stack.ts` and `eventing.ts` use current-credential CDK synthesis with
   Lambda/template assets confined to those separate buckets and `release/`.
@@ -107,7 +107,7 @@ writes have been performed.
 - Planners explicitly cannot assume roles, execute change sets or directly
   create/update/delete/roll back stacks. This is a release-preparation slice,
   **not working deployment authority**. Service-specific execution permissions,
-  boundary-enforced runtime role creation, live IAM proof and notification/
+  reviewed runtime ownership/pass-role controls, live IAM proof and notification/
   smoke/recovery gates remain before deploying any application.
 - The [infra runbook](../infra/README.md#isolated-founder-release-preparation)
   documents reviewed bootstrap prerequisites and non-executing change-set use.
@@ -119,6 +119,38 @@ writes have been performed.
   asset writes allow; unrelated/prod resources, absent/wrong pass-role context,
   shared bootstrap assumptions and execution/delete attempts deny. Simulation
   is not an assumed deployed-role, service-integration or real approval test.
+
+### Governance-owned runtime and execution-boundary slice
+
+- Personal PR #7 is merged; local main was synchronized before this feature
+  branch. The owner selected governance pre-creation of Founder runtime roles
+  instead of widening application execution's IAM management permissions.
+- `infra/src/governance.ts` now defines separate Lambda-only API/worker roles,
+  each with a narrowly scoped managed policy attached as both identity grant
+  and boundary. API has present-key monthly Query only; worker has only owned
+  projection GetItem/PutItem, two main queues and its own logs. The broader
+  compatibility upper bound is retained but not attached to these roles.
+- `stack.ts` and `eventing.ts` immutably import those exact role ARNs and use
+  fixed paired Lambda names. Their actual templates have no IAM role/policy
+  resources. Governance must exist first; runtime trust/boundary/policy changes
+  require separate approved bootstrap ownership, not application execution.
+- `release-planning.ts` attaches a dedicated execution boundary as both identity
+  grant and cap: release-asset reads, metadata reads of the two runtime roles
+  and each exact role's Lambda/function-associated pass-role only. The executor
+  cannot create/edit/delete IAM identities, policies or boundaries. Service
+  deployment permissions remain absent and planner execution stays denied.
+- Governance/foundation/eventing/release-planning template tests and infra/API/
+  worker runbooks are updated. No dependency or lockfile resolution changed.
+  No AWS/DNS resource or privileged workflow is activated. Live role assumption,
+  service-provided pass-role context, notifications and smoke/recovery still
+  need proof before any application deployment.
+- Validation: local lint, infrastructure type checking, 16 infrastructure tests
+  and all eight affected offline synths pass. Read-only IAM custom-policy
+  simulation passed 140 resource-specific decisions across both environment
+  models, including tests with an extra Allow-* identity policy: API writes/
+  receipt reads, cross-scope resources, IAM mutations, unpaired/absent pass-role
+  context, bootstrap assumptions and application execution still deny. This
+  proves generated policy semantics, not live role/service/approval enforcement.
 
 ### Durable reporting slice
 

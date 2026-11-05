@@ -35,27 +35,20 @@ test("Founder infrastructure neither redeclares live profile hosting nor grants 
   template.hasResourceProperties("AWS::Cognito::UserPool", {
     AdminCreateUserConfig: { AllowAdminCreateUserOnly: true }, MfaConfiguration: "ON",
   });
-  const policies = JSON.stringify(template.findResources("AWS::IAM::Policy"));
-  assert.doesNotMatch(policies, /rct-(consulting|dotcom)|dynamodb:(PutItem|UpdateItem|DeleteItem|Scan|GetItem|Batch)|events:|sts:AssumeRole|"Resource":"\*"/);
-  assert.match(policies, /logs:PutLogEvents/);
+  template.resourceCountIs("AWS::IAM::Role", 0);
+  template.resourceCountIs("AWS::IAM::Policy", 0);
+  template.resourceCountIs("AWS::IAM::ManagedPolicy", 0);
   const [tableId] = Object.keys(template.findResources("AWS::DynamoDB::Table"));
   assert.ok(tableId);
-  template.hasResourceProperties("AWS::IAM::Policy", {
-    PolicyDocument: Match.objectLike({ Statement: Match.arrayWith([{
-      Action: "dynamodb:Query", Effect: "Allow", Resource: { "Fn::GetAtt": [tableId, "Arn"] },
-      Condition: { "ForAllValues:StringLike": { "dynamodb:LeadingKeys": ["MONTH#????-??"] } },
-    }]) }),
-  });
   const [ownerId] = Object.keys(template.findParameters("FounderOwnerSubject", { Default: "disabled" }));
   assert.ok(ownerId);
   template.hasResourceProperties("AWS::Lambda::Function", {
+    FunctionName: "rct-founder-development-api",
+    Role: { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+      ":iam::123456789012:role/rct/founder/development/runtime/rct-founder-development-api"]] },
     Environment: { Variables: {
       REPORTING_TABLE_NAME: { Ref: tableId }, FOUNDER_OWNER_SUBJECT: { Ref: ownerId },
     } },
-  });
-  template.hasResourceProperties("AWS::IAM::Role", {
-    PermissionsBoundary: { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
-      ":iam::123456789012:policy/rct/founder/development/rct-founder-development-runtime-boundary"]] },
   });
 });
 

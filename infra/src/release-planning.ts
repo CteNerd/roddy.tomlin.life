@@ -3,7 +3,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import type { Construct } from "constructs";
 import type { Configuration } from "./config.ts";
-import { applications } from "./governance.ts";
+import { applications, founderRuntimeIdentity } from "./governance.ts";
 
 export function releaseAssetsBucketName(config: Configuration): string {
   return `${config.prefix}-release-assets-${config.account}-${config.region}`;
@@ -34,16 +34,35 @@ export class ReleasePlanningStack extends Stack {
       versioned: true,
       removalPolicy: RemovalPolicy.RETAIN,
     });
+    const executionStatements = [new iam.PolicyStatement({
+      actions: ["s3:GetObject", "s3:GetObjectVersion"],
+      resources: [assets.arnForObjects("release/*")],
+    })];
+    const runtimes = (["api", "reporting"] as const).map((handler) =>
+      founderRuntimeIdentity(config, this.partition, handler));
+    executionStatements.push(new iam.PolicyStatement({
+      actions: ["iam:GetRole"], resources: runtimes.map((runtime) => runtime.roleArn),
+    }));
+    for (const runtime of runtimes) executionStatements.push(new iam.PolicyStatement({
+      actions: ["iam:PassRole"], resources: [runtime.roleArn],
+      conditions: {
+        StringEquals: { "iam:PassedToService": "lambda.amazonaws.com" },
+        ArnEquals: { "iam:AssociatedResourceArn": runtime.functionArn },
+      },
+    }));
+    const executionBoundary = new iam.ManagedPolicy(this, "ExecutionBoundary", {
+      managedPolicyName: `${config.prefix}-execution-boundary`,
+      path: `/rct-release/founder/${config.environment}/`,
+      statements: executionStatements,
+    });
     const execution = new iam.Role(this, "ExecutionRole", {
       roleName: `${config.prefix}-execute`,
       path: `/rct-release/founder/${config.environment}/`,
       assumedBy: new iam.ServicePrincipal("cloudformation.amazonaws.com"),
-      description: "Reserved execution identity: asset reads only until application permissions are reviewed",
+      permissionsBoundary: executionBoundary,
+      managedPolicies: [executionBoundary],
+      description: "Bounded asset reads and exact runtime pass-role; application service deployment remains blocked",
     });
-    execution.addToPolicy(new iam.PolicyStatement({
-      actions: ["s3:GetObject", "s3:GetObjectVersion"],
-      resources: [assets.arnForObjects("release/*")],
-    }));
     const provider = iam.OpenIdConnectProvider.fromOpenIdConnectProviderArn(
       this, "ExistingGitHubProvider",
       `arn:${this.partition}:iam::${this.account}:oidc-provider/token.actions.githubusercontent.com`,
@@ -104,6 +123,7 @@ export class ReleasePlanningStack extends Stack {
     }));
     new CfnOutput(this, "ReleasePlanRoleArn", { value: planner.roleArn });
     new CfnOutput(this, "ExecutionRoleArn", { value: execution.roleArn });
+    new CfnOutput(this, "ExecutionBoundaryArn", { value: executionBoundary.managedPolicyArn });
     new CfnOutput(this, "ReleaseAssetsBucket", { value: assets.bucketName });
   }
 }
