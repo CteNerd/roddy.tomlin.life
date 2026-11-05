@@ -14,10 +14,14 @@ import type { Construct } from "constructs";
 import { resolve } from "node:path";
 import type { Configuration } from "./config.ts";
 import { applications } from "./governance.ts";
+import { releaseSynthesizer } from "./release-planning.ts";
 
 export class EventingStack extends Stack {
   constructor(scope: Construct, config: Configuration) {
-    super(scope, `rct-portfolio-${config.environment}-eventing`, { env: { account: config.account, region: config.region } });
+    super(scope, `rct-portfolio-${config.environment}-eventing`, {
+      env: { account: config.account, region: config.region },
+      synthesizer: releaseSynthesizer(config),
+    });
     Tags.of(this).add("Portfolio", "RCT");
     Tags.of(this).add("Environment", config.environment);
     const production = config.environment === "production";
