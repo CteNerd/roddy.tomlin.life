@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { parseReportingEvent } from "@rct/portfolio-contracts";
+import { InvalidReportingEventError, parseReportingEvent } from "@rct/portfolio-contracts";
 import { emptyProjection, projectEvent } from "./projection.ts";
 
 const fixtures: unknown[] = JSON.parse(
@@ -56,4 +56,18 @@ test("invalid events never change an existing projection", () => {
   }), /rejected/);
   assert.equal(state.processedEvents.size, 1);
   assert.equal(state.totals.get("consulting#2026-11#inboundLeads"), 1);
+});
+
+test("rejects unsupported leap seconds before replay and normalizes supported offsets", () => {
+  const state = emptyProjection();
+  assert.throws(() => projectEvent(state, {
+    ...lead,
+    detail: { ...lead.detail, occurredAt: "2016-12-31T23:59:60Z" },
+  }), InvalidReportingEventError);
+  assert.equal(state.processedEvents.size, 0);
+  const result = projectEvent(state, {
+    ...lead,
+    detail: { ...lead.detail, occurredAt: "2017-01-01T01:00:00+01:00" },
+  });
+  assert.equal(result.latestOccurredAt, "2017-01-01T00:00:00.000Z");
 });
