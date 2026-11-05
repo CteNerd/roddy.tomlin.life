@@ -11,7 +11,10 @@ const fixtures: unknown[] = JSON.parse(readFileSync(new URL("../../../packages/c
 const lead = parseReportingEvent(fixtures[0]);
 const prepared = prepareReportingEvent(lead);
 const receipt = { PK: `EVENT#${lead.detail.eventId}`, SK: "RECEIPT", fingerprint: prepared.fingerprint };
-const projection = { PK: "MONTH#2026-11", SK: "consulting#inboundLeads", total: 2, version: 1, latestOccurredAt: prepared.occurredAt };
+const projection = {
+  PK: "MONTH#2026-11", SK: "consulting#inboundLeads", total: 2, version: 1,
+  latestOccurredAt: prepared.occurredAt, updatedAt: prepared.occurredAt,
+};
 const conflict = (receiptConflict = false) => new TransactionCanceledException({
   $metadata: {}, message: "Synthetic condition conflict",
   CancellationReasons: receiptConflict ? [{ Code: "ConditionalCheckFailed" }, { Code: "None" }]

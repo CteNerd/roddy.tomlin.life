@@ -1,4 +1,4 @@
-import { CfnOutput, Duration, RemovalPolicy, Stack, Tags } from "aws-cdk-lib";
+import { CfnOutput, CfnParameter, Duration, RemovalPolicy, Stack, Tags } from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as apigateway from "aws-cdk-lib/aws-apigatewayv2";
@@ -20,7 +20,7 @@ export class FounderStack extends Stack {
     Tags.of(this).add("Environment", config.environment);
     const production = config.environment === "production";
     const removalPolicy = production ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY;
-    new dynamodb.Table(this, "Projections", {
+    const projections = new dynamodb.Table(this, "Projections", {
       tableName: `${config.prefix}-projections`,
       partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
@@ -49,14 +49,28 @@ export class FounderStack extends Stack {
       retention: production ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK,
       removalPolicy,
     });
-    const role = new iam.Role(this, "ApiRole", { assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com") });
+    const role = new iam.Role(this, "ApiRole", {
+      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+      permissionsBoundary: iam.ManagedPolicy.fromManagedPolicyArn(this, "RuntimeBoundary",
+        `arn:${this.partition}:iam::${this.account}:policy/rct/founder/${config.environment}/${config.prefix}-runtime-boundary`),
+    });
     logGroup.grantWrite(role);
+    role.addToPolicy(new iam.PolicyStatement({
+      actions: ["dynamodb:Query"], resources: [projections.tableArn],
+      conditions: { "ForAllValues:StringLike": { "dynamodb:LeadingKeys": ["MONTH#????-??"] } },
+    }));
+    const ownerSubject = new CfnParameter(this, "FounderOwnerSubject", {
+      type: "String", default: "disabled",
+      allowedPattern: "^(disabled|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$",
+      description: "Keep disabled until the reviewed owner is invited into this MFA-required Cognito pool; use its exact sub, never an email",
+    });
     const handler = new NodejsFunction(this, "ApiHandler", {
-      entry: resolve(import.meta.dirname, "../../apps/api/src/handler.ts"),
+      entry: resolve(import.meta.dirname, "../../apps/api/src/index.ts"),
       depsLockFilePath: resolve(import.meta.dirname, "../../package-lock.json"),
       runtime: lambda.Runtime.NODEJS_24_X, handler: "handler",
       memorySize: 256, timeout: Duration.seconds(10), logGroup, role,
-      bundling: { minify: true, sourceMap: false },
+      environment: { REPORTING_TABLE_NAME: projections.tableName, FOUNDER_OWNER_SUBJECT: ownerSubject.valueAsString },
+      bundling: { minify: true, sourceMap: false, externalModules: [] },
     });
     const api = new apigateway.HttpApi(this, "Api", {
       apiName: `${config.prefix}-api`,
@@ -67,9 +81,9 @@ export class FounderStack extends Stack {
     });
     const integration = new HttpLambdaIntegration("ApiIntegration", handler);
     api.addRoutes({ path: "/health", methods: [apigateway.HttpMethod.GET], integration });
-    api.addRoutes({
-      path: "/me", methods: [apigateway.HttpMethod.GET], integration,
-      authorizer: new HttpJwtAuthorizer("Cognito", `https://${pool.userPoolProviderUrl}`, { jwtAudience: [client.userPoolClientId] }),
+    const authorizer = new HttpJwtAuthorizer("Cognito", `https://${pool.userPoolProviderUrl}`, { jwtAudience: [client.userPoolClientId] });
+    for (const path of ["/me", "/metrics"]) api.addRoutes({
+      path, methods: [apigateway.HttpMethod.GET], integration, authorizer,
     });
     new CfnOutput(this, "ApiUrl", { value: api.apiEndpoint });
     new CfnOutput(this, "UserPoolId", { value: pool.userPoolId });
