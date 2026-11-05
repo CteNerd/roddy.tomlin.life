@@ -48,3 +48,36 @@ Only infrastructure disables `exactOptionalPropertyTypes` for CDK's optional
 interface declarations; strict TS remains. Current CDK/ESLint tooling carries
 the upstream moderate minimatch advisory. CI reports all findings and blocks
 high/critical severity; no forced incompatible downgrade or advisory ignore.
+
+## Governance planning and identity preflight
+
+`npm run cdk:synth:governance:development` and the production equivalent synthesize
+a separate governance stack offline. It imports the existing GitHub OIDC provider
+and defines three planning roles per environment. Trust matches the exact
+repository, environment and `sts.amazonaws.com` audience. Planners can read only
+their own environment's named app stacks and their own IAM role metadata.
+They cannot assume CDK bootstrap roles, pass roles, execute change sets, modify
+IAM, read databases or deploy applications. They do not manage the separate bus.
+
+Runtime managed policies define upper bounds for each app's own table/log
+namespace. Producers additionally have only their source/version allowlist on
+the exact environment bus; Founder has reporting-queue receive permissions,
+not event publishing or source-table access. **These policies are not deployed
+or attached yet.** Boundaries cap permissions; they do not grant them. Future
+execution-role creation must require the exact boundary, prohibit its removal
+and restrict pass-role. Do not equate this slice with completed deployment IAM.
+
+For an existing, configured environment, `npm run check:deployment` performs
+read-only GitHub, STS and self-role inventory. Required environment inputs:
+`DEPLOY_REPOSITORY`, `DEPLOY_ENVIRONMENT`, `AWS_ACCOUNT_ID`, `AWS_REGION` and
+`AWS_DEPLOY_ROLE_ARN`. It rejects unapproved repos/accounts, wildcard/tag branch
+policies, truncated inventory, broad local identities, wrong sessions or OIDC
+trust. Production also requires actual reviewer approval with admin bypass
+disabled. Missing environments/API entitlement errors fail explicitly.
+
+This checks identity and environment controls, **not deployment permission
+completeness or operational readiness**. The calling role needs self-scoped
+`iam:GetRole` for trust verification; planners include it. Scoped execution/
+publisher roles, cost-tag activation, approved budget amounts/recipients and
+notification receipt, live allow/deny tests and restore/smoke rehearsal remain
+required before enabling write workflows. No AWS resources are applied here.

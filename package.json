@@ -23,6 +23,9 @@
     "check:portfolio": "npm run check --workspaces",
     "cdk:synth:development": "npm run synth:development --workspace @rct/founder-infra",
     "cdk:synth:production": "npm run synth:production --workspace @rct/founder-infra",
+    "cdk:synth:governance:development": "npm run synth:governance:development --workspace @rct/founder-infra",
+    "cdk:synth:governance:production": "npm run synth:governance:production --workspace @rct/founder-infra",
+    "check:deployment": "npm run check:deployment --workspace @rct/founder-infra",
     "lint": "eslint src/App.jsx src/main.jsx src/profile.js src/App.test.jsx src/setupTests.js vite.config.js eslint.config.js scripts apps/api/src infra/src",
     "check:release": "node scripts/check-release.mjs"
   },
