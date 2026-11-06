@@ -79,7 +79,7 @@ export class FounderStack extends Stack {
     });
     const integration = new HttpLambdaIntegration("ApiIntegration", handler);
     api.addRoutes({ path: "/health", methods: [apigateway.HttpMethod.GET], integration });
-    const authorizer = new HttpJwtAuthorizer("Cognito", `https://${pool.userPoolProviderUrl}`, { jwtAudience: [client.userPoolClientId] });
+    const authorizer = new HttpJwtAuthorizer("Cognito", pool.userPoolProviderUrl, { jwtAudience: [client.userPoolClientId] });
     for (const path of ["/me", "/metrics"]) api.addRoutes({
       path, methods: [apigateway.HttpMethod.GET], integration, authorizer,
     });
