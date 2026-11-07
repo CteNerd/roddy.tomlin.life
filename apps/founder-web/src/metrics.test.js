@@ -38,7 +38,7 @@ describe("Founder reporting requests", () => {
     }]);
   });
 
-  it("preserves empty observations and rejects unknown or malformed report rows", async () => {
+  it("preserves empty observations, accepts signed totals and rejects unknown or malformed rows", async () => {
     const emptyFetch = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ month: options.month, metrics: [] }) }));
     expect(await fetchMetrics({ ...options, fetchImpl: emptyFetch })).toEqual({ month: options.month, metrics: [] });
 
@@ -72,7 +72,8 @@ describe("Founder reporting requests", () => {
         }],
       }),
     }));
-    await expect(fetchMetrics({ ...options, fetchImpl: negativeFetch })).rejects.toThrow("reporting response is invalid");
+    const negativeResult = await fetchMetrics({ ...options, fetchImpl: negativeFetch });
+    expect(negativeResult.metrics[0]?.total).toBe(-1);
   });
 
   it.each([

@@ -206,8 +206,9 @@ writes have been performed.
   code + PKCE, required-MFA sign-in, in-memory access tokens and monthly
   aggregate reporting. It validates OAuth state/issuer/nonce and token claims, calls
   the owner-gated API only after sign-in, and does not fabricate zeroes for
-  missing projections. Its separate `dist/founder/` build is not prerendered or
-  indexed, and the release check disallows JSON report payloads.
+  missing projections. Its separate `founder-dist/` build is not part of the
+  profile publishers' `dist/` artifact, is not prerendered or indexed, and the
+  release check disallows JSON report payloads.
 - This is source-level P5 progress, not a live dashboard: the frontend build
   defaults to disabled public config, no Cognito domain or owner is provisioned,
   `FounderOwnerSubject` remains `disabled`, and no AWS or hosting route changes

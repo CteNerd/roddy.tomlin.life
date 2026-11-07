@@ -1,8 +1,9 @@
 # Founder reporting frontend
 
-This is a separate, non-prerendered application for the `/founder/` route. The
-normal site build places its shell and assets under `dist/founder/`; it does not
-add Founder routes to the public sitemap or load reports into static HTML.
+This is a separate, non-prerendered application for the `/founder/` route. Its
+shell and assets are emitted to `founder-dist/`, outside the public profile's
+`dist/` artifact used by the existing publishers. It does not add Founder
+routes to the public sitemap or load reports into static HTML.
 Report requests are made only after sign-in, and the API remains responsible
 for validating the owner subject.
 
@@ -39,7 +40,7 @@ provisioned before a real sign-in can succeed. Build and test without AWS using
 `npm run build` and `npm test` from the repository root.
 
 The current profile host is not managed by this repository. Before publishing,
-configure only the explicit `/founder` and `/founder/` paths to serve this
-directory, preserve existing retired-route 404 behavior, inject validated
-public configuration, and verify Cognito callbacks and API CORS. No live
-deployment or route change is performed by these commands.
+configure only the explicit `/founder` and `/founder/` paths to serve the
+separately gated `founder-dist/` artifact, preserve existing retired-route 404
+behavior, inject validated public configuration, and verify Cognito callbacks
+and API CORS. No live deployment or route change is performed by these commands.

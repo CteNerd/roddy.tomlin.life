@@ -167,10 +167,14 @@ export function createAuthClient(
     return accessToken;
   }
 
-  function signOut() {
-    requireConfiguration();
+  function clearSession() {
     accessToken = null;
     storage.removeItem(pendingAuthKey);
+  }
+
+  function signOut() {
+    requireConfiguration();
+    clearSession();
     const logout = new URL("/logout", configuration.authUrl);
     logout.search = new URLSearchParams({
       client_id: configuration.clientId,
@@ -183,6 +187,7 @@ export function createAuthClient(
     configured,
     beginSignIn,
     completeSignIn,
+    clearSession,
     getAccessToken: () => accessToken,
     signOut,
   });

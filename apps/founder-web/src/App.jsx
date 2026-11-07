@@ -89,6 +89,13 @@ export default function App({ auth = defaultAuth, loadMetrics = fetchMetrics }) 
     }).catch((error) => {
       if (error.name === "AbortError") return;
       if (!controller.signal.aborted) {
+        if (error.statusCode === 401) {
+          auth.clearSession();
+          setReportResult(null);
+          setAccessToken(null);
+          setAuthError(error.message || "Your session expired. Sign in again.");
+          return;
+        }
         setReportResult({
           month,
           status: "error",
@@ -97,7 +104,7 @@ export default function App({ auth = defaultAuth, loadMetrics = fetchMetrics }) 
       }
     });
     return () => controller.abort();
-  }, [accessToken, month, loadMetrics]);
+  }, [accessToken, month, loadMetrics, auth]);
 
   async function handleSignIn() {
     setAuthError("");

@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [react()],
   base: "/founder/",
   build: {
-    outDir: path.resolve(root, "../../dist/founder"),
+    outDir: path.resolve(root, "../../founder-dist"),
     emptyOutDir: true,
     sourcemap: false,
   },

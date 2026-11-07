@@ -14,6 +14,7 @@ function createAuth(configured, token = null) {
     getAccessToken: vi.fn(() => token),
     completeSignIn: vi.fn(async () => null),
     beginSignIn: vi.fn(async () => {}),
+    clearSession: vi.fn(),
     signOut: vi.fn(),
   };
 }
@@ -64,6 +65,22 @@ describe("Founder reporting UI", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("This account is not authorized");
     expect(screen.queryByText("0")).not.toBeInTheDocument();
+  });
+
+  it("clears an expired session and returns to sign-in after a 401", async () => {
+    const auth = createAuth(true, "expired-access-token");
+    const loadMetrics = vi.fn(async () => {
+      const error = new Error("Your session expired. Sign in again.");
+      error.statusCode = 401;
+      throw error;
+    });
+    render(<App auth={auth} loadMetrics={loadMetrics} />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Your session expired");
+    expect(auth.clearSession).toHaveBeenCalledOnce();
+    expect(auth.signOut).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "Sign out" })).not.toBeInTheDocument();
   });
 
   it("passes layout-independent accessibility checks", async () => {

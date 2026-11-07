@@ -2,8 +2,10 @@
 
 This stack is additive and undeployed. It does not own or modify the live
 profile's existing CloudFormation hosting stack. The Founder frontend is built
-as a separate, non-prerendered `/founder/` artifact; no duplicate CDN/bucket,
-broad SPA fallback or source-business database access is added.
+as a separate, non-prerendered `/founder/` artifact under `founder-dist/`,
+outside the `dist/` artifact consumed by existing profile publishers; no
+duplicate CDN/bucket, broad SPA fallback or source-business database access is
+added.
 
 From the repository root, Node 24/npm 11.6.2:
 

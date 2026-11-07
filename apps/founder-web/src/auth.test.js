@@ -100,6 +100,9 @@ describe("Founder OAuth client", () => {
     expect(auth.getAccessToken()).toBe(accessToken);
     expect(storage.values.size).toBe(0);
     expect(history.replaceState).toHaveBeenCalledWith(null, "", "/founder/");
+
+    auth.clearSession();
+    expect(auth.getAccessToken()).toBeNull();
   });
 
   it("fails closed on state mismatch and invalid public configuration", async () => {

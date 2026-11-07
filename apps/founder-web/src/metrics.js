@@ -32,7 +32,6 @@ function parseMetrics(body, month) {
     if (!metricLabels.has(key)
       || seen.has(key)
       || !Number.isSafeInteger(metric.total)
-      || metric.total < 0
       || !isTimestamp(metric.latestOccurredAt)
       || !isTimestamp(metric.processedAt)) {
       throw new Error("The reporting response is invalid.");
