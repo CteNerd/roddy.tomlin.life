@@ -35,6 +35,17 @@ test("Founder infrastructure neither redeclares live profile hosting nor grants 
   template.hasResourceProperties("AWS::Cognito::UserPool", {
     AdminCreateUserConfig: { AllowAdminCreateUserOnly: true }, MfaConfiguration: "ON",
   });
+  template.hasResourceProperties("AWS::Cognito::UserPoolDomain", {
+    Domain: "rct-founder-development-123456789012", UserPoolId: { Ref: poolId },
+  });
+  template.hasResourceProperties("AWS::Cognito::UserPoolClient", {
+    GenerateSecret: false,
+    AllowedOAuthFlows: ["code"],
+    AllowedOAuthFlowsUserPoolClient: true,
+    AllowedOAuthScopes: ["openid"],
+    CallbackURLs: ["http://localhost:5174/founder/"],
+    LogoutURLs: ["http://localhost:5174/"],
+  });
   template.resourceCountIs("AWS::IAM::Role", 0);
   template.resourceCountIs("AWS::IAM::Policy", 0);
   template.resourceCountIs("AWS::IAM::ManagedPolicy", 0);
@@ -67,8 +78,13 @@ test("production projection data and Cognito pool survive stack removal", () => 
 test("account, environment and production CORS cannot silently fall back to development", () => {
   assert.throws(() => configuration(undefined, "123456789012"), /environment/);
   assert.throws(() => configuration("production", ""), /account/);
+  assert.equal(configuration("development", "123456789012").authDomainPrefix, "rct-founder-development-123456789012");
   const template = Template.fromStack(new FounderStack(new App(), configuration("production", "123456789012")));
   template.hasResourceProperties("AWS::ApiGatewayV2::Api", {
     CorsConfiguration: Match.objectLike({ AllowOrigins: ["https://roddy.tomlin.life"] }),
+  });
+  template.hasResourceProperties("AWS::Cognito::UserPoolClient", {
+    CallbackURLs: ["https://roddy.tomlin.life/founder/"],
+    LogoutURLs: ["https://roddy.tomlin.life/"],
   });
 });
