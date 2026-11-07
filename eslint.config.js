@@ -16,7 +16,7 @@ export default [
     },
   },
   {
-    files: ["src/**/*.{js,jsx}"],
+    files: ["src/**/*.{js,jsx}", "apps/founder-web/src/**/*.{js,jsx}"],
     plugins: {
       "react-hooks": reactHooks,
     },
