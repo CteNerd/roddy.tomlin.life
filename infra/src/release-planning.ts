@@ -71,11 +71,18 @@ export class ReleasePlanningStack extends Stack {
     const api = `${config.prefix}-api`;
     const apiArn = `arn:${this.partition}:lambda:${this.region}:${this.account}:function:${api}`;
     const apiGateway = `arn:${this.partition}:apigateway:${this.region}::/apis`;
+    const apiGatewayTags = `arn:${this.partition}:apigateway:${this.region}::/tags/arn%3A${this.partition}%3Aapigateway%3A${this.region}%3A%3A%2Fapis%2F??????????`;
     const apiLogGroup = `arn:${this.partition}:logs:${this.region}:${this.account}:log-group:/rct/${config.prefix}/api`;
+    const logGroupDiscovery = () => new iam.PolicyStatement({
+      actions: ["logs:DescribeLogGroups"],
+      resources: ["*"],
+      conditions: { StringEquals: { "aws:RequestedRegion": config.region } },
+    });
     const apiExecution = createExecutionRole("api", [
       new iam.PolicyStatement({
         actions: [
           "dynamodb:CreateTable", "dynamodb:DescribeTable", "dynamodb:UpdateTable", "dynamodb:DeleteTable",
+          "dynamodb:DescribeContinuousBackups", "dynamodb:UpdateContinuousBackups",
           "dynamodb:TagResource", "dynamodb:UntagResource", "dynamodb:ListTagsOfResource",
         ],
         resources: [`arn:${this.partition}:dynamodb:${this.region}:${this.account}:table/${config.prefix}-projections`],
@@ -85,12 +92,14 @@ export class ReleasePlanningStack extends Stack {
         resources: [`arn:${this.partition}:cognito-idp:${this.region}:${this.account}:userpool/*`],
         conditions: { StringEquals: {
           "aws:RequestTag/Portfolio": "RCT",
+          "aws:RequestTag/Application": "Founder",
           "aws:RequestTag/Environment": config.environment,
         } },
       }),
       new iam.PolicyStatement({
         actions: [
           "cognito-idp:DescribeUserPool", "cognito-idp:UpdateUserPool", "cognito-idp:DeleteUserPool",
+          "cognito-idp:GetUserPoolMfaConfig", "cognito-idp:SetUserPoolMfaConfig",
           "cognito-idp:CreateUserPoolClient", "cognito-idp:DescribeUserPoolClient",
           "cognito-idp:UpdateUserPoolClient", "cognito-idp:DeleteUserPoolClient",
           "cognito-idp:TagResource", "cognito-idp:UntagResource", "cognito-idp:ListTagsForResource",
@@ -98,9 +107,11 @@ export class ReleasePlanningStack extends Stack {
         resources: [`arn:${this.partition}:cognito-idp:${this.region}:${this.account}:userpool/*`],
         conditions: { StringEquals: {
           "aws:ResourceTag/Portfolio": "RCT",
+          "aws:ResourceTag/Application": "Founder",
           "aws:ResourceTag/Environment": config.environment,
         } },
       }),
+      logGroupDiscovery(),
       new iam.PolicyStatement({
         actions: [
           "logs:CreateLogGroup", "logs:DeleteLogGroup", "logs:PutRetentionPolicy",
@@ -127,6 +138,10 @@ export class ReleasePlanningStack extends Stack {
         actions: ["apigateway:GET", "apigateway:POST", "apigateway:PUT", "apigateway:PATCH", "apigateway:DELETE"],
         resources: [apiGateway, `${apiGateway}/??????????`, `${apiGateway}/??????????/*`],
       }),
+      new iam.PolicyStatement({
+        actions: ["apigateway:GET", "apigateway:PUT", "apigateway:DELETE"],
+        resources: [apiGatewayTags],
+      }),
     ]);
     const reportingFunctionArn = `arn:${this.partition}:lambda:${this.region}:${this.account}:function:${config.prefix}-reporting`;
     const reportingLogGroup = `arn:${this.partition}:logs:${this.region}:${this.account}:log-group:/rct/${config.prefix}/reporting`;
@@ -146,6 +161,7 @@ export class ReleasePlanningStack extends Stack {
       `arn:${this.partition}:cloudwatch:${this.region}:${this.account}:alarm:${busName}-worker-errors`,
     ];
     const reportingExecution = createExecutionRole("reporting", [
+      logGroupDiscovery(),
       new iam.PolicyStatement({
         actions: [
           "logs:CreateLogGroup", "logs:DeleteLogGroup", "logs:PutRetentionPolicy",

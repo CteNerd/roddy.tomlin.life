@@ -156,7 +156,10 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   `rct-founder-<environment>-execute-reporting`, trusted only by CloudFormation.
   Each has its own managed policy attached as both identity grant and
   permissions boundary. The API role is limited to the Founder projections
-  table, Cognito pool, API Lambda/log group and API Gateway management paths.
+  table, Founder-tagged Cognito pool, API Lambda/log group and API Gateway
+  management paths. Table grants include the continuous-backup operations
+  required to configure and read production PITR; Cognito grants include MFA
+  configuration and require the `Application=Founder` tag on create and use.
   The reporting role is limited to the reporting Lambda/log group, the
   portfolio bus and explicitly named rules, the exact six queues, event-source
   mappings for that worker, seven explicitly named alarms and the bus-discovery
@@ -172,6 +175,10 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   the API execution role limits `AddPermission` to the exact API Lambda and
   `apigateway.amazonaws.com`; inspect its three route-specific permission
   resources in every real change set.
+- Both execution boundaries allow only region-conditioned
+  `logs:DescribeLogGroups` discovery on `Resource: *`; log-group mutations
+  remain scoped to their exact group. API Gateway tag reads/writes/deletes use
+  the encoded tag endpoint scoped to the same 10-character Founder API ID.
 - An explicit planner deny of `sts:AssumeRole`, change-set execution and direct
   stack create/update/delete/rollback/policy mutation. No deploy/assume-role
   fallback to the broad local user or shared CDK roles is allowed.

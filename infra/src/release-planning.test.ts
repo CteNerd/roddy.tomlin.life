@@ -102,11 +102,17 @@ for (const environment of ["development", "production"] as const) {
       }))[0]!;
       assert.ok(boundaryId);
       const executionStatements = boundary.Properties.PolicyDocument.Statement;
+      const logGroupDiscovery = executionStatements.find((statement: { Action: string }) =>
+        statement.Action === "logs:DescribeLogGroups");
+      assert.ok(logGroupDiscovery);
+      assert.equal(logGroupDiscovery.Resource, "*");
+      assert.deepEqual(logGroupDiscovery.Condition, {
+        StringEquals: { "aws:RequestedRegion": config.region },
+      });
       const grant = executionStatements.find((statement: { Action: string | string[] }) =>
         Array.isArray(statement.Action) && statement.Action.includes("s3:GetObject"));
       assert.ok(grant);
       assert.deepEqual(grant.Resource, objects);
-      for (const statement of executionStatements) assert.notEqual(statement.Resource, "*");
       const reading = executionStatements.find((statement: { Action: string }) => statement.Action === "iam:GetRole");
       assert.ok(reading);
       const roleArn = { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
@@ -121,9 +127,44 @@ for (const environment of ["development", "production"] as const) {
           `:lambda:us-east-1:123456789012:function:${config.prefix}-${handler}`]] } },
       });
       assert.doesNotMatch(JSON.stringify(executionStatements), /iam:(Create|Update|Put|Attach|Detach|Delete)|sts:|cloudformation:|AdministratorAccess/);
+      for (const statement of executionStatements) {
+        if (statement.Action !== "logs:DescribeLogGroups") assert.notEqual(statement.Resource, "*");
+      }
       if (handler === "api") {
-        assert.match(JSON.stringify(executionStatements), /dynamodb:CreateTable/);
-        assert.match(JSON.stringify(executionStatements), /cognito-idp:CreateUserPool/);
+        const tableGrant = executionStatements.find((statement: { Action: string | string[] }) =>
+          Array.isArray(statement.Action) && statement.Action.includes("dynamodb:CreateTable"));
+        assert.ok(tableGrant);
+        assert.ok(tableGrant.Action.includes("dynamodb:DescribeContinuousBackups"));
+        assert.ok(tableGrant.Action.includes("dynamodb:UpdateContinuousBackups"));
+
+        const poolCreation = executionStatements.find((statement: { Action: string }) =>
+          statement.Action === "cognito-idp:CreateUserPool");
+        assert.ok(poolCreation);
+        assert.deepEqual(poolCreation.Condition, { StringEquals: {
+          "aws:RequestTag/Portfolio": "RCT",
+          "aws:RequestTag/Application": "Founder",
+          "aws:RequestTag/Environment": environment,
+        } });
+        const poolManagement = executionStatements.find((statement: { Action: string | string[] }) =>
+          Array.isArray(statement.Action) && statement.Action.includes("cognito-idp:UpdateUserPool"));
+        assert.ok(poolManagement);
+        assert.ok(poolManagement.Action.includes("cognito-idp:GetUserPoolMfaConfig"));
+        assert.ok(poolManagement.Action.includes("cognito-idp:SetUserPoolMfaConfig"));
+        assert.deepEqual(poolManagement.Condition, { StringEquals: {
+          "aws:ResourceTag/Portfolio": "RCT",
+          "aws:ResourceTag/Application": "Founder",
+          "aws:ResourceTag/Environment": environment,
+        } });
+
+        const apiTagGrant = executionStatements.find((statement: { Action: string | string[]; Resource: unknown }) =>
+          Array.isArray(statement.Action)
+          && statement.Action.includes("apigateway:PUT")
+          && JSON.stringify(statement.Resource).includes("/tags/"));
+        assert.ok(apiTagGrant);
+        assert.deepEqual([...apiTagGrant.Action].sort(), [
+          "apigateway:DELETE", "apigateway:GET", "apigateway:PUT",
+        ]);
+        assert.match(JSON.stringify(apiTagGrant.Resource), /%2Fapis%2F\?{10}/);
         assert.match(JSON.stringify(executionStatements), /apigateway:POST/);
         assert.match(JSON.stringify(executionStatements), /lambda:Principal/);
         assert.doesNotMatch(JSON.stringify(executionStatements), /lambda:SourceArn/);
