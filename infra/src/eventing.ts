@@ -26,7 +26,8 @@ export class EventingStack extends Stack {
     Tags.of(this).add("Environment", config.environment);
     const production = config.environment === "production";
     const removalPolicy = production ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY;
-    const bus = new events.EventBus(this, "PortfolioBus", { eventBusName: `rct-portfolio-${config.environment}` });
+    const busName = `rct-portfolio-${config.environment}`;
+    const bus = new events.EventBus(this, "PortfolioBus", { eventBusName: busName });
     bus.applyRemovalPolicy(removalPolicy);
     const queues = new Map<"consulting" | "dotcom", sqs.Queue>();
     for (const application of applications) {
@@ -47,6 +48,7 @@ export class EventingStack extends Stack {
       });
       queues.set(application.name, queue);
       const rule = new events.Rule(this, `${application.name}ApprovedEvents`, {
+        ruleName: `${busName}-${application.name}-approved-events`,
         eventBus: bus, eventPattern: { source: [application.source], detailType: [...application.detailTypes] },
       });
       rule.addTarget(new targets.SqsQueue(queue, {
@@ -54,6 +56,7 @@ export class EventingStack extends Stack {
       }));
       for (const [suffix, dlq] of [["Delivery", deliveryDlq], ["Processing", processingDlq]] as const) {
         new cloudwatch.Alarm(this, `${application.name}${suffix}Failures`, {
+          alarmName: `${busName}-${application.name}-${suffix.toLowerCase()}-failures`,
           metric: dlq.metricApproximateNumberOfMessagesVisible({ period: Duration.minutes(1), statistic: "Maximum" }),
           threshold: 1, evaluationPeriods: 1,
           treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
@@ -61,6 +64,7 @@ export class EventingStack extends Stack {
         });
       }
       new cloudwatch.Alarm(this, `${application.name}BacklogAge`, {
+        alarmName: `${busName}-${application.name}-backlog-age`,
         metric: queue.metricApproximateAgeOfOldestMessage({ period: Duration.minutes(1), statistic: "Maximum" }),
         threshold: 300, evaluationPeriods: 1,
         treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
@@ -93,6 +97,7 @@ export class EventingStack extends Stack {
       batchSize: 10, maxBatchingWindow: Duration.seconds(1), maxConcurrency: 2, reportBatchItemFailures: true,
     }));
     new cloudwatch.Alarm(this, "WorkerErrors", {
+      alarmName: `${busName}-worker-errors`,
       metric: worker.metricErrors({ period: Duration.minutes(1), statistic: "Sum" }),
       threshold: 1, evaluationPeriods: 1,
       treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,

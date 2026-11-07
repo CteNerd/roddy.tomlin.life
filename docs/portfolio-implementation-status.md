@@ -134,23 +134,36 @@ writes have been performed.
   fixed paired Lambda names. Their actual templates have no IAM role/policy
   resources. Governance must exist first; runtime trust/boundary/policy changes
   require separate approved bootstrap ownership, not application execution.
-- `release-planning.ts` attaches a dedicated execution boundary as both identity
-  grant and cap: release-asset reads, metadata reads of the two runtime roles
-  and each exact role's Lambda/function-associated pass-role only. The executor
-  cannot create/edit/delete IAM identities, policies or boundaries. Service
-  deployment permissions remain absent and planner execution stays denied.
+- `release-planning.ts` now defines separate API and reporting CloudFormation
+  execution roles, each with a service-specific managed policy attached as both
+  identity grant and permissions boundary. The API role is scoped to the owned
+  projections table, Cognito pool, API Lambda/log group and API Gateway resource
+  paths. The reporting role is scoped to its Lambda/log group, portfolio bus
+  and explicitly named rules, six exact queues, worker event-source mappings,
+  seven named alarms and discovery parameter. Each role can pass only its
+  paired governance-owned Lambda runtime role to its exact function.
+- The OIDC planner pairs the API execution role only with the Founder foundation
+  stack and the reporting role only with the matching eventing stack. It still
+  cannot execute change sets, assume roles or mutate IAM. The application
+  execution roles cannot create/edit/delete IAM identities, policies or
+  boundaries. Lambda IAM has no valid `lambda:SourceArn` condition key; the API
+  role instead limits permission management to the exact API Lambda and
+  API-Gateway service principal, so route-specific Lambda permission resources
+  must be reviewed in the actual change set.
 - Governance/foundation/eventing/release-planning template tests and infra/API/
   worker runbooks are updated. No dependency or lockfile resolution changed.
   No AWS/DNS resource or privileged workflow is activated. Live role assumption,
   service-provided pass-role context, notifications and smoke/recovery still
   need proof before any application deployment.
-- Validation: local lint, infrastructure type checking, 16 infrastructure tests
-  and all eight affected offline synths pass. Read-only IAM custom-policy
-  simulation passed 140 resource-specific decisions across both environment
-  models, including tests with an extra Allow-* identity policy: API writes/
-  receipt reads, cross-scope resources, IAM mutations, unpaired/absent pass-role
-  context, bootstrap assumptions and application execution still deny. This
-  proves generated policy semantics, not live role/service/approval enforcement.
+- Validation: local lint, infrastructure type checking, 16 infrastructure tests,
+  all eight affected offline synths, and IAM Access Analyzer validation of all
+  four environment-specific execution boundaries pass. Custom-policy
+  simulation matched 40/40 resource-specific allow/deny decisions across both
+  environments with an extra `Allow *` identity policy. The simulator did not
+  validate Cognito user-pool creation or Lambda event-source-mapping creation,
+  even with broad simulated allows; these still need real change-set verification.
+  No deployed-role assumption, CloudFormation service call or application
+  deployment is claimed.
 
 ### Durable reporting slice
 
