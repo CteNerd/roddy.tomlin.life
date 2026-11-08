@@ -1,8 +1,11 @@
 # Founder infrastructure foundation
 
 This stack is additive and undeployed. It does not own or modify the live
-profile's existing CloudFormation hosting stack. No public Founder UI, duplicate
-CDN/bucket, broad SPA fallback or source-business database access is added.
+profile's existing CloudFormation hosting stack. The Founder frontend is built
+as a separate, non-prerendered `/founder/` artifact under `founder-dist/`,
+outside the `dist/` artifact consumed by existing profile publishers; no
+duplicate CDN/bucket, broad SPA fallback or source-business database access is
+added.
 
 From the repository root, Node 24/npm 11.6.2:
 
@@ -20,8 +23,8 @@ environment context, scoped IAM/bootstrap review and change-set approval.
 Region is `us-east-1`; invalid/missing context throws rather than guessing.
 
 Per-environment resources are an on-demand reporting-projections table,
-invitation-only Cognito with required authenticator MFA, Node 24 Lambda and
-HTTP API. Production data/auth resources are retained; the table has PITR and
+invitation-only Cognito with required authenticator MFA and an account-qualified
+managed-login domain, Node 24 Lambda and HTTP API. Production data/auth resources are retained; the table has PITR and
 deletion protection. The API writes only its explicit log group (7 days dev,
 30 days prod) and can Query only its owned monthly projection partitions. It
 cannot read receipts/source tables, Scan, mutate data or publish events.
@@ -35,12 +38,18 @@ verify its exact subject and review that parameter change separately per
 environment. CDK supplies the Lambda environment, not frontend/GitHub secrets.
 The API imports its governance-owned runtime role, so reviewed governance
 must exist before the foundation is eventually provisioned.
-See the [read-only API runbook](../apps/api/README.md).
+See the [read-only API runbook](../apps/api/README.md) and
+[Founder frontend runbook](../apps/founder-web/README.md).
 
-No hosted login domain, initial users or Founder login/dashboard UI is
-implemented yet. The separate offline eventing stack is described below. Production CORS is the existing profile
-origin; development is loopback until its approved hostname is selected.
-Callback/logout client configuration is not a working login UI.
+The frontend implements Cognito authorization-code + PKCE sign-in and the
+owner-only aggregate dashboard. It keeps access tokens in memory, requests
+reports only after authentication, and does not prerender metrics. Cognito
+domain, callback/logout allowlists and API CORS are defined in source but have
+not been provisioned or exercised against AWS. The development origin is
+`http://localhost:5174`; production uses the existing profile origin.
+Publishing still requires explicit `/founder` route integration, validated
+public runtime configuration and owner authorization setup. No live route or
+AWS changes are performed by local builds.
 
 New deployment automation remains blocked on reviewed repo/environment OIDC
 roles, restricted CloudFormation execution/pass-role, protected production

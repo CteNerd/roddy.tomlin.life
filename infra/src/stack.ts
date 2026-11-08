@@ -45,9 +45,13 @@ export class FounderStack extends Stack {
       generateSecret: false, preventUserExistenceErrors: true, authFlows: { userSrp: true },
       oAuth: {
         flows: { authorizationCodeGrant: true },
-        callbackUrls: [`${config.webOrigin}/auth/callback`],
-        logoutUrls: [config.webOrigin],
+        scopes: [cognito.OAuthScope.OPENID],
+        callbackUrls: [`${config.webOrigin}/founder/`],
+        logoutUrls: [`${config.webOrigin}/`],
       },
+    });
+    pool.addDomain("ManagedLogin", {
+      cognitoDomain: { domainPrefix: config.authDomainPrefix },
     });
     const logGroup = new logs.LogGroup(this, "ApiLogs", {
       logGroupName: `/rct/${config.prefix}/api`,
@@ -84,6 +88,9 @@ export class FounderStack extends Stack {
       path, methods: [apigateway.HttpMethod.GET], integration, authorizer,
     });
     new CfnOutput(this, "ApiUrl", { value: api.apiEndpoint });
+    new CfnOutput(this, "AuthUrl", {
+      value: `https://${config.authDomainPrefix}.auth.${config.region}.amazoncognito.com`,
+    });
     new CfnOutput(this, "UserPoolId", { value: pool.userPoolId });
     new CfnOutput(this, "UserPoolClientId", { value: client.userPoolClientId });
   }

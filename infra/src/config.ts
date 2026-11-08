@@ -10,7 +10,8 @@ export function configuration(environment: unknown, account: unknown) {
     account,
     region: "us-east-1",
     prefix: `rct-founder-${environment}`,
-    webOrigin: environment === "production" ? "https://roddy.tomlin.life" : "http://localhost:5173",
+    authDomainPrefix: `rct-founder-${environment}-${account}`,
+    webOrigin: environment === "production" ? "https://roddy.tomlin.life" : "http://localhost:5174",
   } as const;
 }
 

@@ -8,6 +8,7 @@
     "packages/reporting",
     "apps/api",
     "apps/reporting-worker",
+    "apps/founder-web",
     "infra"
   ],
   "engines": {
@@ -17,7 +18,8 @@
   "scripts": {
     "start": "vite --host 127.0.0.1",
     "dev": "vite --host 127.0.0.1",
-    "build": "vite build && node scripts/prepare-release.mjs",
+    "build": "vite build && npm run build --workspace @rct/founder-web && node scripts/prepare-release.mjs",
+    "dev:founder": "npm run dev --workspace @rct/founder-web",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -32,7 +34,7 @@
     "cdk:synth:release-planning:development": "npm run synth:release-planning:development --workspace @rct/founder-infra",
     "cdk:synth:release-planning:production": "npm run synth:release-planning:production --workspace @rct/founder-infra",
     "check:deployment": "npm run check:deployment --workspace @rct/founder-infra",
-    "lint": "eslint src/App.jsx src/main.jsx src/profile.js src/App.test.jsx src/setupTests.js vite.config.js eslint.config.js scripts apps/api/src apps/reporting-worker/src apps/reporting-worker/test packages/reporting/src packages/contracts/src/index.ts infra/src",
+    "lint": "eslint src/App.jsx src/main.jsx src/profile.js src/App.test.jsx src/setupTests.js vite.config.js eslint.config.js scripts apps/api/src apps/founder-web/src apps/founder-web/vite.config.js apps/reporting-worker/src apps/reporting-worker/test packages/reporting/src packages/contracts/src/index.ts infra/src",
     "check:release": "node scripts/check-release.mjs"
   },
   "dependencies": {

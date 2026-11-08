@@ -6,15 +6,15 @@ import { pages, renderMetadata, renderSitemap, siteUrl } from "./page-metadata.m
 
 export async function checkRelease() {
   let count = 0;
-  async function checkDirectory(directory) {
+  async function checkDirectory(directory, artifactRoot, allowedFiles) {
     for (const entry of await readdir(directory, { withFileTypes: true })) {
       const fullPath = path.join(directory, entry.name);
       if (entry.isDirectory()) {
-        await checkDirectory(fullPath);
+        await checkDirectory(fullPath, artifactRoot, allowedFiles);
         continue;
       }
-      const relative = path.relative("dist", fullPath).replaceAll("\\", "/");
-      assert.match(relative, /^(index\.html|experience\.html|404\.html|favicon\.svg|robots\.txt|sitemap\.xml|roddy-(headshot|seated)\.jpg|assets\/[\w-]+\.(js|css))$/,
+      const relative = path.relative(artifactRoot, fullPath).replaceAll("\\", "/");
+      assert.match(relative, allowedFiles,
         `Unexpected release file: ${relative}`);
       if (relative.endsWith(".jpg")) {
         const image = await readFile(fullPath);
@@ -50,7 +50,12 @@ export async function checkRelease() {
       count++;
     }
   }
-  await checkDirectory("dist");
+  await checkDirectory(
+    "dist",
+    "dist",
+    /^(index\.html|experience\.html|404\.html|favicon\.svg|robots\.txt|sitemap\.xml|roddy-(headshot|seated)\.jpg|assets\/[\w-]+\.(js|css))$/,
+  );
+  await checkDirectory("founder-dist", "founder-dist", /^(index\.html|assets\/[\w-]+\.(js|css))$/);
   const index = await readFile("dist/index.html", "utf8");
   assert.match(index, /Roddy Tomlin/);
   assert.match(index, /Director of Software Engineering/);
@@ -82,6 +87,17 @@ export async function checkRelease() {
   assert.ok(fallback.includes(renderMetadata("notFound")));
   assert.doesNotMatch(fallback, /rel="canonical"|application\/ld\+json/);
   assert.equal(fallback.slice(fallback.indexOf("<body>")), index.slice(index.indexOf("<body>")));
+  const founder = await readFile("founder-dist/index.html", "utf8");
+  assert.match(founder, /<meta name="robots" content="noindex, nofollow"/);
+  assert.match(founder, /<div id="root"><\/div>/, "Founder data must only load after authenticated API requests");
+  assert.doesNotMatch(founder, /application\/json|latestOccurredAt|processedAt|access_token/);
+  const founderScripts = (await readdir("founder-dist/assets")).filter((file) => file.endsWith(".js"));
+  assert.ok(founderScripts.length > 0, "Missing Founder application bundle");
+  const founderBundle = (await Promise.all(
+    founderScripts.map((file) => readFile(`founder-dist/assets/${file}`, "utf8")),
+  )).join("\n");
+  assert.doesNotMatch(founderBundle, /eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+|\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i,
+    "Founder release must not contain tokens or owner subject identifiers");
   assert.equal(await readFile("dist/sitemap.xml", "utf8"), renderSitemap());
   assert.ok((await readFile("dist/robots.txt", "utf8")).includes(`Sitemap: ${siteUrl}sitemap.xml`));
   const javascript = (await readdir("dist/assets")).filter((file) => file.endsWith(".js"));
@@ -90,7 +106,7 @@ export async function checkRelease() {
   for (const expected of ["Roddy Tomlin", "Director of Software Engineering", "FMG"]) {
     assert.ok(app.includes(expected), `Missing public fact: ${expected}`);
   }
-  console.log(`Release checks passed: ${count} public-only files; safe retired-path fallback.`);
+  console.log(`Release checks passed: ${count} approved files; safe retired-path fallback.`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
