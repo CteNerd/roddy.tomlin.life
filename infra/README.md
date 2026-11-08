@@ -161,15 +161,33 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   prepare/read/delete change sets for exactly the Founder foundation and
   that environment's portfolio eventing stack. It cannot manage governance,
   release-planning, producer or existing profile stacks.
-- `rct-founder-<environment>-execute`, trusted only by CloudFormation. It
-  has a dedicated execution boundary attached as both identity policy and
-  boundary. It permits asset reads, metadata reads of the two runtime roles
-  and passing each exact runtime role only to Lambda and its paired function
-  ARN (`iam:AssociatedResourceArn`). No missing/cross-role/function/service
-  context qualifies. It cannot create/edit/delete IAM roles or policies.
-  Application-service deployment permissions are still absent. The planner
-  can pass only this execution role to CloudFormation; creating a change set
-  requires its explicit `RoleArn`.
+- `rct-founder-<environment>-execute-api` and
+  `rct-founder-<environment>-execute-reporting`, trusted only by CloudFormation.
+  Each has its own managed policy attached as both identity grant and
+  permissions boundary. The API role is limited to the Founder projections
+  table, Founder-tagged Cognito pool, API Lambda/log group and API Gateway
+  management paths. Table grants include the continuous-backup operations
+  required to configure and read production PITR; Cognito grants include MFA
+  configuration and require the `Application=Founder` tag on create and use.
+  The reporting role is limited to the reporting Lambda/log group, the
+  portfolio bus and explicitly named rules, the exact six queues, event-source
+  mappings for that worker, seven explicitly named alarms and the bus-discovery
+  parameter. Each can inspect and pass
+  only its paired runtime role to its exact Lambda function. Neither can
+  create/edit/delete IAM identities, policies or boundaries.
+- The planner's `CreateChangeSet` grant pairs the API execution role only with
+  the Founder foundation stack and the reporting execution role only with that
+  environment's eventing stack. API Gateway IDs are AWS-generated, so the API
+  role is constrained to 10-character API IDs in `us-east-1`; the exact stack
+  template and reviewed change set remain essential controls. Lambda IAM has
+  no valid `lambda:SourceArn` condition key (Access Analyzer rejects it), so
+  the API execution role limits `AddPermission` to the exact API Lambda and
+  `apigateway.amazonaws.com`; inspect its three route-specific permission
+  resources in every real change set.
+- Both execution boundaries allow only region-conditioned
+  `logs:DescribeLogGroups` discovery on `Resource: *`; log-group mutations
+  remain scoped to their exact group. API Gateway tag reads/writes/deletes use
+  the encoded tag endpoint scoped to the same 10-character Founder API ID.
 - An explicit planner deny of `sts:AssumeRole`, change-set execution and direct
   stack create/update/delete/rollback/policy mutation. No deploy/assume-role
   fallback to the broad local user or shared CDK roles is allowed.
@@ -183,20 +201,28 @@ deployment. Imports are not automatic CloudFormation dependencies.
 
 After bootstrap, verify the exact short-lived planner with `check:deployment`
 and inspect its policies. CDK supports `--method prepare-change-set`; supply
-`--role-arn` with the exact stack-output execution ARN. Omitting it must fail
-the IAM condition, and neither `cdk deploy`'s default executing method nor
-`ExecuteChangeSet` is permitted. Initial CREATE change sets can leave an
-unexecuted `REVIEW_IN_PROGRESS` stack; review those placeholders explicitly.
-No live change set or allow/deny test is claimed by offline synthesis.
+`--role-arn` with the exact stack-output execution ARN paired to the stack.
+Omitting it or using the other stack's role must fail the IAM condition, and
+neither `cdk deploy`'s default executing method nor `ExecuteChangeSet` is
+permitted. Initial CREATE change sets can leave an unexecuted
+`REVIEW_IN_PROGRESS` stack; review those placeholders explicitly. No live
+change set or service call is claimed by offline synthesis. IAM Access Analyzer
+reports no findings for the candidate boundaries, and custom-policy simulation
+checks supported resource/action cases with an extra `Allow *` identity policy.
+The simulator did not validate Cognito user-pool creation or Lambda
+event-source-mapping creation, even with broad simulated allows; those calls
+still need real development change-set verification.
 
-Next, review service-specific application execution permissions and verify
-the actual CloudFormation/Lambda pass-role context and existing runtime roles.
-Offline assertions/simulations do not prove those service calls. Do not broaden
-this planner or reuse `AdministratorAccess` to make deployment pass. Separate
-reviewed deployment authority, cost/notification verification, cloud IAM
-allow/deny tests and smoke/rollback evidence remain prerequisites. Production
-also requires tested protected-environment approval and separate authorization;
-the owner has approved development preparation only.
+The source now defines service-specific application execution permissions, but
+they remain undeployed and must be verified against a real development
+change-set plan, CloudFormation service calls and Lambda pass-role context.
+Offline assertions, Access Analyzer and custom-policy simulation do not prove
+those calls. Do not
+broaden these roles or reuse `AdministratorAccess` to make deployment pass.
+Separate reviewed bootstrap authority, cost/notification verification, cloud
+IAM allow/deny tests and smoke/rollback evidence remain prerequisites.
+Production also requires tested protected-environment approval and separate
+authorization; the owner has approved development preparation only.
 
 ## Separate reporting/eventing stack
 

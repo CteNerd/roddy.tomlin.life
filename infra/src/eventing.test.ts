@@ -37,6 +37,7 @@ for (const environment of ["development", "production"] as const) {
         QueueName: `${name}-${suffix}`, MessageRetentionPeriod: 1209600, SqsManagedSseEnabled: true,
       });
       template.hasResourceProperties("AWS::Events::Rule", {
+        Name: `rct-portfolio-${environment}-${source}-approved-events`,
         EventPattern: { source: [`rct.${source}`], "detail-type": [...detailTypes] },
         Targets: [Match.objectLike({
           Arn: { "Fn::GetAtt": [queueId, "Arn"] },
@@ -44,6 +45,11 @@ for (const environment of ["development", "production"] as const) {
           RetryPolicy: { MaximumEventAgeInSeconds: 86400, MaximumRetryAttempts: 185 },
         })],
       });
+      for (const alarm of ["delivery-failures", "processing-failures", "backlog-age"]) {
+        template.hasResourceProperties("AWS::CloudWatch::Alarm", {
+          AlarmName: `rct-portfolio-${environment}-${source}-${alarm}`,
+        });
+      }
       template.hasResourceProperties("AWS::Lambda::EventSourceMapping", {
         EventSourceArn: { "Fn::GetAtt": [queueId, "Arn"] },
         BatchSize: 10, MaximumBatchingWindowInSeconds: 1,
@@ -61,6 +67,9 @@ for (const environment of ["development", "production"] as const) {
       Environment: { Variables: Match.objectLike({ REPORTING_TABLE_NAME: `rct-founder-${environment}-projections` }) },
     });
     template.hasResourceProperties("AWS::SSM::Parameter", { Name: `/rct/${environment}/portfolio/event-bus-arn` });
+    template.hasResourceProperties("AWS::CloudWatch::Alarm", {
+      AlarmName: `rct-portfolio-${environment}-worker-errors`,
+    });
     const queuePolicies = JSON.stringify(template.findResources("AWS::SQS::QueuePolicy"));
     assert.match(queuePolicies, /aws:SecureTransport/);
     assert.match(queuePolicies, /aws:SourceArn/);
