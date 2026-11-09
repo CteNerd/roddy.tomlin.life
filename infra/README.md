@@ -218,6 +218,11 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   parameter. Each can inspect and pass
   only its paired runtime role to its exact Lambda function. Neither can
   create/edit/delete IAM identities, policies or boundaries.
+- Tagged reporting mapping creation also requires `lambda:TagResource`.
+  This grant uses the same exact reporting-function condition and requires
+  only the two configured portfolio/environment request-tag keys and values;
+  it does not permit untagged, cross-environment or other-function mappings.
+  Real CloudFormation creation must verify this context, not just simulation.
 - The planner's `CreateChangeSet` grant pairs the API execution role only with
   the Founder foundation stack and the reporting execution role only with that
   environment's eventing stack. API Gateway IDs are AWS-generated, so the API
