@@ -234,6 +234,19 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   HTTP API creation additionally authorizes `POST` against that encoded
   collection before an ID exists. This creation/tag grant requires all three
   exact portfolio, Founder application and environment request tags.
+- The owner separately approved an exact-stage compatibility exception after
+  the live Stage provider required `apigateway:TagResource` while AWS Access
+  Analyzer rejected that action as nonexistent. `FounderHttpApiId` defaults to
+  `disabled`; its validated value must come from the owned foundation or
+  temporary development canary, never an arbitrary API. The service-action
+  wildcard is restricted to that one API's stage-create collection and
+  `$default` stage, all three exact application tags, the default-stage
+  CloudFormation logical ID and the two explicitly owned stack names.
+  The collection is necessary for pre-creation authorization; the reviewed
+  template creates only `$default`. No shared executor, IAM authority,
+  unrelated API ID or untagged request is granted. Validate a real tagged
+  development API plus default-stage canary before production repair, then
+  restore the development parameter to its foundation API ID.
 - An explicit planner deny of `sts:AssumeRole`, change-set execution and direct
   stack create/update/delete/rollback/policy mutation. No deploy/assume-role
   fallback to the broad local user or shared CDK roles is allowed.

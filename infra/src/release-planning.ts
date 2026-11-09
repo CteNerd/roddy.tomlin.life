@@ -1,4 +1,4 @@
-import { CfnOutput, CliCredentialsStackSynthesizer, RemovalPolicy, Stack, Tags } from "aws-cdk-lib";
+import { CfnOutput, CfnParameter, CliCredentialsStackSynthesizer, RemovalPolicy, Stack, Tags } from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import type { Construct } from "constructs";
@@ -72,6 +72,11 @@ export class ReleasePlanningStack extends Stack {
     const apiArn = `arn:${this.partition}:lambda:${this.region}:${this.account}:function:${api}`;
     const apiGateway = `arn:${this.partition}:apigateway:${this.region}::/apis`;
     const apiGatewayTags = `arn:${this.partition}:apigateway:${this.region}::/tags/arn%3A${this.partition}%3Aapigateway%3A${this.region}%3A%3A%2Fv2%2Fapis%2F`;
+    const apiId = new CfnParameter(this, "FounderHttpApiId", {
+      type: "String", default: "disabled", allowedPattern: "^(disabled|[a-z0-9]{10})$",
+      description: "Exact API ID read from this environment's owned foundation or temporary stage canary; disabled grants no real API compatibility access",
+    });
+    const stage = `${apiGateway}/${apiId.valueAsString}/stages`;
     const apiLogGroup = `arn:${this.partition}:logs:${this.region}:${this.account}:log-group:/rct/${config.prefix}/api`;
     const logGroupDiscovery = () => new iam.PolicyStatement({
       actions: ["logs:DescribeLogGroups"],
@@ -156,6 +161,20 @@ export class ReleasePlanningStack extends Stack {
           "aws:RequestTag/Portfolio": "RCT",
           "aws:RequestTag/Application": "Founder",
           "aws:RequestTag/Environment": config.environment,
+        } },
+      }),
+      new iam.PolicyStatement({
+        // The Stage provider requires a tag action absent from IAM's catalog.
+        actions: ["apigateway:*"],
+        resources: [stage, `${stage}/$default`],
+        conditions: { StringEquals: {
+          "aws:RequestTag/Portfolio": "RCT",
+          "aws:RequestTag/Application": "Founder",
+          "aws:RequestTag/Environment": config.environment,
+          "aws:RequestTag/aws:cloudformation:logical-id": "ApiDefaultStage189A7074",
+          "aws:RequestTag/aws:cloudformation:stack-name": [
+            `${config.prefix}-foundation`, `${config.prefix}-api-permission-smoke`,
+          ],
         } },
       }),
     ]);
