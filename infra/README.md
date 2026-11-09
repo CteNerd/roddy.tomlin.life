@@ -219,12 +219,18 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   only its paired runtime role to its exact Lambda function. Neither can
   create/edit/delete IAM identities, policies or boundaries.
 - Tagged reporting mapping creation also requires `lambda:TagResource`.
-  This grant uses the same exact reporting-function condition and requires
-  only the two configured portfolio/environment request-tag keys and values;
-  it does not permit untagged, cross-environment or other-function mappings.
-  The provider's read handler also needs `lambda:ListTags`, limited to mappings
-  already carrying the matching portfolio/environment resource tags.
-  Real CloudFormation creation must verify this context, not just simulation.
+  The [AWS service authorization metadata](https://servicereference.us-east-1.amazonaws.com/v1/lambda/lambda.json)
+  supports `lambda:FunctionArn` for mapping creation, but **not** for tagging.
+  The first live tagged-create repair therefore still failed authorization.
+  Mapping create/read/update/delete remain tied to the exact reporting function.
+  Tagging instead requires the exact portfolio/environment, owned eventing
+  stack name/ARN and either of its two synthesized mapping logical IDs.
+  Only those two application tags and three reserved CloudFormation tag keys
+  are permitted. These reserved tags are present on the existing development
+  mappings; the read handler's `lambda:ListTags` grant checks the same stored
+  ownership tags. No untagged or cross-stack mapping tag grant is added.
+  Validate actual tagged creation through the bounded development executor
+  before retrying production; policy simulation cannot prove service context.
 - The planner's `CreateChangeSet` grant pairs the API execution role only with
   the Founder foundation stack and the reporting execution role only with that
   environment's eventing stack. API Gateway IDs are AWS-generated, so the API
