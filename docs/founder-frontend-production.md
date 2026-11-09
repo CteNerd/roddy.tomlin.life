@@ -7,6 +7,46 @@ disabled: the candidate deliberately builds all five Founder configuration value
 empty; it cannot sign in or contact the API. Enabling owner access requires separate
 UAT approval and a separately reviewed release change, not environment-variable edits.
 
+## Operational integration contract
+
+Read-only observations on 2026-11-09, account `425061472162`, region `us-east-1`:
+
+| Integration | Exact contract |
+| --- | --- |
+| Publisher declaration | `infrastructure/founder-frontend-publisher.yml` |
+| `ExistingProfileBucket` | `roddy-profile-hosting-profilebucket-ybl3ax24jbkq` |
+| `ExistingProfileDistribution` | `E2YXFQ1DC7XTW5` |
+| Publisher output | `PublisherRoleArn` = `arn:aws:iam::425061472162:role/rct-founder-production-frontend-publisher` after authorized provisioning |
+| Publisher status | IAM `GetRole` returned `NoSuchEntity`; not provisioned |
+| Routing declaration / owner | This repository's `infrastructure/profile-hosting.yml`, existing stack `roddy-profile-hosting` |
+| Source ownership evidence | Live original hosting template exactly matched `main` commit `91bafec`'s `infrastructure/profile-hosting.yml` |
+| Existing host | `d1obnj61w0iqrh.cloudfront.net`; origin is the bucket above, with empty origin path |
+| Existing routing state | No viewer-request function, Lambda association, or extra cache behavior; 403 and 404 map to `/404.html` with HTTP 404 |
+| Routing parameters | Retain `DomainName=roddy.tomlin.life`, `HostedZoneId=Z09770441ES3ZDJB86W5A`, `GitHubOidcProviderArn=arn:aws:iam::425061472162:oidc-provider/token.actions.githubusercontent.com`; opt into `EnableFounderRoutes=true` only after release gates |
+
+Neither declaration belongs in the Founder backend/CDK foundation or reporting
+mapping stacks. Do not recreate hosting, change DNS, or reuse the existing
+root-wide profile deployment role. Hosting parameters above are existing values
+to retain in a reviewed change set, not authorization for DNS changes.
+
+Dispatch/variable contract:
+
+- `.github/workflows/founder-candidate.yml`, ref `main`: input
+  `reviewed_sha=<exact dispatched main SHA>`.
+- `.github/workflows/founder-promote.yml`, ref `main`: inputs
+  `reviewed_sha=<candidate SHA>`, `candidate_run=<successful run ID>`,
+  `artifact_id=<immutable artifact ID>`,
+  `artifact_digest=sha256:<reviewed 64-character ZIP hash>`.
+  No candidate IDs/digest exist yet; nothing has been dispatched or published.
+- Protected `production` environment variables:
+  `FOUNDER_PRODUCTION_BUCKET=roddy-profile-hosting-profilebucket-ybl3ax24jbkq`,
+  `FOUNDER_PRODUCTION_DISTRIBUTION=E2YXFQ1DC7XTW5`,
+  `FOUNDER_PRODUCTION_PUBLISHER_ROLE=arn:aws:iam::425061472162:role/rct-founder-production-frontend-publisher`.
+  Keep `FOUNDER_PRODUCTION_PUBLISHER_READY` unset until separately approved
+  integration; only then set it to `true`. No new GitHub secret is required.
+- Preserve required production reviewer approval and exactly branch `main`, no
+  tag policy. Owner access stays disabled independently of backend health.
+
 ## Immutable candidate and promotion
 
 1. Merge reviewed source to protected `main` through the usual PR process.
