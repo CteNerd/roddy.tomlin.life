@@ -102,6 +102,8 @@ export class ReleasePlanningStack extends Stack {
           "cognito-idp:GetUserPoolMfaConfig", "cognito-idp:SetUserPoolMfaConfig",
           "cognito-idp:CreateUserPoolClient", "cognito-idp:DescribeUserPoolClient",
           "cognito-idp:UpdateUserPoolClient", "cognito-idp:DeleteUserPoolClient",
+          "cognito-idp:CreateUserPoolDomain", "cognito-idp:UpdateUserPoolDomain",
+          "cognito-idp:DeleteUserPoolDomain",
           "cognito-idp:TagResource", "cognito-idp:UntagResource", "cognito-idp:ListTagsForResource",
         ],
         resources: [`arn:${this.partition}:cognito-idp:${this.region}:${this.account}:userpool/*`],
@@ -110,6 +112,11 @@ export class ReleasePlanningStack extends Stack {
           "aws:ResourceTag/Application": "Founder",
           "aws:ResourceTag/Environment": config.environment,
         } },
+      }),
+      new iam.PolicyStatement({
+        actions: ["cognito-idp:DescribeUserPoolDomain"],
+        resources: ["*"],
+        conditions: { StringEquals: { "aws:RequestedRegion": config.region } },
       }),
       logGroupDiscovery(),
       new iam.PolicyStatement({
