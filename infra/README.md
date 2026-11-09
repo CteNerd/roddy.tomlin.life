@@ -241,19 +241,23 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   mandatory portfolio/environment request tags. The previous ARN-scoped
   create grant is denied by real-role simulation. Read/update/delete continue
   to use mapping ARNs; this is not a wildcard action or an unconditioned grant.
-  Tagging instead requires the exact portfolio/environment, owned eventing
-  stack name/ARN and either of its two synthesized mapping logical IDs.
+  The real development canary still denied tagged creation with mandatory
+  CloudFormation system-tag conditions. The owner separately approved replacing
+  those conditions with mandatory portfolio/environment request tags, retaining
+  account/region mapping ARNs and the permitted tag-key set.
   Only those two application tags and three reserved CloudFormation tag keys
   are permitted. These reserved tags are present on the existing development
   mappings; the read handler's `lambda:ListTags` grant checks the stored
   portfolio/environment and exact owning stack name. Tagged creation must pass
   both the function-scoped create action and the stricter dependent tagging
-  grant. No untagged or cross-stack mapping tag grant is added.
+  grant. Untagged creation/tagging remains denied. Tagging can label other
+  mappings in that account/region with the required labels; it is not
+  function-scoped. Creation and lifecycle operations remain function-scoped.
   Validate actual tagged creation through the bounded development executor
   before retrying production; policy simulation cannot prove service context.
 - The first context-repair policy was 7,192 resolved characters and its
   development update rolled back at IAM's 6,144-character managed-policy limit.
-  The compact repair keeps the strict dependent tagging gate, avoids repeating
+  The compact repair keeps the dependent request-tag gate, avoids repeating
   it on creation and limits tag reads to the exact owned stack. EventBridge bus
   and rule operations share one statement over the same exact bus/two rule
   ARNs; their distinct resource types preserve the original operation scope.
