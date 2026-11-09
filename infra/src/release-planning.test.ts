@@ -10,6 +10,32 @@ import { EventingStack } from "./eventing.ts";
 import { ReleasePlanningStack, releaseAssetsBucketName } from "./release-planning.ts";
 import { FounderStack } from "./stack.ts";
 
+function resolvePolicyForQuota(value: unknown, references: Readonly<Record<string, string>>): unknown {
+  if (Array.isArray(value)) return value.map((entry: unknown) => resolvePolicyForQuota(entry, references));
+  if (value !== null && typeof value === "object") {
+    if ("Ref" in value) {
+      assert.ok(typeof value.Ref === "string" && Object.hasOwn(references, value.Ref));
+      return references[value.Ref];
+    }
+    if ("Fn::Join" in value) {
+      assert.ok(Array.isArray(value["Fn::Join"]));
+      const [separator, parts] = value["Fn::Join"];
+      assert.ok(typeof separator === "string" && Array.isArray(parts));
+      return parts.map((part: unknown) => resolvePolicyForQuota(part, references)).join(separator);
+    }
+    if ("Fn::GetAtt" in value) {
+      assert.ok(Array.isArray(value["Fn::GetAtt"]));
+      const [id, attribute] = value["Fn::GetAtt"];
+      assert.ok(typeof id === "string" && attribute === "Arn" && Object.hasOwn(references, `${id}.Arn`));
+      return references[`${id}.Arn`];
+    }
+    assert.ok(Object.keys(value).every((key) => !key.startsWith("Fn::")), "Resolve new intrinsics before measuring IAM quota");
+    return Object.fromEntries(Object.entries(value).map(([key, entry]: [string, unknown]) =>
+      [key, resolvePolicyForQuota(entry, references)]));
+  }
+  return value;
+}
+
 for (const environment of ["development", "production"] as const) {
   test(`${environment} release planning has exact OIDC trust, isolated assets and no execution authority`, () => {
     const config = configuration(environment, "123456789012");
@@ -101,6 +127,12 @@ for (const environment of ["development", "production"] as const) {
         Properties: Match.objectLike({ ManagedPolicyName: `${config.prefix}-${handler}-execution-boundary` }),
       }))[0]!;
       assert.ok(boundaryId);
+      const policy = JSON.stringify(resolvePolicyForQuota(boundary.Properties.PolicyDocument, {
+        "AWS::Partition": "aws",
+        FounderHttpApiId: "aaaaaaaaaa",
+        [`${bucketId}.Arn`]: `arn:aws:s3:::${releaseAssetsBucketName(config)}`,
+      }));
+      assert.ok(policy.length <= 6144, `${environment} ${handler} boundary is ${policy.length} characters; IAM permits 6144`);
       const executionStatements = boundary.Properties.PolicyDocument.Statement;
       const logGroupDiscovery = executionStatements.find((statement: { Action: string }) =>
         statement.Action === "logs:DescribeLogGroups");
@@ -244,9 +276,12 @@ for (const environment of ["development", "production"] as const) {
         assert.ok(mappingCreation);
         assert.equal(mappingCreation.Resource, "*");
         assert.deepEqual(mappingCreation.Condition, {
-          ...mappingTags.Condition,
           ArnEquals: { "lambda:FunctionArn": { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
             `:lambda:us-east-1:123456789012:function:${config.prefix}-reporting`]] } },
+          StringEquals: {
+            "aws:RequestTag/Portfolio": "RCT",
+            "aws:RequestTag/Environment": environment,
+          },
         });
         const mappingTagRead = executionStatements.find((statement: { Action: string }) =>
           statement.Action === "lambda:ListTags");
@@ -256,8 +291,7 @@ for (const environment of ["development", "production"] as const) {
           "aws:ResourceTag/Portfolio": "RCT",
           "aws:ResourceTag/Environment": environment,
           "aws:ResourceTag/aws:cloudformation:stack-name": eventingStackName,
-          "aws:ResourceTag/aws:cloudformation:logical-id": mappingLogicalIds,
-        }, ArnLike: { "aws:ResourceTag/aws:cloudformation:stack-id": stackArn } });
+        } });
         assert.match(JSON.stringify(executionStatements), /events:PutRule/);
         assert.match(JSON.stringify(executionStatements), /sqs:CreateQueue/);
         assert.match(JSON.stringify(executionStatements), /cloudwatch:PutMetricAlarm/);
