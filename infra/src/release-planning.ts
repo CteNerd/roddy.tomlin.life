@@ -241,8 +241,11 @@ export class ReleasePlanningStack extends Stack {
         actions: ["lambda:CreateEventSourceMapping"],
         resources: ["*"],
         conditions: {
-          ...mappingRequestConditions,
           ArnEquals: { "lambda:FunctionArn": reportingFunctionArn },
+          StringEquals: {
+            "aws:RequestTag/Portfolio": "RCT",
+            "aws:RequestTag/Environment": config.environment,
+          },
         },
       }),
       new iam.PolicyStatement({
@@ -265,23 +268,16 @@ export class ReleasePlanningStack extends Stack {
           "aws:ResourceTag/Portfolio": "RCT",
           "aws:ResourceTag/Environment": config.environment,
           "aws:ResourceTag/aws:cloudformation:stack-name": eventingStackName,
-          "aws:ResourceTag/aws:cloudformation:logical-id": mappingLogicalIds,
-        }, ArnLike: { "aws:ResourceTag/aws:cloudformation:stack-id": eventingStackArn } },
+        } },
       }),
       new iam.PolicyStatement({
         actions: [
           "events:CreateEventBus", "events:DeleteEventBus", "events:DescribeEventBus",
           "events:TagResource", "events:UntagResource", "events:ListTagsForResource",
-        ],
-        resources: [eventBus],
-      }),
-      new iam.PolicyStatement({
-        actions: [
           "events:PutRule", "events:DeleteRule", "events:DescribeRule", "events:EnableRule",
           "events:DisableRule", "events:PutTargets", "events:RemoveTargets", "events:ListTargetsByRule",
-          "events:TagResource", "events:UntagResource", "events:ListTagsForResource",
         ],
-        resources: rules,
+        resources: [eventBus, ...rules],
       }),
       new iam.PolicyStatement({
         actions: [

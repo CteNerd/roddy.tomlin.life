@@ -237,18 +237,29 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   The first live tagged-create repair therefore still failed authorization.
   Mapping create/read/update/delete remain tied to the exact reporting function.
   AWS does not support resource-level ARNs for `CreateEventSourceMapping`;
-  that single action requires `Resource: *`, with the exact function and the
-  same required CloudFormation ownership/request tags. The previous ARN-scoped
+  that single action requires `Resource: *`, with the exact function and
+  mandatory portfolio/environment request tags. The previous ARN-scoped
   create grant is denied by real-role simulation. Read/update/delete continue
   to use mapping ARNs; this is not a wildcard action or an unconditioned grant.
   Tagging instead requires the exact portfolio/environment, owned eventing
   stack name/ARN and either of its two synthesized mapping logical IDs.
   Only those two application tags and three reserved CloudFormation tag keys
   are permitted. These reserved tags are present on the existing development
-  mappings; the read handler's `lambda:ListTags` grant checks the same stored
-  ownership tags. No untagged or cross-stack mapping tag grant is added.
+  mappings; the read handler's `lambda:ListTags` grant checks the stored
+  portfolio/environment and exact owning stack name. Tagged creation must pass
+  both the function-scoped create action and the stricter dependent tagging
+  grant. No untagged or cross-stack mapping tag grant is added.
   Validate actual tagged creation through the bounded development executor
   before retrying production; policy simulation cannot prove service context.
+- The first context-repair policy was 7,192 resolved characters and its
+  development update rolled back at IAM's 6,144-character managed-policy limit.
+  The compact repair keeps the strict dependent tagging gate, avoids repeating
+  it on creation and limits tag reads to the exact owned stack. EventBridge bus
+  and rule operations share one statement over the same exact bus/two rule
+  ARNs; their distinct resource types preserve the original operation scope.
+  Synthesis tests resolve policy intrinsics and enforce the real quota for both
+  API/reporting boundaries and environments. No named queue/alarm scope or
+  wildcard-action restriction is relaxed to fit the limit.
 - The planner's `CreateChangeSet` grant pairs the API execution role only with
   the Founder foundation stack and the reporting execution role only with that
   environment's eventing stack. API Gateway IDs are AWS-generated, so the API
