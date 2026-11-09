@@ -1,6 +1,10 @@
 # Founder infrastructure foundation
 
-This stack is additive and undeployed. It does not own or modify the live
+This stack is additive. Development foundations and both environments'
+governance/release-planning resources have been provisioned; production
+application rollout is in progress with owner access disabled. See the
+[portfolio handoff](https://github.com/CteNerd/consulting.wellcall.biz/blob/main/docs/development-handoff-2026-11-06.md)
+for actual deployment and validation evidence. This stack does not own or modify the live
 profile's existing CloudFormation hosting stack. The Founder frontend is built
 as a separate, non-prerendered `/founder/` artifact under `founder-dist/`,
 outside the `dist/` artifact consumed by existing profile publishers; no
@@ -44,8 +48,10 @@ See the [read-only API runbook](../apps/api/README.md) and
 The frontend implements Cognito authorization-code + PKCE sign-in and the
 owner-only aggregate dashboard. It keeps access tokens in memory, requests
 reports only after authentication, and does not prerender metrics. Cognito
-domain, callback/logout allowlists and API CORS are defined in source but have
-not been provisioned or exercised against AWS. The development origin is
+domain, callback/logout allowlists and API CORS are defined in source.
+The development migration has verified callback/logout configuration, CORS,
+health and anonymous metrics denial against AWS; authenticated owner UAT is
+still pending. The development origin is
 `http://localhost:5174`; production uses the existing profile origin.
 Publishing still requires explicit `/founder` route integration, validated
 public runtime configuration and owner authorization setup. No live route or
@@ -81,8 +87,7 @@ IAM, read databases or deploy applications. They do not manage the separate bus.
 Runtime managed policies define upper bounds for each app's own table/log
 namespace. Producers additionally have only their source/version allowlist on
 the exact environment bus; Founder has reporting-queue receive permissions,
-not event publishing or source-table access. **These policies are not deployed
-yet.** Boundaries cap permissions; they do not grant them unless separately
+not event publishing or source-table access. Boundaries cap permissions; they do not grant them unless separately
 attached as identity policies. The owner selected governance-owned Founder
 runtime IAM rather than allowing application execution to create/manage roles.
 Do not equate this slice with completed deployment IAM.
@@ -114,9 +119,9 @@ role creation, trust update, policy attachment or boundary mutation privileges.
 Runtime trust/capability changes belong in a separate reviewed governance
 change set by the approved bootstrap operator. Never deploy governance with an
 application role or remove its roles/boundaries to roll back application code.
-All resources remain undeployed; inspect name collisions/actual IAM before
-bootstrap. These source-only naming changes must not be used to replace an
-already-running Lambda/role without a reviewed migration.
+Inspect name collisions/actual IAM before any bootstrap in a new environment.
+These names must not replace an already-running Lambda/role without a reviewed
+migration; the existing development release stack was migrated in place.
 
 For an existing, configured environment, `npm run check:deployment` performs
 read-only GitHub, STS and self-role inventory. Required environment inputs:
@@ -199,19 +204,23 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   stack create/update/delete/rollback/policy mutation. No deploy/assume-role
   fallback to the broad local user or shared CDK roles is allowed.
 
-**This is release preparation, not a completed deployment role chain.** No new
-OIDC workflow or AWS resources are activated. Provisioning this separate stack
+**The repository planner is still preparation-only, not an executing role.**
+Both release-planning stacks are provisioned; no new OIDC execution workflow
+or owner access has been activated. Provisioning or updating this separate stack
 requires a reviewed real-account assembly and approved administrative bootstrap
 change set; the repository planner cannot bootstrap or update its own access.
 Governance and release-planning must exist before eventual application
 deployment. Imports are not automatic CloudFormation dependencies.
 
 After bootstrap, verify the exact short-lived planner with `check:deployment`
-and inspect its policies. CDK supports `--method prepare-change-set`; supply
-`--role-arn` with the exact stack-output execution ARN paired to the stack.
-Omitting it or using the other stack's role must fail the IAM condition, and
-neither `cdk deploy`'s default executing method nor `ExecuteChangeSet` is
-permitted. Initial CREATE change sets can leave an unexecuted
+and inspect its policies. Publish assets from the reviewed real-account assembly
+with `cdk publish-assets`, then use `aws cloudformation create-change-set`
+with `--role-arn` set to the exact stack-output execution ARN paired to the
+stack. Do not substitute `cdk --role-arn`: that global CDK option assumes a role
+as the caller, which the planner explicitly cannot do. Omitting the
+CloudFormation execution role or using the other stack's role must fail the
+IAM condition. Neither default `cdk deploy` execution nor
+`ExecuteChangeSet` is permitted to the planner. Initial CREATE change sets can leave an unexecuted
 `REVIEW_IN_PROGRESS` stack; review those placeholders explicitly. No live
 change set or service call is claimed by offline synthesis. IAM Access Analyzer
 reports no findings for the candidate boundaries, and custom-policy simulation
@@ -220,16 +229,20 @@ The simulator did not validate Cognito user-pool creation or Lambda
 event-source-mapping creation, even with broad simulated allows; those calls
 still need real development change-set verification.
 
-The source now defines service-specific application execution permissions, but
-they remain undeployed and must be verified against a real development
-change-set plan, CloudFormation service calls and Lambda pass-role context.
+The service-specific application execution permissions are deployed. Real
+development API migration has exercised the API role, and initial production
+bootstrap has exercised tagged Cognito creation and exact paired Lambda
+pass-role. Each remaining resource operation still needs real CloudFormation
+verification; initial HTTP API creation exposed the encoded tag-collection
+authorization covered above.
 Offline assertions, Access Analyzer and custom-policy simulation do not prove
 those calls. Do not
 broaden these roles or reuse `AdministratorAccess` to make deployment pass.
 Separate reviewed bootstrap authority, cost/notification verification, cloud
 IAM allow/deny tests and smoke/rollback evidence remain prerequisites.
-Production also requires tested protected-environment approval and separate
-authorization; the owner has approved development preparation only.
+Production also requires protected-environment approval for repository releases.
+The owner has approved production provisioning and public branding, not opening
+intake, enrollment or Founder owner access before UAT.
 
 ## Separate reporting/eventing stack
 
@@ -255,7 +268,9 @@ and writes to its explicit log group. The role is imported immutably from govern
 boundary, not the broader compatibility policy. **Review and provision
 governance and the Founder foundation before any eventual eventing deployment.**
 These external prerequisites are not automatic CloudFormation dependencies.
-Both environments are still source-only and no write deployment roles exist.
+Development eventing is provisioned. The separate bounded reporting execution
+role exists in both environments; production eventing rollout follows successful
+production foundation provisioning.
 
 Seven alarms per environment cover both delivery/processing DLQs, both backlog
 ages and Lambda invocation errors. They deliberately have **no notification
