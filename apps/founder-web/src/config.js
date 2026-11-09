@@ -1,11 +1,9 @@
-const environment = import.meta.env;
-
 export const founderConfiguration = Object.freeze({
-  authUrl: environment.VITE_FOUNDER_AUTH_URL ?? "",
-  clientId: environment.VITE_FOUNDER_CLIENT_ID ?? "",
-  userPoolId: environment.VITE_FOUNDER_USER_POOL_ID ?? "",
-  apiUrl: environment.VITE_FOUNDER_API_URL ?? "",
-  callbackUrl: environment.VITE_FOUNDER_CALLBACK_URL ?? "",
+  authUrl: import.meta.env.VITE_FOUNDER_AUTH_URL ?? "",
+  clientId: import.meta.env.VITE_FOUNDER_CLIENT_ID ?? "",
+  userPoolId: import.meta.env.VITE_FOUNDER_USER_POOL_ID ?? "",
+  apiUrl: import.meta.env.VITE_FOUNDER_API_URL ?? "",
+  callbackUrl: import.meta.env.VITE_FOUNDER_CALLBACK_URL ?? "",
 });
 
 export function isFounderConfigurationValid(configuration) {

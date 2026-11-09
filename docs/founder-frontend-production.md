@@ -6,6 +6,9 @@ remain independent. No synthetic rehearsal output is eligible. Owner access stay
 disabled: the candidate deliberately builds all five Founder configuration values
 empty; it cannot sign in or contact the API. Enabling owner access requires separate
 UAT approval and a separately reviewed release change, not environment-variable edits.
+Configuration reads individual Vite environment properties so production builds
+do not serialize the entire environment, including the disabled rehearsal marker.
+Release checks still reject rehearsal configuration and fixtures.
 
 ## Operational integration contract
 
