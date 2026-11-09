@@ -214,6 +214,27 @@ for (const environment of ["development", "production"] as const) {
         assert.doesNotMatch(JSON.stringify(executionStatements), /events:|sqs:|cloudwatch:|ssm:/);
       } else {
         assert.match(JSON.stringify(executionStatements), /lambda:FunctionArn/);
+        const mappingTags = executionStatements.find((statement: { Action: string }) =>
+          statement.Action === "lambda:TagResource");
+        assert.ok(mappingTags);
+        assert.match(JSON.stringify(mappingTags.Resource), /:event-source-mapping:\*/);
+        assert.deepEqual(mappingTags.Condition, {
+          ArnEquals: { "lambda:FunctionArn": { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+            `:lambda:us-east-1:123456789012:function:${config.prefix}-reporting`]] } },
+          StringEquals: {
+            "aws:RequestTag/Portfolio": "RCT",
+            "aws:RequestTag/Environment": environment,
+          },
+          "ForAllValues:StringEquals": { "aws:TagKeys": ["Portfolio", "Environment"] },
+        });
+        const mappingTagRead = executionStatements.find((statement: { Action: string }) =>
+          statement.Action === "lambda:ListTags");
+        assert.ok(mappingTagRead);
+        assert.match(JSON.stringify(mappingTagRead.Resource), /:event-source-mapping:\*/);
+        assert.deepEqual(mappingTagRead.Condition, { StringEquals: {
+          "aws:ResourceTag/Portfolio": "RCT",
+          "aws:ResourceTag/Environment": environment,
+        } });
         assert.match(JSON.stringify(executionStatements), /events:PutRule/);
         assert.match(JSON.stringify(executionStatements), /sqs:CreateQueue/);
         assert.match(JSON.stringify(executionStatements), /cloudwatch:PutMetricAlarm/);
