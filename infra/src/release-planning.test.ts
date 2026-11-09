@@ -253,19 +253,11 @@ for (const environment of ["development", "production"] as const) {
         assert.ok(mappingTags);
         assert.match(JSON.stringify(mappingTags.Resource), /:event-source-mapping:\*/);
         const eventingStackName = `rct-portfolio-${environment}-eventing`;
-        const mappingLogicalIds = Object.keys(Template.fromStack(new EventingStack(new App(), config))
-          .findResources("AWS::Lambda::EventSourceMapping")).sort();
-        assert.equal(mappingLogicalIds.length, 2);
-        const stackArn = { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
-          `:cloudformation:us-east-1:123456789012:stack/${eventingStackName}/*`]] };
         assert.deepEqual(mappingTags.Condition, {
           StringEquals: {
             "aws:RequestTag/Portfolio": "RCT",
             "aws:RequestTag/Environment": environment,
-            "aws:RequestTag/aws:cloudformation:stack-name": eventingStackName,
-            "aws:RequestTag/aws:cloudformation:logical-id": mappingLogicalIds,
           },
-          ArnLike: { "aws:RequestTag/aws:cloudformation:stack-id": stackArn },
           "ForAllValues:StringEquals": { "aws:TagKeys": [
             "Portfolio", "Environment", "aws:cloudformation:stack-name",
             "aws:cloudformation:logical-id", "aws:cloudformation:stack-id",

@@ -196,23 +196,12 @@ export class ReleasePlanningStack extends Stack {
       `arn:${this.partition}:cloudwatch:${this.region}:${this.account}:alarm:${busName}-worker-errors`,
     ];
     const eventingStackName = `rct-portfolio-${config.environment}-eventing`;
-    // Synthesis tests pin these CloudFormation ownership identifiers in both environments.
-    const mappingLogicalIds = config.environment === "development" ? [
-      "ReportingWorkerSqsEventSourcerctportfoliodevelopmenteventingconsultingQueue60F271D116B57289",
-      "ReportingWorkerSqsEventSourcerctportfoliodevelopmenteventingdotcomQueueB3EB8A64151E7693",
-    ] : [
-      "ReportingWorkerSqsEventSourcerctportfolioproductioneventingconsultingQueueD7BA405418C4F6EC",
-      "ReportingWorkerSqsEventSourcerctportfolioproductioneventingdotcomQueueFEF7AA3C8F131CC0",
-    ];
     const eventingStackArn = `arn:${this.partition}:cloudformation:${this.region}:${this.account}:stack/${eventingStackName}/*`;
     const mappingRequestConditions = {
       StringEquals: {
         "aws:RequestTag/Portfolio": "RCT",
         "aws:RequestTag/Environment": config.environment,
-        "aws:RequestTag/aws:cloudformation:stack-name": eventingStackName,
-        "aws:RequestTag/aws:cloudformation:logical-id": mappingLogicalIds,
       },
-      ArnLike: { "aws:RequestTag/aws:cloudformation:stack-id": eventingStackArn },
       "ForAllValues:StringEquals": { "aws:TagKeys": [
         "Portfolio", "Environment", "aws:cloudformation:stack-name",
         "aws:cloudformation:logical-id", "aws:cloudformation:stack-id",
