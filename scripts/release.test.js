@@ -113,6 +113,28 @@ it("binds promotion to the exact successful main candidate run and immutable art
   ]) expect(() => verifyProvenance({ ...evidence, artifact: { ...artifact, ...changes } })).toThrow();
 });
 
+it("omits rehearsal configuration and fixtures from a disabled-access production Founder build", async () => {
+  const result = await build({
+    configFile: path.resolve("apps/founder-web/vite.config.js"),
+    logLevel: "silent",
+    define: {
+      "import.meta.env.VITE_FOUNDER_AUTH_URL": '""',
+      "import.meta.env.VITE_FOUNDER_CLIENT_ID": '""',
+      "import.meta.env.VITE_FOUNDER_USER_POOL_ID": '""',
+      "import.meta.env.VITE_FOUNDER_API_URL": '""',
+      "import.meta.env.VITE_FOUNDER_CALLBACK_URL": '""',
+      "import.meta.env.VITE_FOUNDER_UAT_REHEARSAL": '""',
+    },
+    build: { write: false },
+  });
+  const chunks = (Array.isArray(result) ? result : [result])
+    .flatMap((bundle) => bundle.output)
+    .filter((output) => output.type === "chunk");
+  expect(chunks.length).toBeGreaterThan(0);
+  const rehearsal = /uat-rehearsal\.js|VITE_FOUNDER_UAT_REHEARSAL|Synthetic local rehearsal|Synthetic monthly timeline|synthetic-local-rehearsal/i;
+  expect(chunks.some((chunk) => rehearsal.test(chunk.code))).toBe(false);
+});
+
 it("fails closed on absent production review or non-main deployment policies", () => {
   const environment = {
     name: "production",
