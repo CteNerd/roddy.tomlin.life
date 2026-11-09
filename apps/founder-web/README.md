@@ -39,6 +39,37 @@ The development pool/API must already be deployed and its owner explicitly
 provisioned before a real sign-in can succeed. Build and test without AWS using
 `npm run build` and `npm test` from the repository root.
 
+### Synthetic dashboard rehearsal
+
+To exercise the actual dashboard cards, month selector, refresh control, and
+error states without Cognito, AWS, or source data, run this explicit
+development-only mode from the repository root:
+
+```sh
+npm run dev:uat --workspace @rct/founder-web
+```
+
+Open <http://localhost:5184/founder/>. The command opts in with
+`VITE_FOUNDER_UAT_REHEARSAL=1`; the app additionally requires Vite development
+mode and the loopback `localhost` hostname. The fixture loader is dynamically
+imported only behind those checks and feeds the same aggregate response parser
+used by the live dashboard. It makes no network requests.
+
+In “Synthetic monthly timeline,” select `2026-09` to see an observed zero with
+a source timestamp, `2026-10` to see no recorded projections (not zero
+activity), and `2026-11` to see populated totals including a signed negative
+correction. Change months and use “Refresh report” to repeat a request. The
+other response choices exercise an expired-session `401`, service `503`, and
+malformed aggregate response.
+
+This is synthetic local UI rehearsal only—not authentication, event-delivery,
+or DynamoDB certification. It does not activate or simulate an owner session,
+prove MFA, read live data, or validate live infrastructure. Normal
+`npm run dev --workspace @rct/founder-web` remains the PKCE sign-in
+flow on `localhost:5174`; production builds do not include the fixture module.
+Real owner-MFA provisioning and authorized live aggregate data remain separate
+gates.
+
 The current profile host is not managed by this repository. Before publishing,
 configure only the explicit `/founder` and `/founder/` paths to serve the
 separately gated `founder-dist/` artifact, preserve existing retired-route 404

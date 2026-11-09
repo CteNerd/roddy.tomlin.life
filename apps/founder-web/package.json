@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.js --host localhost --port 5174",
+    "dev:uat": "VITE_FOUNDER_UAT_REHEARSAL=1 vite --config vite.config.js --host localhost --port 5184 --strictPort",
     "build": "vite build --config vite.config.js",
     "check": "cd ../.. && vitest run apps/founder-web/src"
   },

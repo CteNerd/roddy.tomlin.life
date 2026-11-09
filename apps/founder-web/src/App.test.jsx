@@ -1,11 +1,13 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import axe from "axe-core";
 import App from "./App.jsx";
 
 afterEach(() => {
+  vi.useRealTimers();
   window.history.replaceState({}, "", "/");
+  vi.unstubAllEnvs();
 });
 
 function createAuth(configured, token = null) {
@@ -81,6 +83,72 @@ describe("Founder reporting UI", () => {
     expect(auth.signOut).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled();
     expect(screen.queryByRole("button", { name: "Sign out" })).not.toBeInTheDocument();
+  });
+
+  it("uses the real dashboard UI for an explicit local synthetic rehearsal", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2027-01-15T12:00:00.000Z"));
+    vi.stubEnv("DEV", true);
+    vi.stubEnv("VITE_FOUNDER_UAT_REHEARSAL", "1");
+    const auth = createAuth(false);
+    const loadMetrics = vi.fn();
+    render(<App auth={auth} loadMetrics={loadMetrics} />);
+
+    const month = await screen.findByLabelText("Reporting month");
+    fireEvent.change(month, { target: { value: "2026-11" } });
+    expect(await screen.findByText("8")).toBeVisible();
+    expect(screen.getByText("-1")).toBeVisible();
+    expect(screen.getByRole("note")).toHaveTextContent(
+      "Synthetic local rehearsal — NOT auth, event-delivery, or DynamoDB certification",
+    );
+    expect(auth.completeSignIn).not.toHaveBeenCalled();
+    expect(loadMetrics).not.toHaveBeenCalled();
+
+    fireEvent.change(month, { target: { value: "2026-10" } });
+    expect(await screen.findByText(/No reporting projections are recorded for 2026-10/)).toBeVisible();
+    expect(screen.queryByText("0")).not.toBeInTheDocument();
+
+    fireEvent.change(month, { target: { value: "2026-09" } });
+    expect(await screen.findByText("0")).toBeVisible();
+    expect(screen.getByText("No projection is recorded for this month.")).toBeVisible();
+
+    await userEvent.click(screen.getByRole("button", { name: "Refresh report" }));
+    expect(await screen.findByText("0")).toBeVisible();
+  });
+
+  it.each([
+    ["expired", /session expired/i],
+    ["error", /temporarily unavailable/i],
+    ["malformed", /response is invalid/i],
+  ])("rehearses the %s response through normal error handling", async (scenario, message) => {
+    vi.stubEnv("DEV", true);
+    vi.stubEnv("VITE_FOUNDER_UAT_REHEARSAL", "1");
+    const auth = createAuth(false);
+    render(<App auth={auth} />);
+
+    await userEvent.selectOptions(await screen.findByLabelText("Rehearsal response"), scenario);
+    expect(await screen.findByRole("alert")).toHaveTextContent(message);
+    expect(auth.clearSession).not.toHaveBeenCalled();
+    expect(auth.signOut).not.toHaveBeenCalled();
+  });
+
+  it("does not enable the rehearsal when the explicit startup flag is absent", () => {
+    vi.stubEnv("DEV", true);
+    render(<App auth={createAuth(false)} />);
+
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled();
+    expect(screen.queryByText(/Synthetic local rehearsal/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Rehearsal response")).not.toBeInTheDocument();
+  });
+
+  it("does not enable the rehearsal in a production build even with the startup flag", () => {
+    vi.stubEnv("DEV", false);
+    vi.stubEnv("VITE_FOUNDER_UAT_REHEARSAL", "1");
+    render(<App auth={createAuth(false)} />);
+
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled();
+    expect(screen.queryByText(/Synthetic local rehearsal/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Rehearsal response")).not.toBeInTheDocument();
   });
 
   it("passes layout-independent accessibility checks", async () => {

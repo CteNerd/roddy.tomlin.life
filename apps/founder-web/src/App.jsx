@@ -6,6 +6,11 @@ import "./styles.css";
 
 const defaultAuth = createAuthClient(founderConfiguration);
 const currentMonth = new Date().toISOString().slice(0, 7);
+const loopbackHosts = new Set(["localhost", "127.0.0.1"]);
+
+function isLoopbackHost(hostname) {
+  return loopbackHosts.has(hostname);
+}
 
 function formatNumber(value) {
   return new Intl.NumberFormat().format(value);
@@ -51,15 +56,36 @@ const metricLabels = ["Consulting inbound leads", "Community mentor approvals"];
 export default function App({ auth = defaultAuth, loadMetrics = fetchMetrics }) {
   const [accessToken, setAccessToken] = useState(() => auth.getAccessToken());
   const [month, setMonth] = useState(currentMonth);
+  const [scenario, setScenario] = useState("timeline");
+  const [refreshSequence, setRefreshSequence] = useState(0);
+  const [rehearsalModule, setRehearsalModule] = useState(null);
   const [reportResult, setReportResult] = useState(null);
   const [authError, setAuthError] = useState("");
   const configured = auth.configured;
-  const currentResult = reportResult?.month === month ? reportResult : null;
-  const reportState = !accessToken ? "idle" : currentResult?.status ?? "loading";
+  const rehearsalRequested = import.meta.env.DEV
+    && import.meta.env.VITE_FOUNDER_UAT_REHEARSAL === "1"
+    && isLoopbackHost(window.location.hostname);
+  const rehearsalActive = rehearsalRequested && Boolean(rehearsalModule);
+  const currentResult = reportResult?.month === month && reportResult?.scenario === scenario
+    ? reportResult
+    : null;
+  const reportState = !accessToken && !rehearsalActive
+    ? "idle"
+    : currentResult?.status ?? "loading";
   const report = currentResult?.report ?? null;
   const reportError = currentResult?.error ?? "";
 
   useEffect(() => {
+    if (!rehearsalRequested) return undefined;
+    let active = true;
+    import("./uat-rehearsal.js").then((module) => {
+      if (active) setRehearsalModule(module);
+    });
+    return () => { active = false; };
+  }, [rehearsalRequested]);
+
+  useEffect(() => {
+    if (rehearsalRequested) return undefined;
     let active = true;
     auth.completeSignIn(window.location.href)
       .then((token) => {
@@ -72,24 +98,28 @@ export default function App({ auth = defaultAuth, loadMetrics = fetchMetrics }) 
         if (active) setAuthError("Sign-in could not be completed. Please try again.");
       });
     return () => { active = false; };
-  }, [auth]);
+  }, [auth, rehearsalRequested]);
 
   useEffect(() => {
-    if (!accessToken) return undefined;
+    if (!accessToken && !rehearsalActive) return undefined;
+    if (rehearsalActive && !rehearsalModule) return undefined;
     const controller = new AbortController();
-    loadMetrics({
-      apiUrl: founderConfiguration.apiUrl,
-      accessToken,
-      month,
-      signal: controller.signal,
-    }).then((result) => {
+    const request = rehearsalActive
+      ? rehearsalModule.loadRehearsalMetrics({ month, scenario, signal: controller.signal })
+      : loadMetrics({
+        apiUrl: founderConfiguration.apiUrl,
+        accessToken,
+        month,
+        signal: controller.signal,
+      });
+    request.then((result) => {
       if (!controller.signal.aborted) {
-        setReportResult({ month, status: "ready", report: result });
+        setReportResult({ month, scenario, status: "ready", report: result });
       }
     }).catch((error) => {
       if (error.name === "AbortError") return;
       if (!controller.signal.aborted) {
-        if (error.statusCode === 401) {
+        if (error.statusCode === 401 && !rehearsalActive) {
           auth.clearSession();
           setReportResult(null);
           setAccessToken(null);
@@ -98,13 +128,14 @@ export default function App({ auth = defaultAuth, loadMetrics = fetchMetrics }) 
         }
         setReportResult({
           month,
+          scenario,
           status: "error",
           error: error.message || "Reports are temporarily unavailable. Try again.",
         });
       }
     });
     return () => controller.abort();
-  }, [accessToken, month, loadMetrics, auth]);
+  }, [accessToken, month, scenario, refreshSequence, loadMetrics, auth, rehearsalActive, rehearsalModule]);
 
   async function handleSignIn() {
     setAuthError("");
@@ -126,10 +157,10 @@ export default function App({ auth = defaultAuth, loadMetrics = fetchMetrics }) 
     <div className="founder-shell">
       <header className="founder-header">
         <a href="/" className="founder-wordmark">Roddy Tomlin</a>
-        {accessToken && <button className="button button-quiet" type="button" onClick={handleSignOut}>Sign out</button>}
+        {accessToken && !rehearsalActive && <button className="button button-quiet" type="button" onClick={handleSignOut}>Sign out</button>}
       </header>
       <main className="founder-main">
-        {!accessToken ? (
+        {!accessToken && !rehearsalActive ? (
           <section className="sign-in-card" aria-labelledby="founder-title">
             <p className="eyebrow">Private reporting</p>
             <h1 id="founder-title">Founder dashboard</h1>
@@ -147,18 +178,53 @@ export default function App({ auth = defaultAuth, loadMetrics = fetchMetrics }) 
               <div>
                 <p className="eyebrow">Private reporting</p>
                 <h1 id="founder-title">Founder dashboard</h1>
+                {rehearsalActive && (
+                  <p className="rehearsal-banner" role="note">
+                    Synthetic local rehearsal — NOT auth, event-delivery, or DynamoDB certification. No network or live data is used.
+                  </p>
+                )}
               </div>
-              <label className="month-field">
-                <span>Reporting month</span>
-                <input
-                  type="month"
-                  value={month}
-                  onChange={(event) => {
+              <div className="report-controls">
+                {rehearsalActive && (
+                  <label className="month-field">
+                    <span>Rehearsal response</span>
+                    <select
+                      value={scenario}
+                      onChange={(event) => {
+                        setReportResult(null);
+                        setScenario(event.target.value);
+                      }}
+                    >
+                      <option value="timeline">Synthetic monthly timeline</option>
+                      <option value="expired">Expired session (401)</option>
+                      <option value="error">Service unavailable (503)</option>
+                      <option value="malformed">Malformed aggregate response</option>
+                    </select>
+                  </label>
+                )}
+                <label className="month-field">
+                  <span>Reporting month</span>
+                  <input
+                    type="month"
+                    value={month}
+                    onChange={(event) => {
+                      setReportResult(null);
+                      setMonth(event.target.value);
+                    }}
+                  />
+                </label>
+                <button
+                  className="button button-refresh"
+                  type="button"
+                  disabled={reportState === "loading"}
+                  onClick={() => {
                     setReportResult(null);
-                    setMonth(event.target.value);
+                    setRefreshSequence((sequence) => sequence + 1);
                   }}
-                />
-              </label>
+                >
+                  Refresh report
+                </button>
+              </div>
             </div>
             {reportState === "loading" && <p role="status" className="status-message">Loading authorized report…</p>}
             {reportState === "error" && <p role="alert" className="error-message">{reportError}</p>}
@@ -177,7 +243,10 @@ export default function App({ auth = defaultAuth, loadMetrics = fetchMetrics }) 
                 />
               </div>
             )}
-            <p className="security-note">Only aggregate projections are displayed. Source records and participant details are not available in this dashboard.</p>
+            <p className="security-note">
+              Only aggregate projections are displayed; source records and participant details are not available here.
+              A missing projection is not a zero, and signed totals can reflect corrections.
+            </p>
           </section>
         )}
       </main>
