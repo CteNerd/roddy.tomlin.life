@@ -201,9 +201,18 @@ writes have been performed.
   are an empty array, not zero totals. Storage faults return explicit 503s with
   sanitized diagnostics. The real integration job additionally tests the
   actual API query against worker-written and empty months.
-- API/worker/infra runbooks and manifests/lockfile are updated. The existing
-  profile, public build/hosting and routes remain unchanged; no Founder UI or
-  login flow is published. This is partial P5, not a production-ready dashboard.
+- API/worker/infra runbooks and manifests/lockfile are updated. The isolated
+  `apps/founder-web` frontend now implements Cognito managed-login authorization
+  code + PKCE, required-MFA sign-in, in-memory access tokens and monthly
+  aggregate reporting. It validates OAuth state/issuer/nonce and token claims, calls
+  the owner-gated API only after sign-in, and does not fabricate zeroes for
+  missing projections. Its separate `dist/founder/` build is not prerendered or
+  indexed, and the release check disallows JSON report payloads.
+- This is source-level P5 progress, not a live dashboard: the frontend build
+  defaults to disabled public config, no Cognito domain or owner is provisioned,
+  `FounderOwnerSubject` remains `disabled`, and no AWS or hosting route changes
+  were made. Exact `/founder` routing, public config injection, deployed
+  callback/CORS behavior and real owner/MFA/API acceptance remain gated.
 
 ## Confirmed domains and outstanding DNS/certificates
 
@@ -285,11 +294,11 @@ no broad local bootstrap identity is copied to CI or app profiles.
 
 ## Validation and release blockers
 
-- **Passing locally:** Consulting 16 tests, Community 15, Personal/Founder 64
-  including its 22 existing profile tests and 12 worker unit/bundle tests.
-  All workspace type checks and new
-  source lint pass; both new web builds and the personal 10-file release boundary
-  pass. All six Founder foundation/governance/eventing synth commands, plus
+- **Passing locally:** Consulting 16 tests, Community 15, Personal/Founder 76
+  including 22 profile tests, 12 new Founder UI/auth tests and 12 worker
+  unit/bundle tests. All workspace type checks and source lint pass; all three
+  web builds and the personal 13-file release boundary pass. All six Founder
+  foundation/governance/eventing synth commands, plus
   both producer environments' foundation synths, pass with real local
   Lambda bundling and explicit synthetic account, without AWS lookups.
   Infrastructure alone relaxes exact-optionals for CDK declaration compatibility;
@@ -297,6 +306,8 @@ no broad local bootstrap identity is copied to CI or app profiles.
 - Both producer previews were browser-checked on loopback at desktop and
   390-pixel mobile width: anchor navigation works, no horizontal overflow/forms,
   and the closed-enrollment/youth-safety messaging remains visible.
+- The new Founder preview was browser-checked at `/founder/`; absent public
+  runtime configuration keeps sign-in disabled and no report data is rendered.
 - Dependency gates use high severity. Current selected-workspace audits report
   no high/critical findings, but 10 moderate package entries per producer and 11
   personal entries from upstream minimatch. No advisory is suppressed or
@@ -307,8 +318,9 @@ no broad local bootstrap identity is copied to CI or app profiles.
 - Hosted validation must pass on each PR's latest head before merge; an older
   successful run does not substitute for validation of the current revision.
 - **Not implemented/tested:** live frontend/API integration, backend business
-  authorization, deployment smoke, durable producer outboxes, Cognito login UI,
-  cloud event delivery/recovery, notification receipt or rollback/restore rehearsal.
+  authorization, deployment smoke, durable producer outboxes, live Cognito
+  login/MFA acceptance, cloud event delivery/recovery, notification receipt or
+  rollback/restore rehearsal.
   Template assertions and mocked identity events do not prove live JWT behavior.
 - **GitHub:** the earlier branch-protection entitlement error no longer blocks
   current configuration. Branch protections and main-only controls are verified;

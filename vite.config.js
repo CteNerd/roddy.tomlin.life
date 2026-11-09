@@ -37,6 +37,6 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./src/setupTests.js"],
-    include: ["src/App.test.jsx", "scripts/release.test.js"],
+    include: ["src/App.test.jsx", "apps/founder-web/src/**/*.test.{js,jsx}", "scripts/release.test.js"],
   },
 });
