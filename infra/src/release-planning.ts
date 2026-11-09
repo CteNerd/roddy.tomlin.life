@@ -216,6 +216,14 @@ export class ReleasePlanningStack extends Stack {
         },
       }),
       new iam.PolicyStatement({
+        actions: ["lambda:ListTags"],
+        resources: [`arn:${this.partition}:lambda:${this.region}:${this.account}:event-source-mapping:*`],
+        conditions: { StringEquals: {
+          "aws:ResourceTag/Portfolio": "RCT",
+          "aws:ResourceTag/Environment": config.environment,
+        } },
+      }),
+      new iam.PolicyStatement({
         actions: [
           "events:CreateEventBus", "events:DeleteEventBus", "events:DescribeEventBus",
           "events:TagResource", "events:UntagResource", "events:ListTagsForResource",

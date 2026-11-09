@@ -206,6 +206,14 @@ for (const environment of ["development", "production"] as const) {
           },
           "ForAllValues:StringEquals": { "aws:TagKeys": ["Portfolio", "Environment"] },
         });
+        const mappingTagRead = executionStatements.find((statement: { Action: string }) =>
+          statement.Action === "lambda:ListTags");
+        assert.ok(mappingTagRead);
+        assert.match(JSON.stringify(mappingTagRead.Resource), /:event-source-mapping:\*/);
+        assert.deepEqual(mappingTagRead.Condition, { StringEquals: {
+          "aws:ResourceTag/Portfolio": "RCT",
+          "aws:ResourceTag/Environment": environment,
+        } });
         assert.match(JSON.stringify(executionStatements), /events:PutRule/);
         assert.match(JSON.stringify(executionStatements), /sqs:CreateQueue/);
         assert.match(JSON.stringify(executionStatements), /cloudwatch:PutMetricAlarm/);
