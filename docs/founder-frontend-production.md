@@ -1,6 +1,7 @@
 # Founder frontend production promotion
 
-This is reviewed release **source**, not a deployment or owner-access approval.
+The first reviewed production promotion completed on 2026-11-09 after separate
+owner approval of the exact immutable candidate. This is not owner-access approval.
 The profile root, `/assets`, `experience.html`, and retired-route HTTP 404 behavior
 remain independent. No synthetic rehearsal output is eligible. Owner access stays
 disabled: the candidate deliberately builds all five Founder configuration values
@@ -12,20 +13,20 @@ Release checks still reject rehearsal configuration and fixtures.
 
 ## Operational integration contract
 
-Read-only observations on 2026-11-09, account `425061472162`, region `us-east-1`:
+Verified production integration on 2026-11-09, account `425061472162`, region `us-east-1`:
 
 | Integration | Exact contract |
 | --- | --- |
 | Publisher declaration | `infrastructure/founder-frontend-publisher.yml` |
 | `ExistingProfileBucket` | `roddy-profile-hosting-profilebucket-ybl3ax24jbkq` |
 | `ExistingProfileDistribution` | `E2YXFQ1DC7XTW5` |
-| Publisher output | `PublisherRoleArn` = `arn:aws:iam::425061472162:role/rct-founder-production-frontend-publisher` after authorized provisioning |
-| Publisher status | IAM `GetRole` returned `NoSuchEntity`; not provisioned |
+| Publisher output | `PublisherRoleArn` = `arn:aws:iam::425061472162:role/rct-founder-production-frontend-publisher` |
+| Publisher status | Dedicated stack `CREATE_COMPLETE`; exact production OIDC subject/audience, prefix-only inline policy, no attached policies |
 | Routing declaration / owner | This repository's `infrastructure/profile-hosting.yml`, existing stack `roddy-profile-hosting` |
 | Source ownership evidence | Live original hosting template exactly matched `main` commit `91bafec`'s `infrastructure/profile-hosting.yml` |
 | Existing host | `d1obnj61w0iqrh.cloudfront.net`; origin is the bucket above, with empty origin path |
-| Existing routing state | No viewer-request function, Lambda association, or extra cache behavior; 403 and 404 map to `/404.html` with HTTP 404 |
-| Routing parameters | Retain `DomainName=roddy.tomlin.life`, `HostedZoneId=Z09770441ES3ZDJB86W5A`, `GitHubOidcProviderArn=arn:aws:iam::425061472162:oidc-provider/token.actions.githubusercontent.com`; opt into `EnableFounderRoutes=true` only after release gates |
+| Existing routing state | Exact-entry viewer-request function associated in place; every other distribution setting unchanged, including 403/404 mapping to `/404.html` with HTTP 404 |
+| Routing parameters | Retained `DomainName=roddy.tomlin.life`, `HostedZoneId=Z09770441ES3ZDJB86W5A`, `GitHubOidcProviderArn=arn:aws:iam::425061472162:oidc-provider/token.actions.githubusercontent.com`; approved `EnableFounderRoutes=true` |
 
 Neither declaration belongs in the Founder backend/CDK foundation or reporting
 mapping stacks. Do not recreate hosting, change DNS, or reuse the existing
@@ -40,13 +41,14 @@ Dispatch/variable contract:
   `reviewed_sha=<candidate SHA>`, `candidate_run=<successful run ID>`,
   `artifact_id=<immutable artifact ID>`,
   `artifact_digest=sha256:<reviewed 64-character ZIP hash>`.
-  No candidate IDs/digest exist yet; nothing has been dispatched or published.
+  The first successful immutable candidate and promotion are recorded below.
 - Protected `production` environment variables:
   `FOUNDER_PRODUCTION_BUCKET=roddy-profile-hosting-profilebucket-ybl3ax24jbkq`,
   `FOUNDER_PRODUCTION_DISTRIBUTION=E2YXFQ1DC7XTW5`,
   `FOUNDER_PRODUCTION_PUBLISHER_ROLE=arn:aws:iam::425061472162:role/rct-founder-production-frontend-publisher`.
-  Keep `FOUNDER_PRODUCTION_PUBLISHER_READY` unset until separately approved
-  integration; only then set it to `true`. No new GitHub secret is required.
+  `FOUNDER_PRODUCTION_PUBLISHER_READY=true` was set only after reporting proof,
+  scoped-role verification and stable existing-host integration. No new GitHub
+  secret was required; unset readiness if these integration controls no longer hold.
 - Preserve required production reviewer approval and exactly branch `main`, no
   tag policy. Owner access stays disabled independently of backend health.
 
@@ -82,13 +84,38 @@ certificate, DNS records, OAC, cache/response policies, bucket policy, and exist
 profile deployment role unchanged. The old profile role remains unrelated to
 Founder promotion and is never an acceptable fallback.
 
-These are source-derived expectations, not an executed change set. The authorized
-operator must inspect the real change set and current associations and stop on
+The first integration executed change set `gated-founder-route-pr17` only after
+inspecting actual before/after property values. Future authorized operators must
+inspect the real change set and current associations and stop on
 any unexpected change, replacement, or unresolved replacement status. Updating
 this existing hosting template requires acknowledging its existing IAM resource
 (`CAPABILITY_IAM`); it must not change that role's trust or policy. The **separate**
 publisher declaration has a named role and requires `CAPABILITY_NAMED_IAM`; it
 must not be folded into or used to replace the hosting stack.
+
+## Verified first production release
+
+- Candidate source: `35f2b33872f81c4617509c251ee1de0fd1a84c9f`
+  ([reviewed build repair #20](https://github.com/CteNerd/roddy.tomlin.life/pull/20)).
+- Successful [candidate run 42684093865](https://github.com/CteNerd/roddy.tomlin.life/actions/runs/42684093865),
+  artifact `13704111836`, ZIP digest
+  `sha256:558c0399fff48d6b91e52b880ba20ffc00fac0be4432ca34c23e1e83fb957223`.
+- Owner separately approved those exact inputs. Protected
+  [promotion 42686317738](https://github.com/CteNerd/roddy.tomlin.life/actions/runs/42686317738)
+  passed verification and publication from promoter main `b254dbc`, using the
+  same candidate bytes without rebuilding or deleting objects.
+- `https://roddy.tomlin.life/founder` and `/founder/` return the exact candidate
+  HTML. Browser checks at 1440px and 360px show the dashboard with disabled
+  sign-in, no overflow, no page errors, no backend/auth requests, and no rehearsal
+  content even with the rehearsal query parameter.
+- Existing profile root SHA-256 stayed
+  `fb108bc2c7d346ffe06b9f65a8ca34a58651cd90ed98ede5c0a0ff4aaad65fd6`.
+  Full before/after distribution comparison confirms only the exact Founder
+  function association changed. Root/experience probes and retired
+  `/about/childhood` HTTP 404 passed.
+- All auth/API configuration remains empty; backend owner remains `disabled`,
+  with zero Cognito users. This release intentionally cannot sign in or load
+  report data. Authenticated UAT and owner activation require separate approval.
 
 ## Immutable candidate and promotion
 
@@ -124,20 +151,21 @@ An inline session policy further limits every publisher session. It does **not**
 establish a scoped role, environment protection, or routing approval. Candidate
 and promotion workflows carry no user-provisioning or backend privileges.
 
-## Blocking integration requirements (not performed here)
+## Required integration controls for future promotions
 
 Repository evidence: `infrastructure/profile-hosting.yml` has a profile publisher
 trusted to `aws-production` with root-wide object writes. That role must **not** be
-reused. Read-only GitHub inspection on 2026-11-09 showed `production` has a required
-owner reviewer and branch restrictions; `aws-production` has no required reviewer.
-No environment settings were changed.
+reused. Verified GitHub inspection on 2026-11-09 showed `production` retains a required
+owner reviewer and main-only branch policy; `aws-production` has no required
+reviewer. Only the four documented production publisher variables were configured;
+protection rules were not weakened.
 
 Before setting `FOUNDER_PRODUCTION_PUBLISHER_READY=true`, a separate infrastructure
 review and authorized operator must establish and verify all of the following:
 
 - A dedicated existing-host publisher in account `425061472162`, region `us-east-1`.
-  Declarative source is `infrastructure/founder-frontend-publisher.yml`; this PR
-  does not deploy it. Its only resource is the separately named role
+  Declarative source is `infrastructure/founder-frontend-publisher.yml`.
+  Its only resource is the separately named role
   `rct-founder-production-frontend-publisher`; promotion rejects any other role ARN.
   Review a separate change set with the verified existing bucket and distribution
   as parameters. Confirm the existing GitHub OIDC provider, account, and no
@@ -175,7 +203,7 @@ review and authorized operator must establish and verify all of the following:
   automatically roll back; a prior successful immutable candidate can be promoted
   with fresh approval. Hashed assets are retained to support in-flight older pages.
 
-Only declarative scoped-role source is included: no live bootstrap, AWS writes,
-owner activation, DNS changes, or production environment modifications were made.
-Without that integration the promotion intentionally stops before credentials are
-requested.
+These controls were verified for the first release and remain mandatory.
+Future promotions must stop before credentials if integration or protection
+checks fail. No owner activation or profile-root publication is authorized by
+this frontend release lane.

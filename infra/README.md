@@ -17,19 +17,24 @@ The owner approved all three applications and backend infrastructure, the
 `thirddowntech.com` and `cutblock.org` production domains, and publication of
 the current branding ("publish it all"). Intake, enrollment and Founder owner
 access remain closed until UAT. Preserve the existing `roddy.tomlin.life`
-profile; its `/founder` route still waits for release gates.
+profile; its `/founder/` frontend is now published with sign-in disabled after
+the reporting and exact-candidate approval gates passed.
 
 This is a point-in-time AWS verification in account `425061472162`,
-`us-east-1`, not a claim that the public production release is complete:
+`us-east-1`. Public publication is complete; authenticated workflow and
+operational acceptance remain separate:
 
 | Stack | Verified state | Change set / operation |
 | --- | --- | --- |
 | `rct-governance-production` | `CREATE_COMPLETE` | `production-bootstrap-ac2f179-01` |
-| `rct-founder-production-release-planning` | `UPDATE_COMPLETE` | `enable-proven-stage-91bafec` |
-| `rct-founder-development-release-planning` | `UPDATE_COMPLETE` | `restore-owned-api-91bafec` |
+| `rct-founder-production-release-planning` | `UPDATE_COMPLETE` | `approved-request-tags-b254dbc` |
+| `rct-founder-development-release-planning` | `UPDATE_COMPLETE` | `approved-request-tags-b254dbc` |
 | `rct-founder-development-foundation` | `UPDATE_COMPLETE` | `reviewed-api-migration-9d802f8` |
 | `rct-founder-production-foundation` | `UPDATE_COMPLETE` | Preserved-template retry through bounded API executor |
-| `rct-portfolio-production-eventing` | `UPDATE_FAILED`, successful resources preserved | Mapping tag-context repair still required |
+| `rct-portfolio-development-eventing` | `UPDATE_COMPLETE`, both mappings enabled | `restore-approved-request-tag-mapping` |
+| `rct-portfolio-production-eventing` | `UPDATE_COMPLETE`, both mappings enabled | Preserved-template retry through bounded reporting executor |
+| `rct-founder-production-frontend-publisher` | `CREATE_COMPLETE` | `reviewed-prefix-publisher-pr17` |
+| `roddy-profile-hosting` | `UPDATE_COMPLETE`, existing profile preserved | Separate hosting stack, `gated-founder-route-pr17` |
 
 Bootstrap used reviewed `ac2f179`; the domain-permission fix was merged as
 [PR #13](https://github.com/CteNerd/roddy.tomlin.life/pull/13), `9d802f8`,
@@ -50,13 +55,34 @@ its independently read API `81qhxlwk68`.
 The preserved production foundation then completed in place: health is 200,
 anonymous metrics is 401, the original invitation-only MFA pool and protected
 empty table remain intact, and owner is `disabled` with zero users.
-The reporting retry after [PR #15](https://github.com/CteNerd/roddy.tomlin.life/pull/15)
-still failed `lambda:TagResource`; its unsupported function condition and
-missing reserved tag keys are addressed below. This tag-context repair still
-requires bounded development tagged-create verification before production.
-Do not delete retained data/auth resources or broaden an executor as a recovery
-shortcut. Existing profile hosting and live-user access remain unchanged;
-producer-domain rollout is tracked separately.
+Reporting permission repairs culminated in separately owner-approved
+[PR #21](https://github.com/CteNerd/roddy.tomlin.life/pull/21), merged `b254dbc`.
+A real single-subscription development canary restored the exact original
+template through the bounded reporting executor. The new Community mapping
+`c2d23f64-97af-4bdf-a789-5d5f95338dd9` is enabled with both application tags and
+all three CloudFormation tags; the other mapping, worker and queues are preserved.
+The first removal succeeded, but post-delete reads/retries denied authorization
+after the function context no longer existed; CloudFormation cleanup eventually
+completed. This is not evidence that delete/rollback acceptance has passed,
+and no unconditioned lifecycle fallback was added.
+
+After that successful tagged-create proof, production's preserved template
+completed through its bounded reporting executor. Both mappings are enabled:
+Community `7dc49f93-2954-48da-a104-123c772fe7be` and Consulting
+`84d25bc4-798b-4f93-8c71-9617c5d0d4af`, each with the five expected tags.
+The bus, discovery parameter, two rules, six queues/policies, seven alarms,
+worker and logs remain intact. Actual resolved reporting boundary lengths are
+5,599 development and 5,565 production characters, below IAM's 6,144 limit.
+Simulation additionally permits required tagging and denies wrong-environment
+and untagged requests; the real canary, not simulation, proves service compatibility.
+
+The separately approved immutable Founder frontend promotion is recorded in the
+[frontend production runbook](../docs/founder-frontend-production.md).
+No users, synthetic production events or owner binding were created. Existing
+profile bytes, aliases/certificate/origin and retired-route 404 behavior are
+preserved. Notification/budget delivery, authenticated UAT and recovery/restore
+acceptance are still pending; alarms without notification actions are not an
+accepted operating workflow.
 
 From the repository root, Node 24/npm 11.6.2:
 
@@ -104,9 +130,9 @@ Publishing still requires explicit `/founder` route integration, validated
 public runtime configuration and owner authorization setup. No live route or
 AWS changes are performed by local builds.
 
-New deployment automation remains blocked on reviewed repo/environment OIDC
-roles, restricted CloudFormation execution/pass-role, protected production
-approval and end-to-end notification/smoke/rollback checks. Do not copy broad
+Backend execution automation remains preparation-only. The separate frontend
+promotion lane now uses the verified prefix publisher and protected production
+approval; notification/recovery/rollback acceptance remains pending. Do not copy broad
 local AWS credentials or store keys in GitHub. Future environment inputs are
 `AWS_ACCOUNT_ID`, `AWS_REGION`, `AWS_DEPLOY_ROLE_ARN`, and validated smoke URLs.
 Existing profile publishing workflows remain unchanged and manual.
