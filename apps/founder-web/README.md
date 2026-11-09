@@ -65,7 +65,7 @@ malformed aggregate response.
 This is synthetic local UI rehearsal only—not authentication, event-delivery,
 or DynamoDB certification. It does not activate or simulate an owner session,
 prove MFA, read live data, or validate live infrastructure. Normal
-`npm run dev:founder --workspace @rct/founder-web` remains the PKCE sign-in
+`npm run dev --workspace @rct/founder-web` remains the PKCE sign-in
 flow on `localhost:5174`; production builds do not include the fixture module.
 Real owner-MFA provisioning and authorized live aggregate data remain separate
 gates.

@@ -5,6 +5,7 @@ import axe from "axe-core";
 import App from "./App.jsx";
 
 afterEach(() => {
+  vi.useRealTimers();
   window.history.replaceState({}, "", "/");
   vi.unstubAllEnvs();
 });
@@ -85,12 +86,16 @@ describe("Founder reporting UI", () => {
   });
 
   it("uses the real dashboard UI for an explicit local synthetic rehearsal", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2027-01-15T12:00:00.000Z"));
     vi.stubEnv("DEV", true);
     vi.stubEnv("VITE_FOUNDER_UAT_REHEARSAL", "1");
     const auth = createAuth(false);
     const loadMetrics = vi.fn();
     render(<App auth={auth} loadMetrics={loadMetrics} />);
 
+    const month = await screen.findByLabelText("Reporting month");
+    fireEvent.change(month, { target: { value: "2026-11" } });
     expect(await screen.findByText("8")).toBeVisible();
     expect(screen.getByText("-1")).toBeVisible();
     expect(screen.getByRole("note")).toHaveTextContent(
@@ -99,7 +104,6 @@ describe("Founder reporting UI", () => {
     expect(auth.completeSignIn).not.toHaveBeenCalled();
     expect(loadMetrics).not.toHaveBeenCalled();
 
-    const month = screen.getByLabelText("Reporting month");
     fireEvent.change(month, { target: { value: "2026-10" } });
     expect(await screen.findByText(/No reporting projections are recorded for 2026-10/)).toBeVisible();
     expect(screen.queryByText("0")).not.toBeInTheDocument();
