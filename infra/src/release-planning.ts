@@ -71,7 +71,7 @@ export class ReleasePlanningStack extends Stack {
     const api = `${config.prefix}-api`;
     const apiArn = `arn:${this.partition}:lambda:${this.region}:${this.account}:function:${api}`;
     const apiGateway = `arn:${this.partition}:apigateway:${this.region}::/apis`;
-    const apiGatewayTags = `arn:${this.partition}:apigateway:${this.region}::/tags/arn%3A${this.partition}%3Aapigateway%3A${this.region}%3A%3A%2Fapis%2F??????????`;
+    const apiGatewayTags = `arn:${this.partition}:apigateway:${this.region}::/tags/arn%3A${this.partition}%3Aapigateway%3A${this.region}%3A%3A%2Fv2%2Fapis%2F`;
     const apiLogGroup = `arn:${this.partition}:logs:${this.region}:${this.account}:log-group:/rct/${config.prefix}/api`;
     const logGroupDiscovery = () => new iam.PolicyStatement({
       actions: ["logs:DescribeLogGroups"],
@@ -147,7 +147,16 @@ export class ReleasePlanningStack extends Stack {
       }),
       new iam.PolicyStatement({
         actions: ["apigateway:GET", "apigateway:PUT", "apigateway:DELETE"],
-        resources: [apiGatewayTags],
+        resources: [`${apiGatewayTags}??????????`],
+      }),
+      new iam.PolicyStatement({
+        actions: ["apigateway:POST"],
+        resources: [`${apiGatewayTags}*`],
+        conditions: { StringEquals: {
+          "aws:RequestTag/Portfolio": "RCT",
+          "aws:RequestTag/Application": "Founder",
+          "aws:RequestTag/Environment": config.environment,
+        } },
       }),
     ]);
     const reportingFunctionArn = `arn:${this.partition}:lambda:${this.region}:${this.account}:function:${config.prefix}-reporting`;

@@ -176,7 +176,17 @@ for (const environment of ["development", "production"] as const) {
         assert.deepEqual([...apiTagGrant.Action].sort(), [
           "apigateway:DELETE", "apigateway:GET", "apigateway:PUT",
         ]);
-        assert.match(JSON.stringify(apiTagGrant.Resource), /%2Fapis%2F\?{10}/);
+        assert.match(JSON.stringify(apiTagGrant.Resource), /%2Fv2%2Fapis%2F\?{10}/);
+        const apiCreationTags = executionStatements.find((statement: { Action: string; Resource: unknown }) =>
+          statement.Action === "apigateway:POST"
+          && JSON.stringify(statement.Resource).includes("/tags/"));
+        assert.ok(apiCreationTags);
+        assert.match(JSON.stringify(apiCreationTags.Resource), /%2Fv2%2Fapis%2F\*/);
+        assert.deepEqual(apiCreationTags.Condition, { StringEquals: {
+          "aws:RequestTag/Portfolio": "RCT",
+          "aws:RequestTag/Application": "Founder",
+          "aws:RequestTag/Environment": environment,
+        } });
         assert.match(JSON.stringify(executionStatements), /apigateway:POST/);
         assert.match(JSON.stringify(executionStatements), /lambda:Principal/);
         assert.doesNotMatch(JSON.stringify(executionStatements), /lambda:SourceArn/);
