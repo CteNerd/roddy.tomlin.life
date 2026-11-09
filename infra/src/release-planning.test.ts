@@ -128,7 +128,9 @@ for (const environment of ["development", "production"] as const) {
       });
       assert.doesNotMatch(JSON.stringify(executionStatements), /iam:(Create|Update|Put|Attach|Detach|Delete)|sts:|cloudformation:|AdministratorAccess/);
       for (const statement of executionStatements) {
-        if (statement.Action !== "logs:DescribeLogGroups") assert.notEqual(statement.Resource, "*");
+        if (!["logs:DescribeLogGroups", "cognito-idp:DescribeUserPoolDomain"].includes(statement.Action)) {
+          assert.notEqual(statement.Resource, "*");
+        }
       }
       if (handler === "api") {
         const tableGrant = executionStatements.find((statement: { Action: string | string[] }) =>
@@ -150,11 +152,21 @@ for (const environment of ["development", "production"] as const) {
         assert.ok(poolManagement);
         assert.ok(poolManagement.Action.includes("cognito-idp:GetUserPoolMfaConfig"));
         assert.ok(poolManagement.Action.includes("cognito-idp:SetUserPoolMfaConfig"));
+        for (const action of ["CreateUserPoolDomain", "UpdateUserPoolDomain", "DeleteUserPoolDomain"]) {
+          assert.ok(poolManagement.Action.includes(`cognito-idp:${action}`));
+        }
         assert.deepEqual(poolManagement.Condition, { StringEquals: {
           "aws:ResourceTag/Portfolio": "RCT",
           "aws:ResourceTag/Application": "Founder",
           "aws:ResourceTag/Environment": environment,
         } });
+        const domainDiscovery = executionStatements.find((statement: { Action: string }) =>
+          statement.Action === "cognito-idp:DescribeUserPoolDomain");
+        assert.ok(domainDiscovery);
+        assert.equal(domainDiscovery.Resource, "*");
+        assert.deepEqual(domainDiscovery.Condition, {
+          StringEquals: { "aws:RequestedRegion": config.region },
+        });
 
         const apiTagGrant = executionStatements.find((statement: { Action: string | string[]; Resource: unknown }) =>
           Array.isArray(statement.Action)

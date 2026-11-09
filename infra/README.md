@@ -169,6 +169,10 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   management paths. Table grants include the continuous-backup operations
   required to configure and read production PITR; Cognito grants include MFA
   configuration and require the `Application=Founder` tag on create and use.
+  Managed-login domain creation, update and deletion use the same tagged-pool
+  restriction. `DescribeUserPoolDomain` requires a region-conditioned
+  `Resource: *` read because Cognito accepts a domain name rather than a pool
+  resource for that discovery operation; it grants no user or pool mutations.
   The reporting role is limited to the reporting Lambda/log group, the
   portfolio bus and explicitly named rules, the exact six queues, event-source
   mappings for that worker, seven explicitly named alarms and the bus-discovery
