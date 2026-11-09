@@ -7,6 +7,7 @@ import { applyMetadata, renderMetadata, renderSitemap } from "./page-metadata.mj
 import { founderFiles, publisherPolicy, verifyPayload, verifyProtection, verifyProvenance } from "./founder-promotion.mjs";
 import { mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import vm from "node:vm";
+import { execFileSync } from "node:child_process";
 
 it.each([
   ["home", "https://roddy.tomlin.life/", "Roddy Tomlin | Engineering Leadership"],
@@ -164,6 +165,35 @@ it("limits publisher credentials to Founder object writes and the existing CDN",
   ]);
   expect(() => publisherPolicy("bucket/founder/../../", "E1234567890ABC")).toThrow();
   expect(() => publisherPolicy("approved-profile-bucket", "*")).toThrow();
+});
+
+it("stops the workflow policy step before exporting output when publisher configuration is invalid", async () => {
+  const workflow = await readFile(".github/workflows/founder-promote.yml", "utf8");
+  const commands = workflow.split("\n").filter((line) =>
+    line.includes("scripts/founder-promotion.mjs policy") || line.includes('"$GITHUB_OUTPUT"')).join("\n");
+  const root = path.resolve(`.founder-policy-test-${process.pid}`);
+  const output = path.join(root, "output");
+  try {
+    await mkdir(root);
+    const environment = {
+      ...process.env,
+      FOUNDER_BUCKET: "approved-profile-bucket",
+      FOUNDER_DISTRIBUTION: "E1234567890ABC",
+      GITHUB_OUTPUT: output,
+    };
+    for (const invalid of [{ FOUNDER_BUCKET: "" }, { FOUNDER_DISTRIBUTION: "*" }]) {
+      await writeFile(output, "");
+      expect(() => execFileSync("bash", ["-euo", "pipefail", "-c", commands], {
+        env: { ...environment, ...invalid }, stdio: "pipe",
+      })).toThrow();
+      expect(await readFile(output, "utf8")).toBe("");
+    }
+    execFileSync("bash", ["-euo", "pipefail", "-c", commands], { env: environment, stdio: "pipe" });
+    expect(JSON.parse((await readFile(output, "utf8")).trim().slice("json=".length)))
+      .toEqual(publisherPolicy(environment.FOUNDER_BUCKET, environment.FOUNDER_DISTRIBUTION));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 
 it("routes only exact Founder entry URLs and leaves root, assets, and retired routes untouched", async () => {

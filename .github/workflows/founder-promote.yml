@@ -97,7 +97,8 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/environments/production" > production-environment.json
           gh api "repos/$GITHUB_REPOSITORY/environments/production/deployment-branch-policies" > production-branches.json
           node scripts/founder-promotion.mjs protection
-          echo "json=$(node scripts/founder-promotion.mjs policy)" >> "$GITHUB_OUTPUT"
+          policy=$(node scripts/founder-promotion.mjs policy)
+          echo "json=$policy" >> "$GITHUB_OUTPUT"
       - name: Download exact immutable bytes and verify again after approval
         run: |
           set -euo pipefail
