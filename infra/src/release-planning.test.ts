@@ -129,9 +129,11 @@ for (const environment of ["development", "production"] as const) {
       assert.doesNotMatch(JSON.stringify(executionStatements.map((statement: { Action: string | string[] }) => statement.Action)),
         /iam:(Create|Update|Put|Attach|Detach|Delete)|sts:|cloudformation:|AdministratorAccess/);
       for (const statement of executionStatements) {
-        if (!["logs:DescribeLogGroups", "cognito-idp:DescribeUserPoolDomain"].includes(statement.Action)) {
+        if (!["logs:DescribeLogGroups", "cognito-idp:DescribeUserPoolDomain",
+          "lambda:CreateEventSourceMapping"].includes(statement.Action)) {
           assert.notEqual(statement.Resource, "*");
         }
+        if (statement.Action === "lambda:CreateEventSourceMapping") assert.equal(handler, "reporting");
       }
       if (handler === "api") {
         const tableGrant = executionStatements.find((statement: { Action: string | string[] }) =>
@@ -236,6 +238,15 @@ for (const environment of ["development", "production"] as const) {
             "Portfolio", "Environment", "aws:cloudformation:stack-name",
             "aws:cloudformation:logical-id", "aws:cloudformation:stack-id",
           ] },
+        });
+        const mappingCreation = executionStatements.find((statement: { Action: string }) =>
+          statement.Action === "lambda:CreateEventSourceMapping");
+        assert.ok(mappingCreation);
+        assert.equal(mappingCreation.Resource, "*");
+        assert.deepEqual(mappingCreation.Condition, {
+          ...mappingTags.Condition,
+          ArnEquals: { "lambda:FunctionArn": { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+            `:lambda:us-east-1:123456789012:function:${config.prefix}-reporting`]] } },
         });
         const mappingTagRead = executionStatements.find((statement: { Action: string }) =>
           statement.Action === "lambda:ListTags");

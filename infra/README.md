@@ -236,6 +236,11 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   supports `lambda:FunctionArn` for mapping creation, but **not** for tagging.
   The first live tagged-create repair therefore still failed authorization.
   Mapping create/read/update/delete remain tied to the exact reporting function.
+  AWS does not support resource-level ARNs for `CreateEventSourceMapping`;
+  that single action requires `Resource: *`, with the exact function and the
+  same required CloudFormation ownership/request tags. The previous ARN-scoped
+  create grant is denied by real-role simulation. Read/update/delete continue
+  to use mapping ARNs; this is not a wildcard action or an unconditioned grant.
   Tagging instead requires the exact portfolio/environment, owned eventing
   stack name/ARN and either of its two synthesized mapping logical IDs.
   Only those two application tags and three reserved CloudFormation tag keys

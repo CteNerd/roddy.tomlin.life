@@ -205,6 +205,19 @@ export class ReleasePlanningStack extends Stack {
       "ReportingWorkerSqsEventSourcerctportfolioproductioneventingdotcomQueueFEF7AA3C8F131CC0",
     ];
     const eventingStackArn = `arn:${this.partition}:cloudformation:${this.region}:${this.account}:stack/${eventingStackName}/*`;
+    const mappingRequestConditions = {
+      StringEquals: {
+        "aws:RequestTag/Portfolio": "RCT",
+        "aws:RequestTag/Environment": config.environment,
+        "aws:RequestTag/aws:cloudformation:stack-name": eventingStackName,
+        "aws:RequestTag/aws:cloudformation:logical-id": mappingLogicalIds,
+      },
+      ArnLike: { "aws:RequestTag/aws:cloudformation:stack-id": eventingStackArn },
+      "ForAllValues:StringEquals": { "aws:TagKeys": [
+        "Portfolio", "Environment", "aws:cloudformation:stack-name",
+        "aws:cloudformation:logical-id", "aws:cloudformation:stack-id",
+      ] },
+    };
     const reportingExecution = createExecutionRole("reporting", [
       logGroupDiscovery(),
       new iam.PolicyStatement({
@@ -225,9 +238,17 @@ export class ReleasePlanningStack extends Stack {
         resources: [reportingFunctionArn],
       }),
       new iam.PolicyStatement({
+        actions: ["lambda:CreateEventSourceMapping"],
+        resources: ["*"],
+        conditions: {
+          ...mappingRequestConditions,
+          ArnEquals: { "lambda:FunctionArn": reportingFunctionArn },
+        },
+      }),
+      new iam.PolicyStatement({
         actions: [
-          "lambda:CreateEventSourceMapping", "lambda:DeleteEventSourceMapping",
-          "lambda:GetEventSourceMapping", "lambda:UpdateEventSourceMapping",
+          "lambda:DeleteEventSourceMapping", "lambda:GetEventSourceMapping",
+          "lambda:UpdateEventSourceMapping",
         ],
         resources: [`arn:${this.partition}:lambda:${this.region}:${this.account}:event-source-mapping:*`],
         conditions: { ArnEquals: { "lambda:FunctionArn": reportingFunctionArn } },
@@ -235,19 +256,7 @@ export class ReleasePlanningStack extends Stack {
       new iam.PolicyStatement({
         actions: ["lambda:TagResource"],
         resources: [`arn:${this.partition}:lambda:${this.region}:${this.account}:event-source-mapping:*`],
-        conditions: {
-          StringEquals: {
-            "aws:RequestTag/Portfolio": "RCT",
-            "aws:RequestTag/Environment": config.environment,
-            "aws:RequestTag/aws:cloudformation:stack-name": eventingStackName,
-            "aws:RequestTag/aws:cloudformation:logical-id": mappingLogicalIds,
-          },
-          ArnLike: { "aws:RequestTag/aws:cloudformation:stack-id": eventingStackArn },
-          "ForAllValues:StringEquals": { "aws:TagKeys": [
-            "Portfolio", "Environment", "aws:cloudformation:stack-name",
-            "aws:cloudformation:logical-id", "aws:cloudformation:stack-id",
-          ] },
-        },
+        conditions: mappingRequestConditions,
       }),
       new iam.PolicyStatement({
         actions: ["lambda:ListTags"],
