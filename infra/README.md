@@ -188,10 +188,13 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   the API execution role limits `AddPermission` to the exact API Lambda and
   `apigateway.amazonaws.com`; inspect its three route-specific permission
   resources in every real change set.
-- Both execution boundaries allow only region-conditioned
+- Both execution boundaries allow region-conditioned
   `logs:DescribeLogGroups` discovery on `Resource: *`; log-group mutations
   remain scoped to their exact group. API Gateway tag reads/writes/deletes use
-  the encoded tag endpoint scoped to the same 10-character Founder API ID.
+  the encoded `v2/apis` tag endpoint scoped to 10-character API IDs.
+  HTTP API creation additionally authorizes `POST` against that encoded
+  collection before an ID exists. This creation/tag grant requires all three
+  exact portfolio, Founder application and environment request tags.
 - An explicit planner deny of `sts:AssumeRole`, change-set execution and direct
   stack create/update/delete/rollback/policy mutation. No deploy/assume-role
   fallback to the broad local user or shared CDK roles is allowed.
