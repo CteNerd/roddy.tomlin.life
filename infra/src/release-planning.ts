@@ -204,6 +204,26 @@ export class ReleasePlanningStack extends Stack {
         conditions: { ArnEquals: { "lambda:FunctionArn": reportingFunctionArn } },
       }),
       new iam.PolicyStatement({
+        actions: ["lambda:TagResource"],
+        resources: [`arn:${this.partition}:lambda:${this.region}:${this.account}:event-source-mapping:*`],
+        conditions: {
+          ArnEquals: { "lambda:FunctionArn": reportingFunctionArn },
+          StringEquals: {
+            "aws:RequestTag/Portfolio": "RCT",
+            "aws:RequestTag/Environment": config.environment,
+          },
+          "ForAllValues:StringEquals": { "aws:TagKeys": ["Portfolio", "Environment"] },
+        },
+      }),
+      new iam.PolicyStatement({
+        actions: ["lambda:ListTags"],
+        resources: [`arn:${this.partition}:lambda:${this.region}:${this.account}:event-source-mapping:*`],
+        conditions: { StringEquals: {
+          "aws:ResourceTag/Portfolio": "RCT",
+          "aws:ResourceTag/Environment": config.environment,
+        } },
+      }),
+      new iam.PolicyStatement({
         actions: [
           "events:CreateEventBus", "events:DeleteEventBus", "events:DescribeEventBus",
           "events:TagResource", "events:UntagResource", "events:ListTagsForResource",
