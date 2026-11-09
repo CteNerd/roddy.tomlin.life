@@ -1,0 +1,63 @@
+name: Prepare immutable Founder candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      reviewed_sha:
+        description: Exact reviewed main commit (40 lowercase hex characters)
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  candidate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+      BASE_PATH: /
+      # This release lane cannot enable owner access or build rehearsal fixtures.
+      VITE_FOUNDER_AUTH_URL: ""
+      VITE_FOUNDER_CLIENT_ID: ""
+      VITE_FOUNDER_USER_POOL_ID: ""
+      VITE_FOUNDER_API_URL: ""
+      VITE_FOUNDER_CALLBACK_URL: ""
+      VITE_FOUNDER_UAT_REHEARSAL: ""
+    steps:
+      - name: Require this exact main revision
+        run: |
+          [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$REVIEWED_SHA" = "$GITHUB_SHA"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm install --global npm@11.6.2 --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint && npm run check:portfolio && npm test
+      - run: npm run build && npm run check:release
+      - name: Package only disabled-access Founder files
+        run: |
+          mkdir founder-candidate
+          cp -R founder-dist founder-candidate/founder-dist
+          node scripts/founder-promotion.mjs manifest founder-candidate "$REVIEWED_SHA"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        id: artifact
+        with:
+          name: founder-${{ inputs.reviewed_sha }}
+          path: founder-candidate/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Record immutable approval inputs
+        env:
+          ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.artifact.outputs.artifact-digest }}
+          ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        run: |
+          printf 'SHA: `%s`\n\nRun: `%s`\n\nArtifact ID: `%s`\n\nZIP digest: `sha256:%s`\n\n[Inspect artifact](%s)\n\nOwner access: disabled\n' \
+            "$REVIEWED_SHA" "$GITHUB_RUN_ID" "$ARTIFACT_ID" "$ARTIFACT_DIGEST" "$ARTIFACT_URL" >> "$GITHUB_STEP_SUMMARY"

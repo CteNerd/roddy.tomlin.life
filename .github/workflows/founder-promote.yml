@@ -1,0 +1,137 @@
+name: Promote reviewed Founder frontend
+
+on:
+  workflow_dispatch:
+    inputs:
+      reviewed_sha:
+        description: Exact reviewed candidate main SHA
+        required: true
+      candidate_run:
+        description: Successful Founder candidate workflow run ID
+        required: true
+      artifact_id:
+        description: Immutable candidate artifact ID
+        required: true
+      artifact_digest:
+        description: Reviewed ZIP digest (sha256 followed by colon and 64 hex characters)
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: founder-production-promotion
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+      REVIEWED_DIGEST: ${{ inputs.artifact_digest }}
+      CANDIDATE_RUN: ${{ inputs.candidate_run }}
+      ARTIFACT_ID: ${{ inputs.artifact_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Verify reviewed main provenance before requesting production approval
+        run: |
+          set -euo pipefail
+          [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$REVIEWED_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          [[ "$CANDIDATE_RUN" =~ ^[0-9]+$ ]]
+          [[ "$ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          git merge-base --is-ancestor "$REVIEWED_SHA" "$GITHUB_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CANDIDATE_RUN" > candidate-run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID" > candidate-artifact.json
+          node scripts/founder-promotion.mjs provenance
+          gh api "repos/$GITHUB_REPOSITORY/environments/production" > production-environment.json
+          gh api "repos/$GITHUB_REPOSITORY/environments/production/deployment-branch-policies" > production-branches.json
+          node scripts/founder-promotion.mjs protection
+          printf 'Review SHA `%s`, run `%s`, artifact `%s`, digest `%s` before approving production. Owner access remains disabled.\n' \
+            "$REVIEWED_SHA" "$CANDIDATE_RUN" "$ARTIFACT_ID" "$REVIEWED_DIGEST" >> "$GITHUB_STEP_SUMMARY"
+  promote:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://roddy.tomlin.life/founder/
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      AWS_REGION: us-east-1
+      GH_TOKEN: ${{ github.token }}
+      REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+      REVIEWED_DIGEST: ${{ inputs.artifact_digest }}
+      CANDIDATE_RUN: ${{ inputs.candidate_run }}
+      ARTIFACT_ID: ${{ inputs.artifact_id }}
+      FOUNDER_BUCKET: ${{ vars.FOUNDER_PRODUCTION_BUCKET }}
+      FOUNDER_DISTRIBUTION: ${{ vars.FOUNDER_PRODUCTION_DISTRIBUTION }}
+      PUBLISHER_READY: ${{ vars.FOUNDER_PRODUCTION_PUBLISHER_READY }}
+      PUBLISHER_ROLE: ${{ vars.FOUNDER_PRODUCTION_PUBLISHER_ROLE }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Fail closed until separately reviewed publisher and host integration
+        id: policy
+        run: |
+          set -euo pipefail
+          test "$PUBLISHER_READY" = "true"
+          test "$PUBLISHER_ROLE" = "arn:aws:iam::425061472162:role/rct-founder-production-frontend-publisher"
+          gh api "repos/$GITHUB_REPOSITORY/environments/production" > production-environment.json
+          gh api "repos/$GITHUB_REPOSITORY/environments/production/deployment-branch-policies" > production-branches.json
+          node scripts/founder-promotion.mjs protection
+          echo "json=$(node scripts/founder-promotion.mjs policy)" >> "$GITHUB_OUTPUT"
+      - name: Download exact immutable bytes and verify again after approval
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_RUN" =~ ^[0-9]+$ ]]
+          [[ "$ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$REVIEWED_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CANDIDATE_RUN" > candidate-run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID" > candidate-artifact.json
+          node scripts/founder-promotion.mjs provenance
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID/zip" > candidate.zip
+          printf '%s  candidate.zip\n' "${REVIEWED_DIGEST#sha256:}" | sha256sum --check --strict
+          if unzip -Z1 candidate.zip | grep -Ev '^(release\.json|founder-dist/|founder-dist/index\.html|founder-dist/assets/|founder-dist/assets/[A-Za-z0-9_-]+\.(js|css))$'; then
+            echo "::error::Unexpected archive entry"
+            exit 1
+          fi
+          mkdir reviewed
+          unzip -q candidate.zip -d reviewed
+          node scripts/founder-promotion.mjs verify reviewed "$REVIEWED_SHA"
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ env.PUBLISHER_ROLE }}
+          aws-region: us-east-1
+          allowed-account-ids: "425061472162"
+          mask-aws-account-id: true
+          inline-session-policy: ${{ steps.policy.outputs.json }}
+      - name: Publish only verified Founder prefix (no rebuild or deletion)
+        run: node scripts/founder-promotion.mjs publish reviewed "$REVIEWED_SHA"
+      - name: Preserve profile and retired-route behavior
+        run: |
+          set -euo pipefail
+          curl --fail --retry 5 --retry-all-errors --silent --show-error https://roddy.tomlin.life/ | grep --fixed-strings "Former NFL player" > /dev/null
+          curl --fail --retry 5 --retry-all-errors --silent --show-error https://roddy.tomlin.life/experience.html | grep --fixed-strings "FMG" > /dev/null
+          test "$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' https://roddy.tomlin.life/about/childhood)" = "404"
+          curl --fail --retry 5 --retry-all-errors --silent --show-error https://roddy.tomlin.life/founder/ > published-founder.html
+          cmp reviewed/founder-dist/index.html published-founder.html
+          curl --fail --retry 5 --retry-all-errors --silent --show-error https://roddy.tomlin.life/founder > published-founder-bare.html
+          cmp reviewed/founder-dist/index.html published-founder-bare.html

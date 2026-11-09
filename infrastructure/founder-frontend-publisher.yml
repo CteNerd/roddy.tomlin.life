@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Reviewed Founder-only publisher for an existing profile host; no hosting or backend resources.
+
+Parameters:
+  ExistingProfileBucket:
+    Type: String
+    AllowedPattern: "[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]"
+    Description: Independently verified existing profile bucket; never a new bucket.
+  ExistingProfileDistribution:
+    Type: String
+    AllowedPattern: "[A-Z0-9]{8,32}"
+    Description: Independently verified existing profile CloudFront distribution.
+
+Conditions:
+  ApprovedAccount: !Equals [!Ref AWS::AccountId, "425061472162"]
+
+Resources:
+  FounderFrontendPublisher:
+    Type: AWS::IAM::Role
+    Condition: ApprovedAccount
+    Properties:
+      RoleName: rct-founder-production-frontend-publisher
+      Description: Founder prefix writes only; no profile root, users, routing, or backend permissions.
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: arn:aws:iam::425061472162:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: repo:CteNerd/roddy.tomlin.life:environment:production
+      Policies:
+        - PolicyName: PublishFounderPrefixOnly
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub "arn:aws:s3:::${ExistingProfileBucket}/founder/*"
+              - Effect: Allow
+                Action:
+                  - cloudfront:CreateInvalidation
+                  - cloudfront:GetInvalidation
+                Resource: !Sub "arn:aws:cloudfront::425061472162:distribution/${ExistingProfileDistribution}"
+
+Outputs:
+  PublisherRoleArn:
+    Condition: ApprovedAccount
+    Value: !GetAtt FounderFrontendPublisher.Arn

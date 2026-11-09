@@ -10,8 +10,34 @@ Parameters:
   GitHubOidcProviderArn:
     Type: String
     Description: Existing GitHub Actions OIDC provider in this AWS account.
+  EnableFounderRoutes:
+    Type: String
+    Default: "false"
+    AllowedValues: ["false", "true"]
+    Description: Enable only after reviewed Founder publisher integration and release gates; does not enable owner access.
+
+Conditions:
+  FounderRoutesEnabled: !Equals [!Ref EnableFounderRoutes, "true"]
 
 Resources:
+  FounderEntryRouting:
+    Type: AWS::CloudFront::Function
+    Condition: FounderRoutesEnabled
+    Properties:
+      Name: !Sub "${AWS::StackName}-founder-entry"
+      AutoPublish: true
+      FunctionConfig:
+        Comment: Only exact Founder entry paths; no profile or retired-route fallback.
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function handler(event) {
+          var request = event.request;
+          if (request.uri === "/founder" || request.uri === "/founder/") {
+            request.uri = "/founder/index.html";
+          }
+          return request;
+        }
+
   ProfileBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
@@ -107,6 +133,11 @@ Resources:
               OriginAccessIdentity: ""
         DefaultCacheBehavior:
           TargetOriginId: profile
+          FunctionAssociations: !If
+            - FounderRoutesEnabled
+            - - EventType: viewer-request
+                FunctionARN: !GetAtt FounderEntryRouting.FunctionARN
+            - !Ref AWS::NoValue
           ViewerProtocolPolicy: redirect-to-https
           AllowedMethods: [GET, HEAD]
           CachedMethods: [GET, HEAD]
