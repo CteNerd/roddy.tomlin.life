@@ -195,6 +195,29 @@ export class ReleasePlanningStack extends Stack {
           .map((alarm) => `arn:${this.partition}:cloudwatch:${this.region}:${this.account}:alarm:${busName}-${source}-${alarm}`)),
       `arn:${this.partition}:cloudwatch:${this.region}:${this.account}:alarm:${busName}-worker-errors`,
     ];
+    const eventingStackName = `rct-portfolio-${config.environment}-eventing`;
+    // Synthesis tests pin these CloudFormation ownership identifiers in both environments.
+    const mappingLogicalIds = config.environment === "development" ? [
+      "ReportingWorkerSqsEventSourcerctportfoliodevelopmenteventingconsultingQueue60F271D116B57289",
+      "ReportingWorkerSqsEventSourcerctportfoliodevelopmenteventingdotcomQueueB3EB8A64151E7693",
+    ] : [
+      "ReportingWorkerSqsEventSourcerctportfolioproductioneventingconsultingQueueD7BA405418C4F6EC",
+      "ReportingWorkerSqsEventSourcerctportfolioproductioneventingdotcomQueueFEF7AA3C8F131CC0",
+    ];
+    const eventingStackArn = `arn:${this.partition}:cloudformation:${this.region}:${this.account}:stack/${eventingStackName}/*`;
+    const mappingRequestConditions = {
+      StringEquals: {
+        "aws:RequestTag/Portfolio": "RCT",
+        "aws:RequestTag/Environment": config.environment,
+        "aws:RequestTag/aws:cloudformation:stack-name": eventingStackName,
+        "aws:RequestTag/aws:cloudformation:logical-id": mappingLogicalIds,
+      },
+      ArnLike: { "aws:RequestTag/aws:cloudformation:stack-id": eventingStackArn },
+      "ForAllValues:StringEquals": { "aws:TagKeys": [
+        "Portfolio", "Environment", "aws:cloudformation:stack-name",
+        "aws:cloudformation:logical-id", "aws:cloudformation:stack-id",
+      ] },
+    };
     const reportingExecution = createExecutionRole("reporting", [
       logGroupDiscovery(),
       new iam.PolicyStatement({
@@ -215,9 +238,17 @@ export class ReleasePlanningStack extends Stack {
         resources: [reportingFunctionArn],
       }),
       new iam.PolicyStatement({
+        actions: ["lambda:CreateEventSourceMapping"],
+        resources: ["*"],
+        conditions: {
+          ...mappingRequestConditions,
+          ArnEquals: { "lambda:FunctionArn": reportingFunctionArn },
+        },
+      }),
+      new iam.PolicyStatement({
         actions: [
-          "lambda:CreateEventSourceMapping", "lambda:DeleteEventSourceMapping",
-          "lambda:GetEventSourceMapping", "lambda:UpdateEventSourceMapping",
+          "lambda:DeleteEventSourceMapping", "lambda:GetEventSourceMapping",
+          "lambda:UpdateEventSourceMapping",
         ],
         resources: [`arn:${this.partition}:lambda:${this.region}:${this.account}:event-source-mapping:*`],
         conditions: { ArnEquals: { "lambda:FunctionArn": reportingFunctionArn } },
@@ -225,14 +256,7 @@ export class ReleasePlanningStack extends Stack {
       new iam.PolicyStatement({
         actions: ["lambda:TagResource"],
         resources: [`arn:${this.partition}:lambda:${this.region}:${this.account}:event-source-mapping:*`],
-        conditions: {
-          ArnEquals: { "lambda:FunctionArn": reportingFunctionArn },
-          StringEquals: {
-            "aws:RequestTag/Portfolio": "RCT",
-            "aws:RequestTag/Environment": config.environment,
-          },
-          "ForAllValues:StringEquals": { "aws:TagKeys": ["Portfolio", "Environment"] },
-        },
+        conditions: mappingRequestConditions,
       }),
       new iam.PolicyStatement({
         actions: ["lambda:ListTags"],
@@ -240,7 +264,9 @@ export class ReleasePlanningStack extends Stack {
         conditions: { StringEquals: {
           "aws:ResourceTag/Portfolio": "RCT",
           "aws:ResourceTag/Environment": config.environment,
-        } },
+          "aws:ResourceTag/aws:cloudformation:stack-name": eventingStackName,
+          "aws:ResourceTag/aws:cloudformation:logical-id": mappingLogicalIds,
+        }, ArnLike: { "aws:ResourceTag/aws:cloudformation:stack-id": eventingStackArn } },
       }),
       new iam.PolicyStatement({
         actions: [
@@ -303,9 +329,7 @@ export class ReleasePlanningStack extends Stack {
       resources: [assets.arnForObjects("release/*")],
     }));
     const foundationStackName = `${config.prefix}-foundation`;
-    const eventingStackName = `rct-portfolio-${config.environment}-eventing`;
     const foundationStackArn = `arn:${this.partition}:cloudformation:${this.region}:${this.account}:stack/${foundationStackName}/*`;
-    const eventingStackArn = `arn:${this.partition}:cloudformation:${this.region}:${this.account}:stack/${eventingStackName}/*`;
     planner.addToPolicy(new iam.PolicyStatement({
       actions: [
         "cloudformation:DescribeStacks", "cloudformation:DescribeStackEvents",

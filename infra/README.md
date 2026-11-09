@@ -22,13 +22,14 @@ profile; its `/founder` route still waits for release gates.
 This is a point-in-time AWS verification in account `425061472162`,
 `us-east-1`, not a claim that the public production release is complete:
 
-| Stack | Verified state | Change set |
+| Stack | Verified state | Change set / operation |
 | --- | --- | --- |
 | `rct-governance-production` | `CREATE_COMPLETE` | `production-bootstrap-ac2f179-01` |
-| `rct-founder-production-release-planning` | `UPDATE_COMPLETE` | `managed-login-9d802f8` |
-| `rct-founder-development-release-planning` | `UPDATE_COMPLETE` | `split-executors-9d802f8` |
+| `rct-founder-production-release-planning` | `UPDATE_COMPLETE` | `enable-proven-stage-91bafec` |
+| `rct-founder-development-release-planning` | `UPDATE_COMPLETE` | `restore-owned-api-91bafec` |
 | `rct-founder-development-foundation` | `UPDATE_COMPLETE` | `reviewed-api-migration-9d802f8` |
-| `rct-founder-production-foundation` | `CREATE_FAILED`, successful resources preserved | `initial-founder-9d802f8` |
+| `rct-founder-production-foundation` | `UPDATE_COMPLETE` | Preserved-template retry through bounded API executor |
+| `rct-portfolio-production-eventing` | `UPDATE_FAILED`, successful resources preserved | Mapping tag-context repair still required |
 
 Bootstrap used reviewed `ac2f179`; the domain-permission fix was merged as
 [PR #13](https://github.com/CteNerd/roddy.tomlin.life/pull/13), `9d802f8`,
@@ -36,14 +37,26 @@ after required CI and a Copilot review without findings. The development API
 now uses its bounded API executor: health is 200, anonymous metrics is 401,
 and callback/logout/CORS match `http://localhost:5174`.
 
-The production attempt used its bounded API executor, not a shared CDK or
-administrator execution role. Its invitation-only MFA pool, managed login,
-Lambda and protected/PITR-enabled empty table were created. Owner is
-`disabled` and the pool contains zero users. HTTP API creation failed at the
-encoded tag-collection authorization repaired in this change. Preserve these
-resources for in-place repair; do not delete the pool/table or broaden the
-executor as a recovery shortcut. No profile hosting, apex/API DNS or live-user
-activation changed at this checkpoint.
+Production also uses its bounded API executor, not a shared CDK or
+administrator execution role. The API collection grant was repaired in
+[PR #14](https://github.com/CteNerd/roddy.tomlin.life/pull/14); the separately
+owner-approved exact-stage compatibility grant was reviewed in
+[PR #16](https://github.com/CteNerd/roddy.tomlin.life/pull/16).
+A real temporary development HTTP API plus tagged `$default` stage succeeded
+through that bounded role and was deleted. The development compatibility
+parameter was restored to its owned API `jjvn8mwbs5`; production is bound to
+its independently read API `81qhxlwk68`.
+
+The preserved production foundation then completed in place: health is 200,
+anonymous metrics is 401, the original invitation-only MFA pool and protected
+empty table remain intact, and owner is `disabled` with zero users.
+The reporting retry after [PR #15](https://github.com/CteNerd/roddy.tomlin.life/pull/15)
+still failed `lambda:TagResource`; its unsupported function condition and
+missing reserved tag keys are addressed below. This tag-context repair still
+requires bounded development tagged-create verification before production.
+Do not delete retained data/auth resources or broaden an executor as a recovery
+shortcut. Existing profile hosting and live-user access remain unchanged;
+producer-domain rollout is tracked separately.
 
 From the repository root, Node 24/npm 11.6.2:
 
@@ -219,12 +232,23 @@ The separate `rct-founder-<environment>-release-planning` stack defines:
   only its paired runtime role to its exact Lambda function. Neither can
   create/edit/delete IAM identities, policies or boundaries.
 - Tagged reporting mapping creation also requires `lambda:TagResource`.
-  This grant uses the same exact reporting-function condition and requires
-  only the two configured portfolio/environment request-tag keys and values;
-  it does not permit untagged, cross-environment or other-function mappings.
-  The provider's read handler also needs `lambda:ListTags`, limited to mappings
-  already carrying the matching portfolio/environment resource tags.
-  Real CloudFormation creation must verify this context, not just simulation.
+  The [AWS service authorization metadata](https://servicereference.us-east-1.amazonaws.com/v1/lambda/lambda.json)
+  supports `lambda:FunctionArn` for mapping creation, but **not** for tagging.
+  The first live tagged-create repair therefore still failed authorization.
+  Mapping create/read/update/delete remain tied to the exact reporting function.
+  AWS does not support resource-level ARNs for `CreateEventSourceMapping`;
+  that single action requires `Resource: *`, with the exact function and the
+  same required CloudFormation ownership/request tags. The previous ARN-scoped
+  create grant is denied by real-role simulation. Read/update/delete continue
+  to use mapping ARNs; this is not a wildcard action or an unconditioned grant.
+  Tagging instead requires the exact portfolio/environment, owned eventing
+  stack name/ARN and either of its two synthesized mapping logical IDs.
+  Only those two application tags and three reserved CloudFormation tag keys
+  are permitted. These reserved tags are present on the existing development
+  mappings; the read handler's `lambda:ListTags` grant checks the same stored
+  ownership tags. No untagged or cross-stack mapping tag grant is added.
+  Validate actual tagged creation through the bounded development executor
+  before retrying production; policy simulation cannot prove service context.
 - The planner's `CreateChangeSet` grant pairs the API execution role only with
   the Founder foundation stack and the reporting execution role only with that
   environment's eventing stack. API Gateway IDs are AWS-generated, so the API

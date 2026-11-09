@@ -129,9 +129,11 @@ for (const environment of ["development", "production"] as const) {
       assert.doesNotMatch(JSON.stringify(executionStatements.map((statement: { Action: string | string[] }) => statement.Action)),
         /iam:(Create|Update|Put|Attach|Detach|Delete)|sts:|cloudformation:|AdministratorAccess/);
       for (const statement of executionStatements) {
-        if (!["logs:DescribeLogGroups", "cognito-idp:DescribeUserPoolDomain"].includes(statement.Action)) {
+        if (!["logs:DescribeLogGroups", "cognito-idp:DescribeUserPoolDomain",
+          "lambda:CreateEventSourceMapping"].includes(statement.Action)) {
           assert.notEqual(statement.Resource, "*");
         }
+        if (statement.Action === "lambda:CreateEventSourceMapping") assert.equal(handler, "reporting");
       }
       if (handler === "api") {
         const tableGrant = executionStatements.find((statement: { Action: string | string[] }) =>
@@ -218,14 +220,33 @@ for (const environment of ["development", "production"] as const) {
           statement.Action === "lambda:TagResource");
         assert.ok(mappingTags);
         assert.match(JSON.stringify(mappingTags.Resource), /:event-source-mapping:\*/);
+        const eventingStackName = `rct-portfolio-${environment}-eventing`;
+        const mappingLogicalIds = Object.keys(Template.fromStack(new EventingStack(new App(), config))
+          .findResources("AWS::Lambda::EventSourceMapping")).sort();
+        assert.equal(mappingLogicalIds.length, 2);
+        const stackArn = { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+          `:cloudformation:us-east-1:123456789012:stack/${eventingStackName}/*`]] };
         assert.deepEqual(mappingTags.Condition, {
-          ArnEquals: { "lambda:FunctionArn": { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
-            `:lambda:us-east-1:123456789012:function:${config.prefix}-reporting`]] } },
           StringEquals: {
             "aws:RequestTag/Portfolio": "RCT",
             "aws:RequestTag/Environment": environment,
+            "aws:RequestTag/aws:cloudformation:stack-name": eventingStackName,
+            "aws:RequestTag/aws:cloudformation:logical-id": mappingLogicalIds,
           },
-          "ForAllValues:StringEquals": { "aws:TagKeys": ["Portfolio", "Environment"] },
+          ArnLike: { "aws:RequestTag/aws:cloudformation:stack-id": stackArn },
+          "ForAllValues:StringEquals": { "aws:TagKeys": [
+            "Portfolio", "Environment", "aws:cloudformation:stack-name",
+            "aws:cloudformation:logical-id", "aws:cloudformation:stack-id",
+          ] },
+        });
+        const mappingCreation = executionStatements.find((statement: { Action: string }) =>
+          statement.Action === "lambda:CreateEventSourceMapping");
+        assert.ok(mappingCreation);
+        assert.equal(mappingCreation.Resource, "*");
+        assert.deepEqual(mappingCreation.Condition, {
+          ...mappingTags.Condition,
+          ArnEquals: { "lambda:FunctionArn": { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
+            `:lambda:us-east-1:123456789012:function:${config.prefix}-reporting`]] } },
         });
         const mappingTagRead = executionStatements.find((statement: { Action: string }) =>
           statement.Action === "lambda:ListTags");
@@ -234,7 +255,9 @@ for (const environment of ["development", "production"] as const) {
         assert.deepEqual(mappingTagRead.Condition, { StringEquals: {
           "aws:ResourceTag/Portfolio": "RCT",
           "aws:ResourceTag/Environment": environment,
-        } });
+          "aws:ResourceTag/aws:cloudformation:stack-name": eventingStackName,
+          "aws:ResourceTag/aws:cloudformation:logical-id": mappingLogicalIds,
+        }, ArnLike: { "aws:ResourceTag/aws:cloudformation:stack-id": stackArn } });
         assert.match(JSON.stringify(executionStatements), /events:PutRule/);
         assert.match(JSON.stringify(executionStatements), /sqs:CreateQueue/);
         assert.match(JSON.stringify(executionStatements), /cloudwatch:PutMetricAlarm/);
