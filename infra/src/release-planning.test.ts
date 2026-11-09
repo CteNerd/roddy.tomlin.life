@@ -126,7 +126,8 @@ for (const environment of ["development", "production"] as const) {
         ArnEquals: { "iam:AssociatedResourceArn": { "Fn::Join": ["", ["arn:", { Ref: "AWS::Partition" },
           `:lambda:us-east-1:123456789012:function:${config.prefix}-${handler}`]] } },
       });
-      assert.doesNotMatch(JSON.stringify(executionStatements), /iam:(Create|Update|Put|Attach|Detach|Delete)|sts:|cloudformation:|AdministratorAccess/);
+      assert.doesNotMatch(JSON.stringify(executionStatements.map((statement: { Action: string | string[] }) => statement.Action)),
+        /iam:(Create|Update|Put|Attach|Detach|Delete)|sts:|cloudformation:|AdministratorAccess/);
       for (const statement of executionStatements) {
         if (!["logs:DescribeLogGroups", "cognito-idp:DescribeUserPoolDomain"].includes(statement.Action)) {
           assert.notEqual(statement.Resource, "*");
@@ -187,6 +188,26 @@ for (const environment of ["development", "production"] as const) {
           "aws:RequestTag/Application": "Founder",
           "aws:RequestTag/Environment": environment,
         } });
+        const stageCompatibility = executionStatements.find((statement: { Action: string }) =>
+          statement.Action === "apigateway:*");
+        assert.ok(stageCompatibility);
+        assert.match(JSON.stringify(stageCompatibility.Resource), /FounderHttpApiId/);
+        assert.doesNotMatch(JSON.stringify(stageCompatibility.Resource), /\*|\?/);
+        assert.match(JSON.stringify(stageCompatibility.Resource), /\/stages\/\$default/);
+        assert.deepEqual(stageCompatibility.Condition, { StringEquals: {
+          "aws:RequestTag/Portfolio": "RCT",
+          "aws:RequestTag/Application": "Founder",
+          "aws:RequestTag/Environment": environment,
+          "aws:RequestTag/aws:cloudformation:logical-id": "ApiDefaultStage189A7074",
+          "aws:RequestTag/aws:cloudformation:stack-name": [
+            `${config.prefix}-foundation`, `${config.prefix}-api-permission-smoke`,
+          ],
+        } });
+        template.hasParameter("FounderHttpApiId", Match.objectLike({
+          Type: "String", Default: "disabled", AllowedPattern: "^(disabled|[a-z0-9]{10})$",
+        }));
+        const foundation = Template.fromStack(new FounderStack(new App(), config));
+        assert.deepEqual(Object.keys(foundation.findResources("AWS::ApiGatewayV2::Stage")), ["ApiDefaultStage189A7074"]);
         assert.match(JSON.stringify(executionStatements), /apigateway:POST/);
         assert.match(JSON.stringify(executionStatements), /lambda:Principal/);
         assert.doesNotMatch(JSON.stringify(executionStatements), /lambda:SourceArn/);
