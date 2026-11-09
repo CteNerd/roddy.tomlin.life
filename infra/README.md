@@ -3,13 +3,47 @@
 This stack is additive. Development foundations and both environments'
 governance/release-planning resources have been provisioned; production
 application rollout is in progress with owner access disabled. See the
-[portfolio handoff](https://github.com/CteNerd/consulting.wellcall.biz/blob/main/docs/development-handoff-2026-11-06.md)
-for actual deployment and validation evidence. This stack does not own or modify the live
+[verified deployment checkpoint](#verified-deployment-checkpoint-2026-11-09)
+below rather than older source-only handoffs. This stack does not own or modify the live
 profile's existing CloudFormation hosting stack. The Founder frontend is built
 as a separate, non-prerendered `/founder/` artifact under `founder-dist/`,
 outside the `dist/` artifact consumed by existing profile publishers; no
 duplicate CDN/bucket, broad SPA fallback or source-business database access is
 added.
+
+## Verified deployment checkpoint (2026-11-09)
+
+The owner approved all three applications and backend infrastructure, the
+`thirddowntech.com` and `cutblock.org` production domains, and publication of
+the current branding ("publish it all"). Intake, enrollment and Founder owner
+access remain closed until UAT. Preserve the existing `roddy.tomlin.life`
+profile; its `/founder` route still waits for release gates.
+
+This is a point-in-time AWS verification in account `425061472162`,
+`us-east-1`, not a claim that the public production release is complete:
+
+| Stack | Verified state | Change set |
+| --- | --- | --- |
+| `rct-governance-production` | `CREATE_COMPLETE` | `production-bootstrap-ac2f179-01` |
+| `rct-founder-production-release-planning` | `UPDATE_COMPLETE` | `managed-login-9d802f8` |
+| `rct-founder-development-release-planning` | `UPDATE_COMPLETE` | `split-executors-9d802f8` |
+| `rct-founder-development-foundation` | `UPDATE_COMPLETE` | `reviewed-api-migration-9d802f8` |
+| `rct-founder-production-foundation` | `CREATE_FAILED`, successful resources preserved | `initial-founder-9d802f8` |
+
+Bootstrap used reviewed `ac2f179`; the domain-permission fix was merged as
+[PR #13](https://github.com/CteNerd/roddy.tomlin.life/pull/13), `9d802f8`,
+after required CI and a Copilot review without findings. The development API
+now uses its bounded API executor: health is 200, anonymous metrics is 401,
+and callback/logout/CORS match `http://localhost:5174`.
+
+The production attempt used its bounded API executor, not a shared CDK or
+administrator execution role. Its invitation-only MFA pool, managed login,
+Lambda and protected/PITR-enabled empty table were created. Owner is
+`disabled` and the pool contains zero users. HTTP API creation failed at the
+encoded tag-collection authorization repaired in this change. Preserve these
+resources for in-place repair; do not delete the pool/table or broaden the
+executor as a recovery shortcut. No profile hosting, apex/API DNS or live-user
+activation changed at this checkpoint.
 
 From the repository root, Node 24/npm 11.6.2:
 
