@@ -47,6 +47,46 @@ Dispatch/variable contract:
 - Preserve required production reviewer approval and exactly branch `main`, no
   tag policy. Owner access stays disabled independently of backend health.
 
+### Retained parameters and expected hosting change set
+
+For an **UPDATE of the existing `roddy-profile-hosting` stack**, retain every
+pre-existing parameter using `UsePreviousValue=true`:
+
+| Parameter | Verified retained value |
+| --- | --- |
+| `DomainName` | `roddy.tomlin.life` |
+| `HostedZoneId` | `Z09770441ES3ZDJB86W5A` |
+| `GitHubOidcProviderArn` | `arn:aws:iam::425061472162:oidc-provider/token.actions.githubusercontent.com` |
+
+`EnableFounderRoutes` is a **new** parameter, so it has no previous value on the
+first update. Leave its default `false` before release gates; after approval,
+explicitly supply `ParameterValue=true` for the controlled route-integration
+change set. Do not set `UsePreviousValue=true` for this new parameter on its first
+update. Later updates should retain the approved value unless intentionally
+changing the routing gate through a separately reviewed change set.
+
+Expected resource changes with the retained parameters and routing enabled:
+
+| Logical resource | Expected action | Expected replacement |
+| --- | --- | --- |
+| `FounderEntryRouting` (`AWS::CloudFront::Function`) | Add; publish the exact-entry routing function | New resource, not replacement |
+| `Distribution` (`AWS::CloudFront::Distribution`) | Modify in place: add the default behavior's viewer-request association | `False` |
+
+The expected change set is **not only a function addition**: the existing
+distribution must be updated to associate it. Expect no other additions,
+modifications, removals, or replacements. In particular retain the bucket,
+certificate, DNS records, OAC, cache/response policies, bucket policy, and existing
+profile deployment role unchanged. The old profile role remains unrelated to
+Founder promotion and is never an acceptable fallback.
+
+These are source-derived expectations, not an executed change set. The authorized
+operator must inspect the real change set and current associations and stop on
+any unexpected change, replacement, or unresolved replacement status. Updating
+this existing hosting template requires acknowledging its existing IAM resource
+(`CAPABILITY_IAM`); it must not change that role's trust or policy. The **separate**
+publisher declaration has a named role and requires `CAPABILITY_NAMED_IAM`; it
+must not be folded into or used to replace the hosting stack.
+
 ## Immutable candidate and promotion
 
 1. Merge reviewed source to protected `main` through the usual PR process.
