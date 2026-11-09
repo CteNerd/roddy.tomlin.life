@@ -57,7 +57,11 @@ it("keeps retired paths non-indexable and includes only public pages in the site
   ]);
 });
 
-it.each(["src/unapproved-fixture.js", "docs/unapproved-fixture.js"])(
+it.each([
+  "src/unapproved-fixture.js",
+  "docs/unapproved-fixture.js",
+  "apps/founder-web/src/uat-rehearsal.js",
+])(
   "rejects an accidental private module import: %s",
   async (relative) => {
     const fixture = path.resolve(relative);

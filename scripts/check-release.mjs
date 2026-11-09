@@ -93,16 +93,30 @@ export async function checkRelease() {
   assert.doesNotMatch(founder, /application\/json|latestOccurredAt|processedAt|access_token/);
   const founderScripts = (await readdir("founder-dist/assets")).filter((file) => file.endsWith(".js"));
   assert.ok(founderScripts.length > 0, "Missing Founder application bundle");
+  assert.ok(
+    founderScripts.every((file) => !/rehearsal/i.test(file)),
+    "Synthetic rehearsal modules must not be emitted in the Founder release",
+  );
   const founderBundle = (await Promise.all(
     founderScripts.map((file) => readFile(`founder-dist/assets/${file}`, "utf8")),
   )).join("\n");
   assert.doesNotMatch(founderBundle, /eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+|\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i,
     "Founder release must not contain tokens or owner subject identifiers");
+  assert.doesNotMatch(
+    founderBundle,
+    /uat-rehearsal\.js|VITE_FOUNDER_UAT_REHEARSAL|Synthetic local rehearsal|Synthetic monthly timeline|synthetic-local-rehearsal/i,
+    "Founder release must not contain the opt-in synthetic rehearsal or its fixtures",
+  );
   assert.equal(await readFile("dist/sitemap.xml", "utf8"), renderSitemap());
   assert.ok((await readFile("dist/robots.txt", "utf8")).includes(`Sitemap: ${siteUrl}sitemap.xml`));
   const javascript = (await readdir("dist/assets")).filter((file) => file.endsWith(".js"));
   assert.ok(javascript.length > 0, "Missing application bundle");
   const app = (await Promise.all(javascript.map((file) => readFile(`dist/assets/${file}`, "utf8")))).join("\n");
+  assert.doesNotMatch(
+    app,
+    /uat-rehearsal\.js|VITE_FOUNDER_UAT_REHEARSAL|Synthetic local rehearsal|Synthetic monthly timeline|synthetic-local-rehearsal/i,
+    "Public profile release must not contain Founder rehearsal code or fixtures",
+  );
   for (const expected of ["Roddy Tomlin", "Director of Software Engineering", "FMG"]) {
     assert.ok(app.includes(expected), `Missing public fact: ${expected}`);
   }
