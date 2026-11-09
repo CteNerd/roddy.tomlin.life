@@ -22,13 +22,14 @@ profile; its `/founder` route still waits for release gates.
 This is a point-in-time AWS verification in account `425061472162`,
 `us-east-1`, not a claim that the public production release is complete:
 
-| Stack | Verified state | Change set |
+| Stack | Verified state | Change set / operation |
 | --- | --- | --- |
 | `rct-governance-production` | `CREATE_COMPLETE` | `production-bootstrap-ac2f179-01` |
-| `rct-founder-production-release-planning` | `UPDATE_COMPLETE` | `managed-login-9d802f8` |
-| `rct-founder-development-release-planning` | `UPDATE_COMPLETE` | `split-executors-9d802f8` |
+| `rct-founder-production-release-planning` | `UPDATE_COMPLETE` | `enable-proven-stage-91bafec` |
+| `rct-founder-development-release-planning` | `UPDATE_COMPLETE` | `restore-owned-api-91bafec` |
 | `rct-founder-development-foundation` | `UPDATE_COMPLETE` | `reviewed-api-migration-9d802f8` |
-| `rct-founder-production-foundation` | `CREATE_FAILED`, successful resources preserved | `initial-founder-9d802f8` |
+| `rct-founder-production-foundation` | `UPDATE_COMPLETE` | Preserved-template retry through bounded API executor |
+| `rct-portfolio-production-eventing` | `UPDATE_FAILED`, successful resources preserved | Mapping tag-context repair still required |
 
 Bootstrap used reviewed `ac2f179`; the domain-permission fix was merged as
 [PR #13](https://github.com/CteNerd/roddy.tomlin.life/pull/13), `9d802f8`,
@@ -36,14 +37,26 @@ after required CI and a Copilot review without findings. The development API
 now uses its bounded API executor: health is 200, anonymous metrics is 401,
 and callback/logout/CORS match `http://localhost:5174`.
 
-The production attempt used its bounded API executor, not a shared CDK or
-administrator execution role. Its invitation-only MFA pool, managed login,
-Lambda and protected/PITR-enabled empty table were created. Owner is
-`disabled` and the pool contains zero users. HTTP API creation failed at the
-encoded tag-collection authorization repaired in this change. Preserve these
-resources for in-place repair; do not delete the pool/table or broaden the
-executor as a recovery shortcut. No profile hosting, apex/API DNS or live-user
-activation changed at this checkpoint.
+Production also uses its bounded API executor, not a shared CDK or
+administrator execution role. The API collection grant was repaired in
+[PR #14](https://github.com/CteNerd/roddy.tomlin.life/pull/14); the separately
+owner-approved exact-stage compatibility grant was reviewed in
+[PR #16](https://github.com/CteNerd/roddy.tomlin.life/pull/16).
+A real temporary development HTTP API plus tagged `$default` stage succeeded
+through that bounded role and was deleted. The development compatibility
+parameter was restored to its owned API `jjvn8mwbs5`; production is bound to
+its independently read API `81qhxlwk68`.
+
+The preserved production foundation then completed in place: health is 200,
+anonymous metrics is 401, the original invitation-only MFA pool and protected
+empty table remain intact, and owner is `disabled` with zero users.
+The reporting retry after [PR #15](https://github.com/CteNerd/roddy.tomlin.life/pull/15)
+still failed `lambda:TagResource`; its unsupported function condition and
+missing reserved tag keys are addressed below. This tag-context repair still
+requires bounded development tagged-create verification before production.
+Do not delete retained data/auth resources or broaden an executor as a recovery
+shortcut. Existing profile hosting and live-user access remain unchanged;
+producer-domain rollout is tracked separately.
 
 From the repository root, Node 24/npm 11.6.2:
 
