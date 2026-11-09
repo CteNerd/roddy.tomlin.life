@@ -23,6 +23,12 @@ UAT approval and a separately reviewed release change, not environment-variable 
    an ancestor of the promoting main SHA, and the matching immutable artifact ID/digest.
    It also reads production protection metadata and fails closed unless required
    reviewers and exactly the main branch (no tag policy) are configured.
+   These two metadata endpoints are intentionally read without `GITHUB_TOKEN`:
+   this public repository exposes both anonymously (HTTP 200 verified read-only
+   on 2026-11-09), avoiding the Administration permission required by authenticated
+   fine-grained branch-policy reads. Errors/rate limits fail closed. If repository
+   visibility changes, separately review metadata-reader integration; there is no
+   automatic privileged-token fallback.
 5. A reviewer approves the **production** environment deployment after inspecting
    those inputs and the verify-job summary. This never uses `aws-production`.
    After approval the metadata and downloaded ZIP digest are checked again. There

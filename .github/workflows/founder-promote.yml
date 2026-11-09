@@ -54,8 +54,9 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CANDIDATE_RUN" > candidate-run.json
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID" > candidate-artifact.json
           node scripts/founder-promotion.mjs provenance
-          gh api "repos/$GITHUB_REPOSITORY/environments/production" > production-environment.json
-          gh api "repos/$GITHUB_REPOSITORY/environments/production/deployment-branch-policies" > production-branches.json
+          # Public metadata reads deliberately omit GITHUB_TOKEN (no Administration permission).
+          curl --disable --fail --silent --show-error --retry 3 "https://api.github.com/repos/$GITHUB_REPOSITORY/environments/production" > production-environment.json
+          curl --disable --fail --silent --show-error --retry 3 "https://api.github.com/repos/$GITHUB_REPOSITORY/environments/production/deployment-branch-policies" > production-branches.json
           node scripts/founder-promotion.mjs protection
           printf 'Review SHA `%s`, run `%s`, artifact `%s`, digest `%s` before approving production. Owner access remains disabled.\n' \
             "$REVIEWED_SHA" "$CANDIDATE_RUN" "$ARTIFACT_ID" "$REVIEWED_DIGEST" >> "$GITHUB_STEP_SUMMARY"
@@ -94,8 +95,9 @@ jobs:
           set -euo pipefail
           test "$PUBLISHER_READY" = "true"
           test "$PUBLISHER_ROLE" = "arn:aws:iam::425061472162:role/rct-founder-production-frontend-publisher"
-          gh api "repos/$GITHUB_REPOSITORY/environments/production" > production-environment.json
-          gh api "repos/$GITHUB_REPOSITORY/environments/production/deployment-branch-policies" > production-branches.json
+          # Public metadata reads deliberately omit GITHUB_TOKEN (no Administration permission).
+          curl --disable --fail --silent --show-error --retry 3 "https://api.github.com/repos/$GITHUB_REPOSITORY/environments/production" > production-environment.json
+          curl --disable --fail --silent --show-error --retry 3 "https://api.github.com/repos/$GITHUB_REPOSITORY/environments/production/deployment-branch-policies" > production-branches.json
           node scripts/founder-promotion.mjs protection
           policy=$(node scripts/founder-promotion.mjs policy)
           echo "json=$policy" >> "$GITHUB_OUTPUT"
